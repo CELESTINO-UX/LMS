@@ -10,7 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
-    /* All styles remain the same as in the original code */
+    /* All styles remain the same */
     * {
       margin: 0;
       padding: 0;
@@ -955,15 +955,16 @@
 
   <script type="module">
     // ============================================================
-    // FIREBASE CONFIGURATION - Replace with your actual config
+    // FIREBASE CONFIGURATION - YOUR ACTUAL CONFIG
     // ============================================================
     const firebaseConfig = {
-      apiKey: "AIzaSyDzY-2q7v7Fj9wQp3rX9uZ8kLmN0oP1qR2sT3uV4wX5yZ6",
+      apiKey: "AIzaSyClEbwwaLodqrvJQofXCw0AThAQAKxUM0U",
       authDomain: "cele-e2104.firebaseapp.com",
       projectId: "cele-e2104",
       storageBucket: "cele-e2104.firebasestorage.app",
       messagingSenderId: "351126477464",
-      appId: "1:351126477464:web:abc123def456ghi789jkl"
+      appId: "1:351126477464:web:f38c2b828b647a191f8eed",
+      measurementId: "G-EGBKE1FMD6"
     };
 
     // Import Firebase SDKs
@@ -997,6 +998,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+
+    console.log('✅ Firebase initialized successfully!');
+    console.log('📁 Project ID:', firebaseConfig.projectId);
+    console.log('🔐 Auth Domain:', firebaseConfig.authDomain);
 
     // ============================================================
     // APPLICATION CODE
@@ -1138,13 +1143,16 @@
       const adminPassword = prompt('Enter admin password:');
       if (!adminPassword) return;
       
+      showLoading();
       const result = await loginUser(ADMIN_EMAIL, adminPassword);
+      hideLoading();
+      
       if (result.success) {
         // The onAuthStateChanged listener will handle the rest
         closeModal();
-        alert('Welcome Admin! You have full system access.');
+        alert('👑 Welcome Admin! You have full system access.');
       } else {
-        alert('Admin login failed: ' + result.message);
+        alert('❌ Admin login failed: ' + result.message);
       }
     }
 
@@ -1162,10 +1170,10 @@
         users = [];
         activityLog = [];
         updateUIForLoggedOut();
-        alert('Logged out successfully');
+        alert('✅ Logged out successfully');
       } catch (error) {
         console.error('Logout error:', error);
-        alert('Error logging out: ' + error.message);
+        alert('❌ Error logging out: ' + error.message);
       }
     }
 
@@ -1199,16 +1207,20 @@
         return;
       }
 
+      console.log('📡 Setting up Firestore listeners for:', currentUser.isAdmin ? 'Admin' : currentUser.institution);
+
       // ---------- BOOKS LISTENER ----------
       let booksQuery;
       if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
         booksQuery = collection(db, "books");
+        console.log('📚 Admin: Viewing all books');
       } else {
         const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
         booksQuery = query(
           collection(db, "books"), 
           where("institution", "==", filterSchool)
         );
+        console.log('📚 Filtering books by institution:', filterSchool);
       }
 
       unsubscribeBooks = onSnapshot(booksQuery, (snapshot) => {
@@ -1325,9 +1337,6 @@
     // ============================================================
     // FIRESTORE OPERATIONS
     // ============================================================
-    
-    // All CRUD operations remain the same as before
-    // (Add, Delete, Update functions for books, laptops, stationary)
     
     async function addBookToCloud(bookData) {
       try {
@@ -1484,14 +1493,6 @@
     }
 
     // ============================================================
-    // WRAPPER FUNCTIONS FOR UI ACTIONS (Keep all as before)
-    // ============================================================
-
-    // ... (All wrapper functions remain the same as in the original code)
-    // The wrapper functions (window.deleteBook, window.editBook, etc.) 
-    // are kept exactly as they were in the original code
-
-    // ============================================================
     // UI UPDATE FUNCTIONS
     // ============================================================
     
@@ -1559,7 +1560,7 @@
     }
 
     // ============================================================
-    // RENDER FUNCTIONS (Keep all as before)
+    // RENDER FUNCTIONS
     // ============================================================
     
     function getCategoryLabel(category) {
@@ -1808,32 +1809,36 @@
       if (isLoginMode) {
         // Login
         const result = await loginUser(email, password);
+        hideLoading();
         if (result.success) {
           // The onAuthStateChanged listener will handle the rest
           closeModal();
           await addActivityToCloud(`User ${result.user.email} logged in`);
-          alert(`Welcome ${result.user.email}!`);
+          alert(`✅ Welcome ${result.user.email}!`);
         } else {
-          alert('Login failed: ' + result.message);
+          alert('❌ Login failed: ' + result.message);
         }
       } else {
         // Register
         const school = authSchool.value.trim();
-        if (!school) return alert('Please enter your school/institution');
+        if (!school) {
+          hideLoading();
+          return alert('Please enter your school/institution');
+        }
         const result = await registerUser(email, password, school);
+        hideLoading();
         if (result.success) {
           await addActivityToCloud(`New user registered: ${email} (${school})`);
-          alert('Registration successful! Please login.');
+          alert('✅ Registration successful! Please login.');
           openModal('login');
         } else {
-          alert('Registration failed: ' + result.message);
+          alert('❌ Registration failed: ' + result.message);
         }
       }
-      hideLoading();
     }
 
     // ============================================================
-    // PDF EXPORT (Keep as before)
+    // PDF EXPORT
     // ============================================================
     
     function getInstitution() {
@@ -1869,7 +1874,7 @@
     }
 
     // ============================================================
-    // WINDOW FUNCTIONS FOR UI ACTIONS (Keep all as before)
+    // WINDOW FUNCTIONS FOR UI ACTIONS
     // ============================================================
 
     // Define wrapper functions for UI actions
@@ -2138,7 +2143,7 @@
       addActivityToCloud(`Admin switched to view: ${adminSelectedSchool === '__all__' ? 'All Schools' : adminSelectedSchool}`);
     });
 
-    // --- ADD/EDIT/DELETE BUTTONS (Same as before) ---
+    // --- ADD/EDIT/DELETE BUTTONS ---
     
     // Add Book
     document.getElementById('addBookPageBtn').addEventListener('click', async function() {
@@ -2163,8 +2168,9 @@
         document.getElementById('bookAuthorPage').value = '';
         document.getElementById('bookAccPage').value = '';
         await addActivityToCloud(`Book added: ${title} (${getCategoryLabel(category)}) (${institution})`);
+        alert('✅ Book added successfully!');
       } catch (error) {
-        alert('Error adding book: ' + error.message);
+        alert('❌ Error adding book: ' + error.message);
       }
       hideLoading();
     });
@@ -2191,8 +2197,9 @@
         document.getElementById('laptopTypePage').value = '';
         document.getElementById('laptopDatePage').value = '';
         await addActivityToCloud(`Laptop added: ${owner} (${type}) (${institution})`);
+        alert('✅ Laptop added successfully!');
       } catch (error) {
-        alert('Error adding laptop: ' + error.message);
+        alert('❌ Error adding laptop: ' + error.message);
       }
       hideLoading();
     });
@@ -2217,8 +2224,9 @@
         document.getElementById('stationaryNamePage').value = '';
         document.getElementById('stationaryQtyPage').value = '1';
         await addActivityToCloud(`Stationary added: ${name} (x${qty}) (${institution})`);
+        alert('✅ Stationary item added successfully!');
       } catch (error) {
-        alert('Error adding stationary: ' + error.message);
+        alert('❌ Error adding stationary: ' + error.message);
       }
       hideLoading();
     });
@@ -2239,8 +2247,9 @@
       try {
         await borrowBookInCloud(book.id, borrower);
         await addActivityToCloud(`Book borrowed: ${book.title} by ${borrower}`);
+        alert('✅ Book borrowed successfully!');
       } catch (error) {
-        alert('Error borrowing book: ' + error.message);
+        alert('❌ Error borrowing book: ' + error.message);
       }
       hideLoading();
     });
@@ -2258,8 +2267,9 @@
       try {
         await returnBookInCloud(book.id);
         await addActivityToCloud(`Book returned: ${book.title}`);
+        alert('✅ Book returned successfully!');
       } catch (error) {
-        alert('Error returning book: ' + error.message);
+        alert('❌ Error returning book: ' + error.message);
       }
       hideLoading();
     });
@@ -2280,8 +2290,9 @@
       try {
         await borrowLaptopInCloud(laptop.id, borrower);
         await addActivityToCloud(`Laptop borrowed: ${laptop.owner} by ${borrower}`);
+        alert('✅ Laptop borrowed successfully!');
       } catch (error) {
-        alert('Error borrowing laptop: ' + error.message);
+        alert('❌ Error borrowing laptop: ' + error.message);
       }
       hideLoading();
     });
@@ -2299,8 +2310,9 @@
       try {
         await returnLaptopInCloud(laptop.id);
         await addActivityToCloud(`Laptop returned: ${laptop.owner}`);
+        alert('✅ Laptop returned successfully!');
       } catch (error) {
-        alert('Error returning laptop: ' + error.message);
+        alert('❌ Error returning laptop: ' + error.message);
       }
       hideLoading();
     });
@@ -2317,9 +2329,9 @@
           await returnBookInCloud(b.id);
         }
         await addActivityToCloud(`Cleared all borrowed books (${borrowed.length} items)`);
-        alert(`Cleared ${borrowed.length} borrowed books. All returned.`);
+        alert(`✅ Cleared ${borrowed.length} borrowed books. All returned.`);
       } catch (error) {
-        alert('Error clearing books: ' + error.message);
+        alert('❌ Error clearing books: ' + error.message);
       }
       hideLoading();
     });
@@ -2336,9 +2348,9 @@
           await returnLaptopInCloud(l.id);
         }
         await addActivityToCloud(`Cleared all borrowed laptops (${borrowed.length} items)`);
-        alert(`Cleared ${borrowed.length} borrowed laptops. All returned.`);
+        alert(`✅ Cleared ${borrowed.length} borrowed laptops. All returned.`);
       } catch (error) {
-        alert('Error clearing laptops: ' + error.message);
+        alert('❌ Error clearing laptops: ' + error.message);
       }
       hideLoading();
     });
@@ -2366,9 +2378,9 @@
           await updateStationaryInCloud(item.id, { quantity: newQuantity });
         }
         await addActivityToCloud(`Stationary given: ${qty} x ${item.name} to staff`);
-        alert(`Given ${qty} ${item.name} to staff.`);
+        alert(`✅ Given ${qty} ${item.name} to staff.`);
       } catch (error) {
-        alert('Error updating stationary: ' + error.message);
+        alert('❌ Error updating stationary: ' + error.message);
       }
       hideLoading();
     });
@@ -2384,10 +2396,13 @@
         try {
           await addSchoolToCloud(name);
           await addActivityToCloud(`School registered: ${name}`);
+          alert('✅ School registered successfully!');
         } catch (error) {
-          alert('Error registering school: ' + error.message);
+          alert('❌ Error registering school: ' + error.message);
         }
         hideLoading();
+      } else {
+        alert('⚠️ School already exists.');
       }
       document.getElementById('schoolNamePage').value = '';
     });
@@ -2395,7 +2410,7 @@
     // Admin Reset All
     document.getElementById('adminResetAllBtn').addEventListener('click', async function() {
       if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
-      if (!confirm('Reset ALL borrowed items across ALL institutions? This action cannot be undone.')) return;
+      if (!confirm('⚠️ Reset ALL borrowed items across ALL institutions? This action cannot be undone.')) return;
       
       showLoading();
       try {
@@ -2410,9 +2425,9 @@
           }
         }
         await addActivityToCloud('Admin: Reset all borrowed items');
-        alert('All borrowed items have been reset.');
+        alert('✅ All borrowed items have been reset.');
       } catch (error) {
-        alert('Error resetting items: ' + error.message);
+        alert('❌ Error resetting items: ' + error.message);
       }
       hideLoading();
     });
@@ -2434,13 +2449,13 @@
       a.click();
       URL.revokeObjectURL(url);
       addActivityToCloud('Admin: Exported all data');
-      alert('Data exported successfully!');
+      alert('✅ Data exported successfully!');
     });
 
     // Admin Refresh
     document.getElementById('adminRefreshBtn').addEventListener('click', function() {
       if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
-      alert('Data is already live via Firestore listeners!');
+      alert('🔄 Data is already live via Firestore listeners!');
     });
 
     // PDF buttons
@@ -2481,6 +2496,8 @@
       if (firebaseUser) {
         // User is logged in
         try {
+          console.log('👤 User authenticated:', firebaseUser.email);
+          
           // Fetch user profile from Firestore using UID
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           
@@ -2505,6 +2522,8 @@
             currentUser = { id: firebaseUser.uid, ...fallbackUser };
           }
           
+          console.log('📋 User profile loaded:', currentUser);
+          
           // Update UI for logged-in state
           updateUIForLoggedIn();
           
@@ -2516,7 +2535,7 @@
           
           hideLoading();
         } catch (error) {
-          console.error('Error loading user data:', error);
+          console.error('❌ Error loading user data:', error);
           // If we can't load user data, treat as logged out
           currentUser = null;
           updateUIForLoggedOut();
@@ -2524,6 +2543,8 @@
         }
       } else {
         // User is logged out
+        console.log('👤 User logged out');
+        
         // Clean up all listeners
         cleanupListeners();
         
