@@ -107,7 +107,7 @@
     .koha-btn-admin { background: #ff6f00; color: white; border: 2px solid var(--yellow-gold); }
     .koha-btn-admin:hover { background: #e65100; transform: scale(1.02); }
 
-    /* ----- Institution title ----- */
+    /* ----- Institution title (hidden for admin) ----- */
     .institution-title {
       background: var(--yellow-pale);
       padding: 0.2rem 1rem;
@@ -132,6 +132,34 @@
       font-family: 'Times New Roman', Times, serif;
     }
     .institution-title input:focus { outline: none; border-bottom: 2px solid var(--primary-green); }
+    .institution-title.hidden { display: none; }
+
+    /* Admin school selector */
+    .admin-school-selector {
+      background: var(--yellow-pale);
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      color: var(--text-dark);
+      border: 1px solid var(--yellow-gold);
+      font-family: 'Times New Roman', Times, serif;
+    }
+    .admin-school-selector select {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--primary-green);
+      font-weight: 600;
+      color: var(--text-dark);
+      padding: 0.1rem 0.3rem;
+      font-size: 0.9rem;
+      font-family: 'Times New Roman', Times, serif;
+      cursor: pointer;
+    }
+    .admin-school-selector select:focus { outline: none; }
+    .admin-school-selector i { color: var(--yellow-gold); }
 
     /* ----- Dashboard Wrapper (flex grow) ----- */
     .dashboard-wrapper {
@@ -569,9 +597,18 @@
       <span style="background:#3f4f62; color:white;">Library</span>
     </div>
     <div class="koha-nav-actions">
-      <div class="institution-title">
+      <!-- Institution title - hidden for admin -->
+      <div class="institution-title" id="institutionTitle">
         <i class="fas fa-university"></i>
         <input type="text" id="institutionName" value="Springfield University Library" placeholder="Institution">
+      </div>
+      <!-- Admin school selector - only visible to admin -->
+      <div class="admin-school-selector" id="adminSchoolSelector" style="display:none;">
+        <i class="fas fa-eye"></i>
+        <span>Monitoring:</span>
+        <select id="adminSchoolSelect">
+          <option value="__all__">📊 All Schools</option>
+        </select>
       </div>
       <button class="koha-btn koha-btn-outline" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
       <button class="koha-btn koha-btn-primary" id="registerBtn"><i class="fas fa-user-plus"></i> Register</button>
@@ -896,6 +933,7 @@
       ];
       let schools = ['Springfield University', 'Westside Academy'];
       let activityLog = [];
+      let adminSelectedSchool = '__all__'; // '__all__' or specific school name
 
       // ---------- USER SYSTEM ----------
       const ADMIN_EMAIL = 'onyangocelestino@gmail.com';
@@ -930,12 +968,14 @@
       const homepageContainer = document.getElementById('homepageContainer');
       const sidebarUser = document.getElementById('sidebarUser');
       const adminQuickLoginBtn = document.getElementById('adminQuickLoginBtn');
+      const institutionTitle = document.getElementById('institutionTitle');
+      const adminSchoolSelector = document.getElementById('adminSchoolSelector');
+      const adminSchoolSelect = document.getElementById('adminSchoolSelect');
 
       let isLoginMode = true;
 
       // ---------- AUTH FUNCTIONS ----------
       function ensureAdminExists() {
-        // Check if admin exists in users array
         const adminExists = users.some(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
         if (!adminExists) {
           users.push({ 
@@ -949,7 +989,6 @@
           saveUsers();
           console.log('✅ Admin account created');
         } else {
-          // Ensure admin has correct password
           const admin = users.find(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
           if (admin && admin.password !== ADMIN_PASSWORD) {
             admin.password = ADMIN_PASSWORD;
@@ -957,7 +996,6 @@
             console.log('✅ Admin password reset');
           }
         }
-        console.log('👑 Admin exists:', users.some(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()));
       }
 
       function saveUsers() {
@@ -984,11 +1022,9 @@
         } catch(e) {
           users = [];
         }
-        // Always ensure admin exists
         ensureAdminExists();
       }
       
-      // Initialize users
       loadUsers();
 
       function findUser(email) {
@@ -996,15 +1032,12 @@
       }
 
       function loginUser(email, password) {
-        // Special handling for admin
         if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-          // Check if admin exists
           const admin = users.find(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
           if (admin) {
             if (admin.password === password) {
               return { success: true, user: admin };
             } else {
-              // Fix the password if it's wrong
               admin.password = ADMIN_PASSWORD;
               saveUsers();
               if (admin.password === password) {
@@ -1013,7 +1046,6 @@
               return { success: false, message: 'Incorrect password. Please use: Cele.Dev2026' };
             }
           } else {
-            // Create admin if missing
             const newAdmin = { 
               email: ADMIN_EMAIL, 
               password: ADMIN_PASSWORD, 
@@ -1031,7 +1063,6 @@
           }
         }
 
-        // Regular user login
         const user = findUser(email);
         if (!user) return { success: false, message: 'User not found' };
         if (user.password !== password) return { success: false, message: 'Incorrect password' };
@@ -1141,9 +1172,7 @@
       }
 
       function handleAdminQuickLogin() {
-        // Ensure admin exists before login
         ensureAdminExists();
-        // Try to login as admin
         const result = loginUser(ADMIN_EMAIL, ADMIN_PASSWORD);
         if (result.success) {
           currentUser = { 
@@ -1206,9 +1235,22 @@
           const usersItem = document.getElementById('usersMenuItem');
           const adminItem = document.getElementById('adminMenuItem');
           
-          schoolsItem.style.display = 'flex';
-          usersItem.style.display = 'flex';
-          adminItem.style.display = 'flex';
+          // Show/Hide admin items based on user role
+          if (currentUser.isAdmin) {
+            schoolsItem.style.display = 'flex';
+            usersItem.style.display = 'flex';
+            adminItem.style.display = 'flex';
+            // Show admin school selector, hide institution title
+            institutionTitle.classList.add('hidden');
+            adminSchoolSelector.style.display = 'inline-flex';
+            populateSchoolSelector();
+          } else {
+            schoolsItem.style.display = 'none';
+            usersItem.style.display = 'none';
+            adminItem.style.display = 'none';
+            institutionTitle.classList.remove('hidden');
+            adminSchoolSelector.style.display = 'none';
+          }
           
           if (!currentUser.isAdmin) {
             const activePage = document.querySelector('.page.active-page');
@@ -1223,15 +1265,48 @@
           document.getElementById('registerBtn').style.display = 'inline-flex';
           dashboardWrapper.style.display = 'none';
           homepageContainer.style.display = 'flex';
+          institutionTitle.classList.remove('hidden');
+          adminSchoolSelector.style.display = 'none';
         }
       }
+
+      // ---------- SCHOOL SELECTOR ----------
+      function populateSchoolSelector() {
+        adminSchoolSelect.innerHTML = '<option value="__all__">📊 All Schools</option>';
+        schools.forEach(s => {
+          const option = document.createElement('option');
+          option.value = s;
+          option.textContent = '🏫 ' + s;
+          adminSchoolSelect.appendChild(option);
+        });
+        adminSchoolSelect.value = adminSelectedSchool;
+      }
+
+      adminSchoolSelect.addEventListener('change', function() {
+        adminSelectedSchool = this.value;
+        renderAll();
+        addActivity(`Admin switched to view: ${adminSelectedSchool === '__all__' ? 'All Schools' : adminSelectedSchool}`);
+      });
 
       // ---------- FILTER DATA BY INSTITUTION ----------
       function getFilteredData() {
         if (!currentUser) return { books: [], laptops: [], stationary: [] };
+        
+        // If admin and monitoring a specific school
+        if (currentUser.isAdmin && adminSelectedSchool !== '__all__') {
+          const inst = adminSelectedSchool;
+          return {
+            books: books.filter(b => b.institution === inst),
+            laptops: laptops.filter(l => l.institution === inst),
+            stationary: stationary.filter(s => s.institution === inst)
+          };
+        }
+        
+        // Admin viewing all schools OR regular user
         if (currentUser.isAdmin) {
           return { books: books, laptops: laptops, stationary: stationary };
         }
+        
         const inst = currentUser.institution;
         return {
           books: books.filter(b => b.institution === inst),
@@ -1252,7 +1327,7 @@
         item.addEventListener('click', function() {
           const pageId = this.dataset.page;
           if ((pageId === 'pageSchools' || pageId === 'pageUsers' || pageId === 'pageAdmin') && (!currentUser || !currentUser.isAdmin)) {
-            alert('⚠️ Admin access required. Please login with admin credentials.\n\nAdmin: onyangocelestino@gmail.com\nPassword: Cele.Dev2026');
+            alert('⚠️ Admin access required.');
             return;
           }
           switchPage(pageId);
@@ -1527,7 +1602,10 @@
         const author = document.getElementById('bookAuthorPage').value.trim();
         const acc = document.getElementById('bookAccPage').value.trim();
         if (!title || !author || !acc) return alert('Fill all fields');
-        const institution = currentUser.isAdmin ? prompt('Enter institution for this book:', currentUser.institution) || currentUser.institution : currentUser.institution;
+        let institution = currentUser.institution;
+        if (currentUser.isAdmin) {
+          institution = prompt('Enter institution for this book:', adminSelectedSchool === '__all__' ? 'Springfield University' : adminSelectedSchool) || 'Springfield University';
+        }
         books.push({ id: Date.now() + Math.random()*1000, title, author, acc, borrowed: false, borrower: '', institution });
         document.getElementById('bookTitlePage').value = '';
         document.getElementById('bookAuthorPage').value = '';
@@ -1542,7 +1620,10 @@
         const type = document.getElementById('laptopTypePage').value.trim();
         const date = document.getElementById('laptopDatePage').value;
         if (!owner || !type || !date) return alert('Fill all fields');
-        const institution = currentUser.isAdmin ? prompt('Enter institution for this laptop:', currentUser.institution) || currentUser.institution : currentUser.institution;
+        let institution = currentUser.institution;
+        if (currentUser.isAdmin) {
+          institution = prompt('Enter institution for this laptop:', adminSelectedSchool === '__all__' ? 'Springfield University' : adminSelectedSchool) || 'Springfield University';
+        }
         laptops.push({ id: Date.now() + Math.random()*1000, owner, type, date, borrowed: false, borrower: '', institution });
         document.getElementById('laptopOwnerPage').value = '';
         document.getElementById('laptopTypePage').value = '';
@@ -1556,7 +1637,10 @@
         const name = document.getElementById('stationaryNamePage').value.trim();
         const qty = parseInt(document.getElementById('stationaryQtyPage').value) || 1;
         if (!name) return alert('Enter item name');
-        const institution = currentUser.isAdmin ? prompt('Enter institution for this item:', currentUser.institution) || currentUser.institution : currentUser.institution;
+        let institution = currentUser.institution;
+        if (currentUser.isAdmin) {
+          institution = prompt('Enter institution for this item:', adminSelectedSchool === '__all__' ? 'Springfield University' : adminSelectedSchool) || 'Springfield University';
+        }
         stationary.push({ id: Date.now() + Math.random()*1000, name, quantity: qty, institution });
         document.getElementById('stationaryNamePage').value = '';
         document.getElementById('stationaryQtyPage').value = '1';
@@ -1696,6 +1780,8 @@
         if (!name) return alert('Enter school name');
         if (!schools.includes(name)) {
           schools.push(name);
+          // Update the school selector
+          populateSchoolSelector();
         }
         document.getElementById('schoolNamePage').value = '';
         addActivity(`School registered: ${name}`);
@@ -1846,7 +1932,6 @@
       });
 
       // ---------- INIT ----------
-      // Ensure admin exists on startup
       ensureAdminExists();
       updateUIForLoggedIn();
       renderAll();
