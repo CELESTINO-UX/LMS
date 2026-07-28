@@ -104,6 +104,8 @@
     .koha-btn-pdf { background: #c62828; color: white; }
     .koha-btn-pdf:hover { background: #b71c1c; }
     .koha-btn-sm { padding: 0.2rem 0.9rem; font-size: 0.75rem; }
+    .koha-btn-admin { background: #ff6f00; color: white; border: 2px solid var(--yellow-gold); }
+    .koha-btn-admin:hover { background: #e65100; transform: scale(1.02); }
 
     /* ----- Institution title ----- */
     .institution-title {
@@ -487,6 +489,22 @@
       font-family: 'Times New Roman', Times, serif;
     }
     .forgot-link a:hover { text-decoration: underline; }
+    .admin-login-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .admin-login-divider hr {
+      flex: 1;
+      border: none;
+      border-top: 1px solid var(--border-color);
+    }
+    .admin-login-divider span {
+      color: var(--text-dark);
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
 
     /* ----- Footer (pushed to bottom) ----- */
     .koha-footer {
@@ -824,6 +842,13 @@
           <a id="forgotPasswordLink">Forgot password?</a>
         </div>
         <button class="koha-btn koha-btn-primary" id="authSubmitBtn"><i class="fas fa-arrow-right"></i> Login</button>
+        
+        <!-- Admin Quick Login -->
+        <div class="admin-login-divider">
+          <hr><span>OR</span><hr>
+        </div>
+        <button class="koha-btn koha-btn-admin" id="adminQuickLoginBtn"><i class="fas fa-crown"></i> Login as Admin</button>
+        
         <div class="switch-action">
           <span id="authSwitchText">Don't have an account?</span>
           <a id="authSwitchLink">Register</a>
@@ -906,10 +931,19 @@
       const dashboardWrapper = document.getElementById('dashboardWrapper');
       const homepageContainer = document.getElementById('homepageContainer');
       const sidebarUser = document.getElementById('sidebarUser');
+      const adminQuickLoginBtn = document.getElementById('adminQuickLoginBtn');
 
       let isLoginMode = true;
 
       // ---------- AUTH FUNCTIONS ----------
+      function ensureAdminExists() {
+        const adminExists = users.some(u => u.email === ADMIN_EMAIL);
+        if (!adminExists) {
+          users.push({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', institution: 'Admin', registered: new Date().toISOString(), isAdmin: true });
+          saveUsers();
+        }
+      }
+
       function saveUsers() {
         try {
           localStorage.setItem('cele_lms_users', JSON.stringify(users));
@@ -928,6 +962,7 @@
             users = parsed;
           }
         } catch(e) {}
+        ensureAdminExists();
         saveUsers();
       }
       loadUsers();
@@ -1003,23 +1038,29 @@
         modal.classList.remove('show');
       }
 
+      function performLogin(email, password) {
+        const result = loginUser(email, password);
+        if (result.success) {
+          currentUser = { email: result.user.email, school: result.user.school, institution: result.user.institution, isAdmin: result.user.isAdmin || false };
+          updateUIForLoggedIn();
+          closeModal();
+          renderAll();
+          addActivity(`User ${currentUser.email} logged in`);
+          alert(`Welcome ${currentUser.email}!`);
+          return true;
+        } else {
+          alert(result.message);
+          return false;
+        }
+      }
+
       function handleAuthSubmit() {
         const email = authEmail.value.trim();
         const password = authPassword.value.trim();
         if (!email || !password) return alert('Please fill in all fields');
 
         if (isLoginMode) {
-          const result = loginUser(email, password);
-          if (result.success) {
-            currentUser = { email: result.user.email, school: result.user.school, institution: result.user.institution, isAdmin: result.user.isAdmin || false };
-            updateUIForLoggedIn();
-            closeModal();
-            renderAll();
-            addActivity(`User ${currentUser.email} logged in`);
-            alert(`Welcome ${currentUser.email}!`);
-          } else {
-            alert(result.message);
-          }
+          performLogin(email, password);
         } else {
           const school = authSchool.value.trim();
           if (!school) return alert('Please enter your school/institution');
@@ -1032,6 +1073,10 @@
             alert(result.message);
           }
         }
+      }
+
+      function handleAdminQuickLogin() {
+        performLogin(ADMIN_EMAIL, ADMIN_PASSWORD);
       }
 
       function handleForgotPassword() {
@@ -1078,13 +1123,10 @@
           const usersItem = document.getElementById('usersMenuItem');
           const adminItem = document.getElementById('adminMenuItem');
           
-          // Admin items are always visible in sidebar but only accessible if admin
-          // We keep them visible but will check access when clicked
           schoolsItem.style.display = 'flex';
           usersItem.style.display = 'flex';
           adminItem.style.display = 'flex';
           
-          // If not admin and on admin page, redirect to dashboard
           if (!currentUser.isAdmin) {
             const activePage = document.querySelector('.page.active-page');
             if (activePage && (activePage.id === 'pageSchools' || activePage.id === 'pageUsers' || activePage.id === 'pageAdmin')) {
@@ -1126,7 +1168,6 @@
       document.querySelectorAll('.sidebar-item').forEach(item => {
         item.addEventListener('click', function() {
           const pageId = this.dataset.page;
-          // Check admin access for restricted pages
           if ((pageId === 'pageSchools' || pageId === 'pageUsers' || pageId === 'pageAdmin') && (!currentUser || !currentUser.isAdmin)) {
             alert('⚠️ Admin access required. Please login with admin credentials.\n\nAdmin: onyangocelestino@gmail.com\nPassword: Cele.Dev2026');
             return;
@@ -1619,6 +1660,7 @@
       document.getElementById('registerBtn').addEventListener('click', () => openModal('register'));
       document.getElementById('homepageLoginBtn').addEventListener('click', () => openModal('login'));
       document.getElementById('homepageRegisterBtn').addEventListener('click', () => openModal('register'));
+      adminQuickLoginBtn.addEventListener('click', handleAdminQuickLogin);
       modalClose.addEventListener('click', closeModal);
       modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
@@ -1721,10 +1763,7 @@
       });
 
       // ---------- INIT ----------
-      if (!users.some(u => u.email === ADMIN_EMAIL)) {
-        users.push({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', institution: 'Admin', registered: new Date().toISOString(), isAdmin: true });
-        saveUsers();
-      }
+      ensureAdminExists();
       updateUIForLoggedIn();
       renderAll();
       addActivity('System initialized');
