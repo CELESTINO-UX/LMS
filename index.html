@@ -947,16 +947,17 @@
             isAdmin: true 
           });
           saveUsers();
-          console.log('Admin account created');
+          console.log('✅ Admin account created');
         } else {
           // Ensure admin has correct password
           const admin = users.find(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
           if (admin && admin.password !== ADMIN_PASSWORD) {
             admin.password = ADMIN_PASSWORD;
             saveUsers();
-            console.log('Admin password reset');
+            console.log('✅ Admin password reset');
           }
         }
+        console.log('👑 Admin exists:', users.some(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()));
       }
 
       function saveUsers() {
@@ -972,7 +973,6 @@
           const data = localStorage.getItem('cele_lms_users');
           if (data) {
             const parsed = JSON.parse(data);
-            // Ensure we have an array
             if (Array.isArray(parsed)) {
               users = parsed;
             } else {
@@ -996,9 +996,44 @@
       }
 
       function loginUser(email, password) {
+        // Special handling for admin
+        if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+          // Check if admin exists
+          const admin = users.find(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+          if (admin) {
+            if (admin.password === password) {
+              return { success: true, user: admin };
+            } else {
+              // Fix the password if it's wrong
+              admin.password = ADMIN_PASSWORD;
+              saveUsers();
+              if (admin.password === password) {
+                return { success: true, user: admin };
+              }
+              return { success: false, message: 'Incorrect password. Please use: Cele.Dev2026' };
+            }
+          } else {
+            // Create admin if missing
+            const newAdmin = { 
+              email: ADMIN_EMAIL, 
+              password: ADMIN_PASSWORD, 
+              school: 'Admin', 
+              institution: 'Admin', 
+              registered: new Date().toISOString(), 
+              isAdmin: true 
+            };
+            users.push(newAdmin);
+            saveUsers();
+            if (password === ADMIN_PASSWORD) {
+              return { success: true, user: newAdmin };
+            }
+            return { success: false, message: 'Admin created. Please use password: Cele.Dev2026' };
+          }
+        }
+
+        // Regular user login
         const user = findUser(email);
         if (!user) return { success: false, message: 'User not found' };
-        // Case-sensitive password check
         if (user.password !== password) return { success: false, message: 'Incorrect password' };
         return { success: true, user };
       }
@@ -1108,12 +1143,22 @@
       function handleAdminQuickLogin() {
         // Ensure admin exists before login
         ensureAdminExists();
-        // Find the admin user
-        const adminUser = users.find(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
-        if (adminUser) {
-          performLogin(ADMIN_EMAIL, ADMIN_PASSWORD);
+        // Try to login as admin
+        const result = loginUser(ADMIN_EMAIL, ADMIN_PASSWORD);
+        if (result.success) {
+          currentUser = { 
+            email: result.user.email, 
+            school: result.user.school, 
+            institution: result.user.institution, 
+            isAdmin: result.user.isAdmin || true 
+          };
+          updateUIForLoggedIn();
+          closeModal();
+          renderAll();
+          addActivity(`Admin ${currentUser.email} logged in`);
+          alert(`Welcome Admin! You have full system access.`);
         } else {
-          alert('Admin account not found. Please contact support.');
+          alert('Admin login failed: ' + result.message);
         }
       }
 
