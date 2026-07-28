@@ -259,6 +259,15 @@
       margin-top: 0.8rem;
       border: 1px solid var(--border-color);
     }
+    .status-badge {
+      display: inline-block;
+      padding: 0.1rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .status-available { background: #c8e6c9; color: #1a4d2e; }
+    .status-borrowed { background: #ffcdd2; color: #c62828; }
 
     /* ----- Login/Register modal ----- */
     .modal-overlay {
@@ -400,7 +409,8 @@
 
   <!-- PAGE TABS -->
   <div class="page-tabs">
-    <button class="page-tab active" data-page="pageBooks"><i class="fas fa-book"></i> Books</button>
+    <button class="page-tab active" data-page="pageDashboard"><i class="fas fa-home"></i> Dashboard</button>
+    <button class="page-tab" data-page="pageBooks"><i class="fas fa-book"></i> Books</button>
     <button class="page-tab" data-page="pageLaptops"><i class="fas fa-laptop"></i> Laptops</button>
     <button class="page-tab" data-page="pageStationary"><i class="fas fa-pencil-alt"></i> Stationary</button>
     <button class="page-tab" data-page="pageBorrowing"><i class="fas fa-hand-holding-heart"></i> Borrowing</button>
@@ -410,8 +420,46 @@
 
   <!-- ========== PAGES ========== -->
 
+  <!-- PAGE: DASHBOARD -->
+  <div id="pageDashboard" class="page active-page">
+    <div class="koha-card">
+      <div class="koha-card-header">
+        <h3><i class="fas fa-tachometer-alt"></i> Dashboard</h3>
+        <span class="koha-badge" id="dashboardStats">Welcome</span>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+        <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+          <h4 style="color:var(--primary-dark);">📚 Books</h4>
+          <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="dashBookCount">0</p>
+          <span class="text-muted">Total</span>
+        </div>
+        <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+          <h4 style="color:var(--primary-dark);">💻 Laptops</h4>
+          <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="dashLaptopCount">0</p>
+          <span class="text-muted">Total</span>
+        </div>
+        <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+          <h4 style="color:var(--primary-dark);">✏️ Stationary</h4>
+          <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="dashStationaryCount">0</p>
+          <span class="text-muted">Items</span>
+        </div>
+        <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+          <h4 style="color:var(--primary-dark);">👥 Users</h4>
+          <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="dashUserCount">0</p>
+          <span class="text-muted">Registered</span>
+        </div>
+      </div>
+      <div style="background:var(--yellow-pale); padding:1rem; border-radius:12px; border:1px solid var(--yellow-gold);">
+        <h4><i class="fas fa-clock" style="color:var(--yellow-gold);"></i> Recent Activity</h4>
+        <ul id="dashActivityList" style="list-style:none; margin-top:0.5rem;">
+          <li class="text-muted">Welcome to Cele.Dev ILS</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <!-- PAGE: BOOKS -->
-  <div id="pageBooks" class="page active-page">
+  <div id="pageBooks" class="page">
     <div class="koha-card">
       <div class="koha-card-header">
         <h3><i class="fas fa-book"></i> Book Catalog</h3>
@@ -477,7 +525,10 @@
     <div class="koha-card">
       <div class="koha-card-header">
         <h3><i class="fas fa-hand-holding-heart"></i> Borrowed Books</h3>
-        <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBorrowedBooksPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+        <div>
+          <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBorrowedBooksPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+          <button class="koha-btn koha-btn-success koha-btn-sm" id="clearReturnedBooksBtn"><i class="fas fa-check-double"></i> Clear Returned</button>
+        </div>
       </div>
       <ul class="koha-item-list" id="borrowedBookListPage"></ul>
       <div class="flex mt-2">
@@ -488,7 +539,10 @@
     <div class="koha-card">
       <div class="koha-card-header">
         <h3><i class="fas fa-laptop-code"></i> Borrowed Laptops</h3>
-        <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBorrowedLaptopsPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+        <div>
+          <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBorrowedLaptopsPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+          <button class="koha-btn koha-btn-success koha-btn-sm" id="clearReturnedLaptopsBtn"><i class="fas fa-check-double"></i> Clear Returned</button>
+        </div>
       </div>
       <ul class="koha-item-list" id="borrowedLaptopListPage"></ul>
       <div class="flex mt-2">
@@ -586,10 +640,11 @@
         { id: 2, name: 'Whiteboard markers', quantity: 12 }
       ];
       let schools = ['Springfield High', 'Westside Academy'];
+      let activityLog = [];
 
       // ---------- USER SYSTEM ----------
       const ADMIN_EMAIL = 'onyangocelestino@gmail.com';
-      const ADMIN_PASSWORD = 'admin123';
+      const ADMIN_PASSWORD = 'Cele.Dev2026';
 
       let users = [
         { email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', registered: new Date().toISOString() }
@@ -724,6 +779,7 @@
             updateUIForLoggedIn();
             closeModal();
             renderAll();
+            addActivity(`User ${currentUser.email} logged in`);
             alert(`Welcome ${currentUser.email}!`);
           } else {
             alert(result.message);
@@ -733,6 +789,7 @@
           if (!school) return alert('Please enter your school/institution');
           const result = registerUser(email, password, school);
           if (result.success) {
+            addActivity(`New user registered: ${email}`);
             alert('Registration successful! Please login.');
             openModal('login');
           } else {
@@ -763,6 +820,7 @@
       }
 
       function logout() {
+        if (currentUser) addActivity(`User ${currentUser.email} logged out`);
         currentUser = null;
         updateUIForLoggedIn();
         renderAll();
@@ -788,6 +846,17 @@
         } else {
           userTab.style.display = 'none';
           if (document.getElementById('pageUsers').classList.contains('active-page') && !(currentUser && currentUser.email === ADMIN_EMAIL)) {
+            switchTab('pageDashboard');
+          }
+        }
+        // Show dashboard only if logged in
+        const dashboardTab = document.querySelector('.page-tab[data-page="pageDashboard"]');
+        if (currentUser) {
+          dashboardTab.style.display = 'inline-flex';
+        } else {
+          dashboardTab.style.display = 'none';
+          // If on dashboard and not logged in, switch to books
+          if (document.getElementById('pageDashboard').classList.contains('active-page') && !currentUser) {
             switchTab('pageBooks');
           }
         }
@@ -801,6 +870,25 @@
         document.getElementById(pageId)?.classList.add('active-page');
       }
 
+      // ---------- ACTIVITY LOG ----------
+      function addActivity(msg) {
+        const timestamp = new Date().toLocaleString();
+        activityLog.unshift({ msg, timestamp });
+        if (activityLog.length > 50) activityLog.pop();
+        renderActivityLog();
+      }
+
+      function renderActivityLog() {
+        const list = document.getElementById('dashActivityList');
+        if (!list) return;
+        list.innerHTML = activityLog.slice(0, 10).map(a => 
+          `<li style="padding:4px 0; border-bottom:1px solid #e8f0e8;"><i class="fas fa-circle" style="color:var(--primary-green); font-size:0.5rem; margin-right:6px;"></i> ${a.msg} <span class="text-muted" style="float:right;">${a.timestamp}</span></li>`
+        ).join('');
+        if (activityLog.length === 0) {
+          list.innerHTML = '<li class="text-muted">No recent activity</li>';
+        }
+      }
+
       // ---------- RENDER ALL ----------
       function renderAll() {
         renderBooksPage();
@@ -810,14 +898,21 @@
         renderBorrowedLaptopsPage();
         renderSchoolsPage();
         renderUsersPage();
+        renderDashboard();
         updateCounts();
+        renderActivityLog();
       }
 
       function renderBooksPage() {
         const list = document.getElementById('bookListPage');
         list.innerHTML = books.map(b => `
           <li>
-            <span><strong>${b.title}</strong> by ${b.author} (${b.acc}) ${b.borrowed ? '🔴' : '🟢'}</span>
+            <span>
+              <strong>${b.title}</strong> by ${b.author} (${b.acc})
+              <span class="status-badge ${b.borrowed ? 'status-borrowed' : 'status-available'}">
+                ${b.borrowed ? '🔴 Borrowed' : '🟢 Available'}
+              </span>
+            </span>
             <span class="koha-item-actions">
               <button onclick="editBook(${b.id})"><i class="fas fa-edit"></i></button>
               <button onclick="deleteBook(${b.id})"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
@@ -830,7 +925,12 @@
         const list = document.getElementById('laptopListPage');
         list.innerHTML = laptops.map(l => `
           <li>
-            <span>${l.owner} · ${l.type} · ${l.date} ${l.borrowed ? '🔴' : '🟢'}</span>
+            <span>
+              ${l.owner} · ${l.type} · ${l.date}
+              <span class="status-badge ${l.borrowed ? 'status-borrowed' : 'status-available'}">
+                ${l.borrowed ? '🔴 Borrowed' : '🟢 Available'}
+              </span>
+            </span>
             <span class="koha-item-actions">
               <button onclick="editLaptop(${l.id})"><i class="fas fa-edit"></i></button>
               <button onclick="deleteLaptop(${l.id})"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
@@ -858,8 +958,9 @@
         list.innerHTML = borrowed.length ? borrowed.map(b => `
           <li class="borrowed-item">
             <span><strong>${b.borrower}</strong> · ${b.title} (${b.acc}) <span class="text-muted">${new Date().toLocaleString()}</span></span>
+            <button class="koha-btn koha-btn-success koha-btn-sm" onclick="returnBookById(${b.id})"><i class="fas fa-undo-alt"></i> Return</button>
           </li>
-        `).join('') : '<li class="text-muted">No books borrowed</li>';
+        `).join('') : '<li class="text-muted">No books currently borrowed</li>';
       }
 
       function renderBorrowedLaptopsPage() {
@@ -867,9 +968,10 @@
         const borrowed = laptops.filter(l => l.borrowed);
         list.innerHTML = borrowed.length ? borrowed.map(l => `
           <li class="borrowed-item">
-            <span><strong>${l.borrower}</strong> · ${l.owner} ${l.type} <span class="text-muted">${new Date().toLocaleString()}</span></span>
+            <span><strong>${l.borrower}</strong> · ${l.owner} (${l.type}) <span class="text-muted">${new Date().toLocaleString()}</span></span>
+            <button class="koha-btn koha-btn-success koha-btn-sm" onclick="returnLaptopById(${l.id})"><i class="fas fa-undo-alt"></i> Return</button>
           </li>
-        `).join('') : '<li class="text-muted">No laptops borrowed</li>';
+        `).join('') : '<li class="text-muted">No laptops currently borrowed</li>';
       }
 
       function renderSchoolsPage() {
@@ -887,6 +989,15 @@
         `).join('');
       }
 
+      function renderDashboard() {
+        if (!currentUser) return;
+        document.getElementById('dashBookCount').textContent = books.length;
+        document.getElementById('dashLaptopCount').textContent = laptops.length;
+        document.getElementById('dashStationaryCount').textContent = stationary.reduce((sum, s) => sum + s.quantity, 0);
+        document.getElementById('dashUserCount').textContent = users.length;
+        document.getElementById('dashboardStats').textContent = `Welcome ${currentUser.email}`;
+      }
+
       function updateCounts() {
         document.getElementById('bookCountPage').textContent = books.length;
         document.getElementById('laptopCountPage').textContent = laptops.length;
@@ -896,41 +1007,53 @@
       // ---------- CRUD (global) ----------
       window.deleteBook = function(id) {
         if (!currentUser) return alert('Please login first');
+        const book = books.find(b => b.id === id);
+        if (book && book.borrowed) return alert('Cannot delete a borrowed book');
         books = books.filter(b => b.id !== id);
+        addActivity(`Book deleted: ${book?.title || 'Unknown'}`);
         renderAll();
       };
       window.editBook = function(id) {
         if (!currentUser) return alert('Please login first');
         const b = books.find(x => x.id === id);
         if (!b) return;
+        if (b.borrowed) return alert('Cannot edit a borrowed book');
         const newTitle = prompt('Edit title:', b.title);
         if (newTitle !== null) b.title = newTitle || b.title;
         const newAuthor = prompt('Edit author:', b.author);
         if (newAuthor !== null) b.author = newAuthor || b.author;
         const newAcc = prompt('Edit accession:', b.acc);
         if (newAcc !== null) b.acc = newAcc || b.acc;
+        addActivity(`Book edited: ${b.title}`);
         renderAll();
       };
       window.deleteLaptop = function(id) {
         if (!currentUser) return alert('Please login first');
+        const laptop = laptops.find(l => l.id === id);
+        if (laptop && laptop.borrowed) return alert('Cannot delete a borrowed laptop');
         laptops = laptops.filter(l => l.id !== id);
+        addActivity(`Laptop deleted: ${laptop?.owner || 'Unknown'}`);
         renderAll();
       };
       window.editLaptop = function(id) {
         if (!currentUser) return alert('Please login first');
         const l = laptops.find(x => x.id === id);
         if (!l) return;
+        if (l.borrowed) return alert('Cannot edit a borrowed laptop');
         const owner = prompt('Edit owner:', l.owner);
         if (owner !== null) l.owner = owner || l.owner;
         const type = prompt('Edit type:', l.type);
         if (type !== null) l.type = type || l.type;
         const date = prompt('Edit date (YYYY-MM-DD):', l.date);
         if (date !== null) l.date = date || l.date;
+        addActivity(`Laptop edited: ${l.owner}`);
         renderAll();
       };
       window.deleteStationary = function(id) {
         if (!currentUser) return alert('Please login first');
+        const item = stationary.find(s => s.id === id);
         stationary = stationary.filter(s => s.id !== id);
+        addActivity(`Stationary deleted: ${item?.name || 'Unknown'}`);
         renderAll();
       };
       window.editStationary = function(id) {
@@ -941,6 +1064,28 @@
         if (name !== null) s.name = name || s.name;
         const qty = prompt('Edit quantity:', s.quantity);
         if (qty !== null) s.quantity = parseInt(qty) || 1;
+        addActivity(`Stationary edited: ${s.name}`);
+        renderAll();
+      };
+
+      // ---------- RETURN FUNCTIONS (global) ----------
+      window.returnBookById = function(id) {
+        if (!currentUser) return alert('Please login first');
+        const book = books.find(b => b.id === id);
+        if (!book || !book.borrowed) return alert('Book is not borrowed');
+        book.borrowed = false;
+        book.borrower = '';
+        addActivity(`Book returned: ${book.title} by ${currentUser.email}`);
+        renderAll();
+      };
+
+      window.returnLaptopById = function(id) {
+        if (!currentUser) return alert('Please login first');
+        const laptop = laptops.find(l => l.id === id);
+        if (!laptop || !laptop.borrowed) return alert('Laptop is not borrowed');
+        laptop.borrowed = false;
+        laptop.borrower = '';
+        addActivity(`Laptop returned: ${laptop.owner} by ${currentUser.email}`);
         renderAll();
       };
 
@@ -955,6 +1100,7 @@
         document.getElementById('bookTitlePage').value = '';
         document.getElementById('bookAuthorPage').value = '';
         document.getElementById('bookAccPage').value = '';
+        addActivity(`Book added: ${title}`);
         renderAll();
       });
 
@@ -968,6 +1114,7 @@
         document.getElementById('laptopOwnerPage').value = '';
         document.getElementById('laptopTypePage').value = '';
         document.getElementById('laptopDatePage').value = '';
+        addActivity(`Laptop added: ${owner} (${type})`);
         renderAll();
       });
 
@@ -979,6 +1126,7 @@
         stationary.push({ id: Date.now() + Math.random()*1000, name, quantity: qty });
         document.getElementById('stationaryNamePage').value = '';
         document.getElementById('stationaryQtyPage').value = '1';
+        addActivity(`Stationary added: ${name} (x${qty})`);
         renderAll();
       });
 
@@ -993,6 +1141,7 @@
         if (!borrower) return;
         book.borrowed = true;
         book.borrower = borrower;
+        addActivity(`Book borrowed: ${book.title} by ${borrower}`);
         renderAll();
       });
 
@@ -1004,31 +1153,62 @@
         if (!book) return alert('Book not found or not borrowed');
         book.borrowed = false;
         book.borrower = '';
+        addActivity(`Book returned: ${book.title}`);
         renderAll();
       });
 
       document.getElementById('borrowLaptopPageBtn').addEventListener('click', function() {
         if (!currentUser) return alert('Please login first');
-        const id = prompt('Enter Laptop owner (identifier):');
-        if (!id) return;
-        const laptop = laptops.find(l => l.owner === id && !l.borrowed);
+        const owner = prompt('Enter Laptop owner (identifier):');
+        if (!owner) return;
+        const laptop = laptops.find(l => l.owner === owner && !l.borrowed);
         if (!laptop) return alert('Laptop not available or already borrowed');
         const borrower = prompt('Enter borrower name:');
         if (!borrower) return;
         laptop.borrowed = true;
         laptop.borrower = borrower;
+        addActivity(`Laptop borrowed: ${laptop.owner} by ${borrower}`);
         renderAll();
       });
 
       document.getElementById('returnLaptopPageBtn').addEventListener('click', function() {
         if (!currentUser) return alert('Please login first');
-        const id = prompt('Enter Laptop owner to return:');
-        if (!id) return;
-        const laptop = laptops.find(l => l.owner === id && l.borrowed);
+        const owner = prompt('Enter Laptop owner to return:');
+        if (!owner) return;
+        const laptop = laptops.find(l => l.owner === owner && l.borrowed);
         if (!laptop) return alert('Laptop not found or not borrowed');
         laptop.borrowed = false;
         laptop.borrower = '';
+        addActivity(`Laptop returned: ${laptop.owner}`);
         renderAll();
+      });
+
+      // ---------- CLEAR RETURNED (Remove borrowers who have returned) ----------
+      document.getElementById('clearReturnedBooksBtn').addEventListener('click', function() {
+        if (!currentUser) return alert('Please login first');
+        const borrowed = books.filter(b => b.borrowed);
+        if (borrowed.length === 0) return alert('No borrowed books to clear');
+        // Clear all borrowed status (mark as returned)
+        borrowed.forEach(b => {
+          b.borrowed = false;
+          b.borrower = '';
+        });
+        addActivity(`Cleared all borrowed books (${borrowed.length} items)`);
+        renderAll();
+        alert(`Cleared ${borrowed.length} borrowed books. All returned.`);
+      });
+
+      document.getElementById('clearReturnedLaptopsBtn').addEventListener('click', function() {
+        if (!currentUser) return alert('Please login first');
+        const borrowed = laptops.filter(l => l.borrowed);
+        if (borrowed.length === 0) return alert('No borrowed laptops to clear');
+        borrowed.forEach(l => {
+          l.borrowed = false;
+          l.borrower = '';
+        });
+        addActivity(`Cleared all borrowed laptops (${borrowed.length} items)`);
+        renderAll();
+        alert(`Cleared ${borrowed.length} borrowed laptops. All returned.`);
       });
 
       // ---------- STATIONARY GIVE ----------
@@ -1043,6 +1223,7 @@
         if (qty > item.quantity) return alert('Not enough quantity');
         item.quantity -= qty;
         if (item.quantity === 0) stationary = stationary.filter(s => s.id !== item.id);
+        addActivity(`Stationary given: ${qty} x ${item.name} to staff`);
         alert(`Given ${qty} ${item.name} to staff.`);
         renderAll();
       });
@@ -1054,6 +1235,7 @@
         if (!name) return alert('Enter school name');
         schools.push(name);
         document.getElementById('schoolNamePage').value = '';
+        addActivity(`School registered: ${name}`);
         renderAll();
       });
 
@@ -1061,6 +1243,10 @@
       document.querySelectorAll('.page-tab').forEach(tab => {
         tab.addEventListener('click', function() {
           const pageId = this.dataset.page;
+          if (pageId === 'pageDashboard' && !currentUser) {
+            alert('Please login first to access the dashboard');
+            return;
+          }
           switchTab(pageId);
         });
       });
@@ -1172,6 +1358,7 @@
       }
       updateUIForLoggedIn();
       renderAll();
+      addActivity('System initialized');
     })();
   </script>
 </body>
