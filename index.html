@@ -15,9 +15,11 @@
       box-sizing: border-box;
       font-family: 'Times New Roman', Times, serif;
     }
+    html, body {
+      height: 100%;
+    }
     body {
       background: #f0f5f0;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
@@ -47,6 +49,7 @@
       flex-wrap: wrap;
       border-bottom: 4px solid var(--yellow-gold);
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      flex-shrink: 0;
     }
     .koha-logo {
       display: flex;
@@ -128,38 +131,73 @@
     }
     .institution-title input:focus { outline: none; border-bottom: 2px solid var(--primary-green); }
 
-    /* ----- Page Tabs ----- */
-    .page-tabs {
-      background: white;
-      padding: 0.6rem 2rem;
+    /* ----- Dashboard Wrapper (flex grow) ----- */
+    .dashboard-wrapper {
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      border-bottom: 2px solid var(--border-color);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      flex: 1;
+      min-height: 0;
     }
-    .page-tab {
-      padding: 0.4rem 1.5rem;
-      border-radius: 40px;
-      background: var(--bg-light);
-      color: var(--text-dark);
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      border: none;
-      transition: 0.15s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: 'Times New Roman', Times, serif;
-    }
-    .page-tab i { color: var(--primary-green); }
-    .page-tab.active { background: var(--primary-dark); color: white; }
-    .page-tab.active i { color: var(--yellow-gold); }
-    .page-tab:hover { background: var(--yellow-gold); color: var(--primary-dark); }
 
-    /* ----- Pages (show/hide) ----- */
-    .page { display: none; padding: 2rem; max-width: 1600px; margin: 0 auto; width: 100%; }
+    /* ----- Dashboard Sidebar ----- */
+    .dashboard-sidebar {
+      width: 220px;
+      background: var(--primary-dark);
+      padding: 1.5rem 0;
+      border-right: 3px solid var(--yellow-gold);
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+    .dashboard-sidebar .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.8rem 1.5rem;
+      color: #d4d9d4;
+      cursor: pointer;
+      transition: 0.15s;
+      border-left: 4px solid transparent;
+      text-decoration: none;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 1rem;
+    }
+    .dashboard-sidebar .sidebar-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+    .dashboard-sidebar .sidebar-item.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--yellow-gold);
+      border-left-color: var(--yellow-gold);
+    }
+    .dashboard-sidebar .sidebar-item i {
+      width: 24px;
+      color: var(--yellow-gold);
+    }
+    .dashboard-sidebar .sidebar-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 0.5rem 1.5rem;
+    }
+    .dashboard-sidebar .sidebar-user {
+      padding: 0.8rem 1.5rem;
+      color: var(--yellow-pale);
+      font-size: 0.85rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 0.5rem;
+    }
+    .dashboard-sidebar .sidebar-user strong {
+      color: var(--yellow-gold);
+    }
+
+    /* ----- Dashboard Content ----- */
+    .dashboard-content {
+      flex: 1;
+      padding: 2rem;
+      max-width: calc(100% - 220px);
+      width: 100%;
+      overflow-y: auto;
+    }
+    .page { display: none; }
     .page.active-page { display: block; }
 
     /* ----- Cards ----- */
@@ -269,6 +307,117 @@
     .status-available { background: #c8e6c9; color: #1a4d2e; }
     .status-borrowed { background: #ffcdd2; color: #c62828; }
 
+    /* Stats grid for dashboard */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--bg-light);
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+    .stat-card h4 { color: var(--primary-dark); font-family: 'Times New Roman', Times, serif; }
+    .stat-card p { font-size: 1.8rem; font-weight: bold; color: var(--primary-green); font-family: 'Times New Roman', Times, serif; }
+
+    /* Admin badge */
+    .admin-badge {
+      background: var(--yellow-gold);
+      color: var(--primary-dark);
+      padding: 0.1rem 0.8rem;
+      border-radius: 30px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    /* ----- HOMEPAGE STYLING (before login) ----- */
+    .homepage-hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, #f1f8e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+      text-align: center;
+      min-height: 60vh;
+    }
+    .homepage-hero .hero-icon {
+      font-size: 5rem;
+      color: var(--primary-dark);
+      margin-bottom: 1rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    .homepage-hero .hero-icon i {
+      color: var(--yellow-gold);
+      text-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .homepage-hero h1 {
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-family: 'Times New Roman', Times, serif;
+      margin-bottom: 0.5rem;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.08);
+    }
+    .homepage-hero h1 .highlight {
+      color: var(--yellow-gold);
+      background: var(--primary-dark);
+      padding: 0.1rem 0.8rem;
+      border-radius: 12px;
+      display: inline-block;
+    }
+    .homepage-hero .subtitle {
+      font-size: 1.4rem;
+      color: var(--text-dark);
+      margin-bottom: 1.5rem;
+      font-family: 'Times New Roman', Times, serif;
+      font-style: italic;
+      opacity: 0.85;
+    }
+    .homepage-hero .hero-images {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .homepage-hero .hero-images .img-placeholder {
+      width: 180px;
+      height: 140px;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border-color);
+      transition: transform 0.3s;
+      font-size: 3rem;
+      color: var(--primary-green);
+    }
+    .homepage-hero .hero-images .img-placeholder:hover {
+      transform: translateY(-8px);
+      border-color: var(--yellow-gold);
+    }
+    .homepage-hero .hero-images .img-placeholder span {
+      font-size: 0.8rem;
+      color: var(--text-dark);
+      margin-top: 6px;
+      font-family: 'Times New Roman', Times, serif;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
     /* ----- Login/Register modal ----- */
     .modal-overlay {
       display: none;
@@ -339,16 +488,17 @@
     }
     .forgot-link a:hover { text-decoration: underline; }
 
-    /* ----- Footer / Contact ----- */
+    /* ----- Footer (pushed to bottom) ----- */
     .koha-footer {
       text-align: center;
       padding: 1.2rem;
       color: var(--text-dark);
       border-top: 2px solid var(--border-color);
-      margin-top: 1rem;
       font-size: 0.9rem;
       background: var(--yellow-pale);
       font-family: 'Times New Roman', Times, serif;
+      flex-shrink: 0;
+      margin-top: auto;
     }
     .footer-contact {
       display: flex;
@@ -380,9 +530,14 @@
     ::-webkit-scrollbar-track { background: var(--bg-light); }
     ::-webkit-scrollbar-thumb { background: var(--primary-green); border-radius: 20px; }
 
-    @media (max-width: 700px) {
-      .koha-header, .page-tabs { padding: 0.6rem 1rem; }
-      .page { padding: 1rem; }
+    @media (max-width: 768px) {
+      .dashboard-sidebar { width: 100%; min-height: auto; border-right: none; border-bottom: 3px solid var(--yellow-gold); }
+      .dashboard-wrapper { flex-direction: column; }
+      .dashboard-content { max-width: 100%; padding: 1rem; }
+      .koha-header { padding: 0.6rem 1rem; }
+      .homepage-hero h1 { font-size: 2rem; }
+      .homepage-hero .subtitle { font-size: 1rem; }
+      .homepage-hero .hero-images .img-placeholder { width: 120px; height: 100px; font-size: 2rem; }
     }
   </style>
 </head>
@@ -407,171 +562,246 @@
     </div>
   </header>
 
-  <!-- PAGE TABS -->
-  <div class="page-tabs">
-    <button class="page-tab active" data-page="pageDashboard"><i class="fas fa-home"></i> Dashboard</button>
-    <button class="page-tab" data-page="pageBooks"><i class="fas fa-book"></i> Books</button>
-    <button class="page-tab" data-page="pageLaptops"><i class="fas fa-laptop"></i> Laptops</button>
-    <button class="page-tab" data-page="pageStationary"><i class="fas fa-pencil-alt"></i> Stationary</button>
-    <button class="page-tab" data-page="pageBorrowing"><i class="fas fa-hand-holding-heart"></i> Borrowing</button>
-    <button class="page-tab" data-page="pageSchools"><i class="fas fa-school"></i> Schools</button>
-    <button class="page-tab" data-page="pageUsers"><i class="fas fa-users"></i> Users</button>
-  </div>
-
-  <!-- ========== PAGES ========== -->
-
-  <!-- PAGE: DASHBOARD -->
-  <div id="pageDashboard" class="page active-page">
-    <div class="koha-card">
-      <div class="koha-card-header">
-        <h3><i class="fas fa-tachometer-alt"></i> Dashboard</h3>
-        <span class="koha-badge" id="dashboardStats">Welcome</span>
+  <!-- HOMEPAGE (shown when not logged in) -->
+  <div id="homepageContainer" class="homepage-hero">
+    <div class="hero-icon"><i class="fas fa-book-open"></i></div>
+    <h1>Cele.Dev <span class="highlight">Integrated</span> Library<br>Management System</h1>
+    <p class="subtitle"><i class="fas fa-quote-left" style="color:var(--yellow-gold); opacity:0.6;"></i> Empowering knowledge, one book at a time <i class="fas fa-quote-right" style="color:var(--yellow-gold); opacity:0.6;"></i></p>
+    <div class="hero-images">
+      <div class="img-placeholder">
+        <i class="fas fa-book"></i>
+        <span>Books Catalog</span>
       </div>
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-        <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
-          <h4 style="color:var(--primary-dark);">📚 Books</h4>
-          <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="dashBookCount">0</p>
-          <span class="text-muted">Total</span>
-        </div>
-        <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
-          <h4 style="color:var(--primary-dark);">💻 Laptops</h4>
-          <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="dashLaptopCount">0</p>
-          <span class="text-muted">Total</span>
-        </div>
-        <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
-          <h4 style="color:var(--primary-dark);">✏️ Stationary</h4>
-          <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="dashStationaryCount">0</p>
-          <span class="text-muted">Items</span>
-        </div>
-        <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
-          <h4 style="color:var(--primary-dark);">👥 Users</h4>
-          <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="dashUserCount">0</p>
-          <span class="text-muted">Registered</span>
-        </div>
+      <div class="img-placeholder">
+        <i class="fas fa-laptop"></i>
+        <span>Laptops</span>
       </div>
-      <div style="background:var(--yellow-pale); padding:1rem; border-radius:12px; border:1px solid var(--yellow-gold);">
-        <h4><i class="fas fa-clock" style="color:var(--yellow-gold);"></i> Recent Activity</h4>
-        <ul id="dashActivityList" style="list-style:none; margin-top:0.5rem;">
-          <li class="text-muted">Welcome to Cele.Dev ILS</li>
-        </ul>
+      <div class="img-placeholder">
+        <i class="fas fa-pencil-alt"></i>
+        <span>Stationary</span>
       </div>
+      <div class="img-placeholder">
+        <i class="fas fa-school"></i>
+        <span>Schools</span>
+      </div>
+    </div>
+    <div style="margin-top: 2rem;">
+      <button class="koha-btn koha-btn-primary" style="font-size:1.1rem; padding:0.6rem 2rem;" id="homepageLoginBtn"><i class="fas fa-sign-in-alt"></i> Login to Dashboard</button>
+      <button class="koha-btn koha-btn-outline" style="font-size:1.1rem; padding:0.6rem 2rem; background:var(--primary-dark); color:white; border-color:var(--yellow-gold); margin-left:10px;" id="homepageRegisterBtn"><i class="fas fa-user-plus"></i> Register</button>
     </div>
   </div>
 
-  <!-- PAGE: BOOKS -->
-  <div id="pageBooks" class="page">
-    <div class="koha-card">
-      <div class="koha-card-header">
-        <h3><i class="fas fa-book"></i> Book Catalog</h3>
-        <div>
-          <span class="koha-badge" id="bookCountPage">0</span>
-          <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBooksPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+  <!-- DASHBOARD WRAPPER (hidden when not logged in) -->
+  <div class="dashboard-wrapper" id="dashboardWrapper" style="display:none;">
+    <!-- Sidebar -->
+    <nav class="dashboard-sidebar" id="dashboardSidebar">
+      <div class="sidebar-user" id="sidebarUser">Not logged in</div>
+      <div class="sidebar-item active" data-page="pageDashboard"><i class="fas fa-home"></i> Dashboard</div>
+      <div class="sidebar-item" data-page="pageBooks"><i class="fas fa-book"></i> Books</div>
+      <div class="sidebar-item" data-page="pageLaptops"><i class="fas fa-laptop"></i> Laptops</div>
+      <div class="sidebar-item" data-page="pageStationary"><i class="fas fa-pencil-alt"></i> Stationary</div>
+      <div class="sidebar-item" data-page="pageBorrowing"><i class="fas fa-hand-holding-heart"></i> Borrowing</div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-item" data-page="pageSchools" id="schoolsMenuItem"><i class="fas fa-school"></i> Schools</div>
+      <div class="sidebar-item" data-page="pageUsers" id="usersMenuItem"><i class="fas fa-users"></i> Users</div>
+      <div class="sidebar-item" data-page="pageAdmin" id="adminMenuItem" style="background: rgba(249, 168, 37, 0.15); border-left: 4px solid var(--yellow-gold);"><i class="fas fa-crown" style="color:var(--yellow-gold);"></i> <span style="color:var(--yellow-gold);">Admin Panel</span> <span class="admin-badge">FULL</span></div>
+    </nav>
+
+    <!-- Content -->
+    <div class="dashboard-content">
+
+      <!-- PAGE: DASHBOARD -->
+      <div id="pageDashboard" class="page active-page">
+        <div class="koha-card">
+          <div class="koha-card-header">
+            <h3><i class="fas fa-tachometer-alt"></i> Dashboard</h3>
+            <span class="koha-badge" id="dashboardStats">Welcome</span>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card"><h4>📚 Books</h4><p id="dashBookCount">0</p><span class="text-muted">Total</span></div>
+            <div class="stat-card"><h4>💻 Laptops</h4><p id="dashLaptopCount">0</p><span class="text-muted">Total</span></div>
+            <div class="stat-card"><h4>✏️ Stationary</h4><p id="dashStationaryCount">0</p><span class="text-muted">Items</span></div>
+            <div class="stat-card"><h4>👥 Users</h4><p id="dashUserCount">0</p><span class="text-muted">Registered</span></div>
+          </div>
+          <div style="background:var(--yellow-pale); padding:1rem; border-radius:12px; border:1px solid var(--yellow-gold);">
+            <h4><i class="fas fa-clock" style="color:var(--yellow-gold);"></i> Recent Activity</h4>
+            <ul id="dashActivityList" style="list-style:none; margin-top:0.5rem;">
+              <li class="text-muted">Welcome to Cele.Dev ILS</li>
+            </ul>
+          </div>
         </div>
       </div>
-      <ul class="koha-item-list" id="bookListPage"></ul>
-      <div class="koha-input-group">
-        <input type="text" id="bookTitlePage" placeholder="Title">
-        <input type="text" id="bookAuthorPage" placeholder="Author">
-        <input type="text" id="bookAccPage" placeholder="Accession">
-        <button class="koha-btn koha-btn-success koha-btn-sm" id="addBookPageBtn"><i class="fas fa-plus"></i> Add</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- PAGE: LAPTOPS -->
-  <div id="pageLaptops" class="page">
-    <div class="koha-card">
-      <div class="koha-card-header">
-        <h3><i class="fas fa-laptop"></i> Laptops Registered</h3>
-        <div>
-          <span class="koha-badge" id="laptopCountPage">0</span>
-          <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfLaptopsPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+      <!-- PAGE: BOOKS -->
+      <div id="pageBooks" class="page">
+        <div class="koha-card">
+          <div class="koha-card-header">
+            <h3><i class="fas fa-book"></i> Book Catalog</h3>
+            <div>
+              <span class="koha-badge" id="bookCountPage">0</span>
+              <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBooksPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+          </div>
+          <ul class="koha-item-list" id="bookListPage"></ul>
+          <div class="koha-input-group">
+            <input type="text" id="bookTitlePage" placeholder="Title">
+            <input type="text" id="bookAuthorPage" placeholder="Author">
+            <input type="text" id="bookAccPage" placeholder="Accession">
+            <button class="koha-btn koha-btn-success koha-btn-sm" id="addBookPageBtn"><i class="fas fa-plus"></i> Add</button>
+          </div>
         </div>
       </div>
-      <ul class="koha-item-list" id="laptopListPage"></ul>
-      <div class="koha-input-group">
-        <input type="text" id="laptopOwnerPage" placeholder="Owner">
-        <input type="text" id="laptopTypePage" placeholder="Type">
-        <input type="date" id="laptopDatePage">
-        <button class="koha-btn koha-btn-success koha-btn-sm" id="addLaptopPageBtn"><i class="fas fa-plus"></i> Add</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- PAGE: STATIONARY -->
-  <div id="pageStationary" class="page">
-    <div class="koha-card">
-      <div class="koha-card-header">
-        <h3><i class="fas fa-pencil-alt"></i> Stationary Inventory</h3>
-        <div>
-          <span class="koha-badge" id="stationaryCountPage">0</span>
-          <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfStationaryPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+      <!-- PAGE: LAPTOPS -->
+      <div id="pageLaptops" class="page">
+        <div class="koha-card">
+          <div class="koha-card-header">
+            <h3><i class="fas fa-laptop"></i> Laptops Registered</h3>
+            <div>
+              <span class="koha-badge" id="laptopCountPage">0</span>
+              <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfLaptopsPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+          </div>
+          <ul class="koha-item-list" id="laptopListPage"></ul>
+          <div class="koha-input-group">
+            <input type="text" id="laptopOwnerPage" placeholder="Owner">
+            <input type="text" id="laptopTypePage" placeholder="Type">
+            <input type="date" id="laptopDatePage">
+            <button class="koha-btn koha-btn-success koha-btn-sm" id="addLaptopPageBtn"><i class="fas fa-plus"></i> Add</button>
+          </div>
         </div>
       </div>
-      <ul class="koha-item-list" id="stationaryListPage"></ul>
-      <div class="koha-input-group">
-        <input type="text" id="stationaryNamePage" placeholder="Item name">
-        <input type="number" id="stationaryQtyPage" placeholder="Qty" value="1">
-        <button class="koha-btn koha-btn-success koha-btn-sm" id="addStationaryPageBtn"><i class="fas fa-plus"></i> Add</button>
-      </div>
-      <div class="mt-2">
-        <button class="koha-btn koha-btn-warning koha-btn-sm" id="giveStationaryPageBtn"><i class="fas fa-hand-holding"></i> Give to Staff</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- PAGE: BORROWING -->
-  <div id="pageBorrowing" class="page">
-    <div class="koha-card">
-      <div class="koha-card-header">
-        <h3><i class="fas fa-hand-holding-heart"></i> Borrowed Books</h3>
-        <div>
-          <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBorrowedBooksPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
-          <button class="koha-btn koha-btn-success koha-btn-sm" id="clearReturnedBooksBtn"><i class="fas fa-check-double"></i> Clear Returned</button>
+      <!-- PAGE: STATIONARY -->
+      <div id="pageStationary" class="page">
+        <div class="koha-card">
+          <div class="koha-card-header">
+            <h3><i class="fas fa-pencil-alt"></i> Stationary Inventory</h3>
+            <div>
+              <span class="koha-badge" id="stationaryCountPage">0</span>
+              <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfStationaryPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+            </div>
+          </div>
+          <ul class="koha-item-list" id="stationaryListPage"></ul>
+          <div class="koha-input-group">
+            <input type="text" id="stationaryNamePage" placeholder="Item name">
+            <input type="number" id="stationaryQtyPage" placeholder="Qty" value="1">
+            <button class="koha-btn koha-btn-success koha-btn-sm" id="addStationaryPageBtn"><i class="fas fa-plus"></i> Add</button>
+          </div>
+          <div class="mt-2">
+            <button class="koha-btn koha-btn-warning koha-btn-sm" id="giveStationaryPageBtn"><i class="fas fa-hand-holding"></i> Give to Staff</button>
+          </div>
         </div>
       </div>
-      <ul class="koha-item-list" id="borrowedBookListPage"></ul>
-      <div class="flex mt-2">
-        <button class="koha-btn koha-btn-warning koha-btn-sm" id="borrowBookPageBtn"><i class="fas fa-hand-holding"></i> Borrow Book</button>
-        <button class="koha-btn koha-btn-success koha-btn-sm" id="returnBookPageBtn"><i class="fas fa-undo-alt"></i> Return Book</button>
-      </div>
-    </div>
-    <div class="koha-card">
-      <div class="koha-card-header">
-        <h3><i class="fas fa-laptop-code"></i> Borrowed Laptops</h3>
-        <div>
-          <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBorrowedLaptopsPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
-          <button class="koha-btn koha-btn-success koha-btn-sm" id="clearReturnedLaptopsBtn"><i class="fas fa-check-double"></i> Clear Returned</button>
+
+      <!-- PAGE: BORROWING -->
+      <div id="pageBorrowing" class="page">
+        <div class="koha-card">
+          <div class="koha-card-header">
+            <h3><i class="fas fa-hand-holding-heart"></i> Borrowed Books</h3>
+            <div>
+              <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBorrowedBooksPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+              <button class="koha-btn koha-btn-success koha-btn-sm" id="clearReturnedBooksBtn"><i class="fas fa-check-double"></i> Clear Returned</button>
+            </div>
+          </div>
+          <ul class="koha-item-list" id="borrowedBookListPage"></ul>
+          <div class="flex mt-2">
+            <button class="koha-btn koha-btn-warning koha-btn-sm" id="borrowBookPageBtn"><i class="fas fa-hand-holding"></i> Borrow Book</button>
+            <button class="koha-btn koha-btn-success koha-btn-sm" id="returnBookPageBtn"><i class="fas fa-undo-alt"></i> Return Book</button>
+          </div>
+        </div>
+        <div class="koha-card">
+          <div class="koha-card-header">
+            <h3><i class="fas fa-laptop-code"></i> Borrowed Laptops</h3>
+            <div>
+              <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBorrowedLaptopsPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+              <button class="koha-btn koha-btn-success koha-btn-sm" id="clearReturnedLaptopsBtn"><i class="fas fa-check-double"></i> Clear Returned</button>
+            </div>
+          </div>
+          <ul class="koha-item-list" id="borrowedLaptopListPage"></ul>
+          <div class="flex mt-2">
+            <button class="koha-btn koha-btn-warning koha-btn-sm" id="borrowLaptopPageBtn"><i class="fas fa-hand-holding"></i> Borrow Laptop</button>
+            <button class="koha-btn koha-btn-success koha-btn-sm" id="returnLaptopPageBtn"><i class="fas fa-undo-alt"></i> Return Laptop</button>
+          </div>
         </div>
       </div>
-      <ul class="koha-item-list" id="borrowedLaptopListPage"></ul>
-      <div class="flex mt-2">
-        <button class="koha-btn koha-btn-warning koha-btn-sm" id="borrowLaptopPageBtn"><i class="fas fa-hand-holding"></i> Borrow Laptop</button>
-        <button class="koha-btn koha-btn-success koha-btn-sm" id="returnLaptopPageBtn"><i class="fas fa-undo-alt"></i> Return Laptop</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- PAGE: SCHOOLS -->
-  <div id="pageSchools" class="page">
-    <div class="koha-card koha-school-card">
-      <div class="koha-card-header"><h3><i class="fas fa-school"></i> Adopting Schools</h3></div>
-      <ul class="koha-item-list" id="schoolListPage"></ul>
-      <div class="koha-input-group">
-        <input type="text" id="schoolNamePage" placeholder="School name">
-        <button class="koha-btn koha-btn-primary koha-btn-sm" id="addSchoolPageBtn"><i class="fas fa-plus"></i> Register</button>
+      <!-- PAGE: SCHOOLS (admin only) -->
+      <div id="pageSchools" class="page">
+        <div class="koha-card koha-school-card">
+          <div class="koha-card-header"><h3><i class="fas fa-school"></i> Adopting Schools</h3></div>
+          <ul class="koha-item-list" id="schoolListPage"></ul>
+          <div class="koha-input-group">
+            <input type="text" id="schoolNamePage" placeholder="School name">
+            <button class="koha-btn koha-btn-primary koha-btn-sm" id="addSchoolPageBtn"><i class="fas fa-plus"></i> Register</button>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- PAGE: USERS (admin only) -->
-  <div id="pageUsers" class="page">
-    <div class="koha-card">
-      <div class="koha-card-header">
-        <h3><i class="fas fa-users"></i> Registered Users</h3>
-        <span class="koha-badge" id="userCountPage">0</span>
+      <!-- PAGE: USERS (admin only) -->
+      <div id="pageUsers" class="page">
+        <div class="koha-card">
+          <div class="koha-card-header">
+            <h3><i class="fas fa-users"></i> Registered Users</h3>
+            <span class="koha-badge" id="userCountPage">0</span>
+          </div>
+          <ul class="koha-item-list" id="userListPage"></ul>
+        </div>
       </div>
-      <ul class="koha-item-list" id="userListPage"></ul>
+
+      <!-- PAGE: ADMIN PANEL (full system access) -->
+      <div id="pageAdmin" class="page">
+        <div class="koha-card" style="border: 2px solid var(--yellow-gold);">
+          <div class="koha-card-header">
+            <h3><i class="fas fa-crown" style="color:var(--yellow-gold);"></i> Admin Panel <span class="admin-badge">FULL ACCESS</span></h3>
+            <span class="koha-badge" style="background:var(--yellow-gold); color:var(--primary-dark);">System Control</span>
+          </div>
+          <p style="margin-bottom:1rem; color:var(--text-dark);"><i class="fas fa-info-circle" style="color:var(--primary-green);"></i> As admin, you have full access to all system data across all institutions.</p>
+          
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+            <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color);">
+              <h4 style="color:var(--primary-dark);"><i class="fas fa-book"></i> Books</h4>
+              <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="adminBookCount">0</p>
+              <span class="text-muted">All institutions</span>
+            </div>
+            <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color);">
+              <h4 style="color:var(--primary-dark);"><i class="fas fa-laptop"></i> Laptops</h4>
+              <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="adminLaptopCount">0</p>
+              <span class="text-muted">All institutions</span>
+            </div>
+            <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color);">
+              <h4 style="color:var(--primary-dark);"><i class="fas fa-pencil-alt"></i> Stationary</h4>
+              <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="adminStationaryCount">0</p>
+              <span class="text-muted">All institutions</span>
+            </div>
+            <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color);">
+              <h4 style="color:var(--primary-dark);"><i class="fas fa-users"></i> Users</h4>
+              <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="adminUserCount">0</p>
+              <span class="text-muted">Registered</span>
+            </div>
+            <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color);">
+              <h4 style="color:var(--primary-dark);"><i class="fas fa-school"></i> Schools</h4>
+              <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="adminSchoolCount">0</p>
+              <span class="text-muted">Registered</span>
+            </div>
+            <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color);">
+              <h4 style="color:var(--primary-dark);"><i class="fas fa-hand-holding-heart"></i> Borrowed</h4>
+              <p style="font-size:1.8rem; font-weight:bold; color:var(--primary-green);" id="adminBorrowedCount">0</p>
+              <span class="text-muted">Books + Laptops</span>
+            </div>
+          </div>
+
+          <div style="background:var(--yellow-pale); padding:1rem; border-radius:12px; border:1px solid var(--yellow-gold); margin-top:0.5rem;">
+            <h4><i class="fas fa-tools" style="color:var(--yellow-gold);"></i> Admin Actions</h4>
+            <div class="flex" style="margin-top:0.8rem;">
+              <button class="koha-btn koha-btn-danger koha-btn-sm" id="adminResetAllBtn"><i class="fas fa-undo-alt"></i> Reset All Borrowed</button>
+              <button class="koha-btn koha-btn-warning koha-btn-sm" id="adminExportAllBtn"><i class="fas fa-file-export"></i> Export All Data</button>
+              <button class="koha-btn koha-btn-primary koha-btn-sm" id="adminRefreshBtn"><i class="fas fa-sync"></i> Refresh Stats</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -613,9 +843,9 @@
     </div>
   </div>
 
-  <!-- FOOTER with contact info -->
+  <!-- FOOTER (pushed to bottom) -->
   <footer class="koha-footer">
-    <div>Cele.Dev ILS · Library Management System</div>
+    <div>Cele.Dev ILS · Integrated Library Management System</div>
     <div class="footer-contact">
       <a href="mailto:onyangocelestino@gmail.com"><i class="fas fa-envelope"></i> onyangocelestino@gmail.com</a>
       <a href="tel:+254714019736"><i class="fas fa-phone"></i> 0714019736</a>
@@ -627,19 +857,19 @@
     (function() {
       // ---------- DATA ----------
       let books = [
-        { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', acc: 'A101', borrowed: false, borrower: '' },
-        { id: 2, title: '1984', author: 'George Orwell', acc: 'A102', borrowed: false, borrower: '' },
-        { id: 3, title: 'To Kill a Mockingbird', author: 'Harper Lee', acc: 'A103', borrowed: false, borrower: '' }
+        { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', acc: 'A101', borrowed: false, borrower: '', institution: 'Springfield University' },
+        { id: 2, title: '1984', author: 'George Orwell', acc: 'A102', borrowed: false, borrower: '', institution: 'Springfield University' },
+        { id: 3, title: 'To Kill a Mockingbird', author: 'Harper Lee', acc: 'A103', borrowed: false, borrower: '', institution: 'Springfield University' }
       ];
       let laptops = [
-        { id: 1, owner: 'IT Dept', type: 'Dell XPS', date: '2025-01-10', borrowed: false, borrower: '' },
-        { id: 2, owner: 'Library', type: 'MacBook Pro', date: '2025-02-15', borrowed: false, borrower: '' }
+        { id: 1, owner: 'IT Dept', type: 'Dell XPS', date: '2025-01-10', borrowed: false, borrower: '', institution: 'Springfield University' },
+        { id: 2, owner: 'Library', type: 'MacBook Pro', date: '2025-02-15', borrowed: false, borrower: '', institution: 'Springfield University' }
       ];
       let stationary = [
-        { id: 1, name: 'Stapler', quantity: 5 },
-        { id: 2, name: 'Whiteboard markers', quantity: 12 }
+        { id: 1, name: 'Stapler', quantity: 5, institution: 'Springfield University' },
+        { id: 2, name: 'Whiteboard markers', quantity: 12, institution: 'Springfield University' }
       ];
-      let schools = ['Springfield High', 'Westside Academy'];
+      let schools = ['Springfield University', 'Westside Academy'];
       let activityLog = [];
 
       // ---------- USER SYSTEM ----------
@@ -647,7 +877,7 @@
       const ADMIN_PASSWORD = 'Cele.Dev2026';
 
       let users = [
-        { email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', registered: new Date().toISOString() }
+        { email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', institution: 'Admin', registered: new Date().toISOString(), isAdmin: true }
       ];
       let currentUser = null;
       let resetTokens = {};
@@ -673,6 +903,9 @@
       const modalClose = document.getElementById('authModalClose');
       const userDisplay = document.getElementById('userDisplay');
       const logoutBtn = document.getElementById('logoutBtn');
+      const dashboardWrapper = document.getElementById('dashboardWrapper');
+      const homepageContainer = document.getElementById('homepageContainer');
+      const sidebarUser = document.getElementById('sidebarUser');
 
       let isLoginMode = true;
 
@@ -690,7 +923,7 @@
             const parsed = JSON.parse(data);
             const adminExists = parsed.some(u => u.email === ADMIN_EMAIL);
             if (!adminExists) {
-              parsed.push({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', registered: new Date().toISOString() });
+              parsed.push({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', institution: 'Admin', registered: new Date().toISOString(), isAdmin: true });
             }
             users = parsed;
           }
@@ -713,7 +946,10 @@
       function registerUser(email, password, school) {
         if (findUser(email)) return { success: false, message: 'Email already registered' };
         if (!email || !password || !school) return { success: false, message: 'All fields required' };
-        users.push({ email, password, school, registered: new Date().toISOString() });
+        if (!schools.includes(school)) {
+          schools.push(school);
+        }
+        users.push({ email, password, school, institution: school, registered: new Date().toISOString(), isAdmin: false });
         saveUsers();
         return { success: true };
       }
@@ -775,7 +1011,7 @@
         if (isLoginMode) {
           const result = loginUser(email, password);
           if (result.success) {
-            currentUser = { email: result.user.email, school: result.user.school };
+            currentUser = { email: result.user.email, school: result.user.school, institution: result.user.institution, isAdmin: result.user.isAdmin || false };
             updateUIForLoggedIn();
             closeModal();
             renderAll();
@@ -789,7 +1025,7 @@
           if (!school) return alert('Please enter your school/institution');
           const result = registerUser(email, password, school);
           if (result.success) {
-            addActivity(`New user registered: ${email}`);
+            addActivity(`New user registered: ${email} (${school})`);
             alert('Registration successful! Please login.');
             openModal('login');
           } else {
@@ -834,41 +1070,70 @@
           logoutBtn.style.display = 'inline-flex';
           document.getElementById('loginBtn').style.display = 'none';
           document.getElementById('registerBtn').style.display = 'none';
+          dashboardWrapper.style.display = 'flex';
+          homepageContainer.style.display = 'none';
+          sidebarUser.innerHTML = `<strong>${currentUser.email}</strong><br><span style="font-size:0.8rem; color:#aab8a8;">${currentUser.isAdmin ? '👑 Admin' : currentUser.institution}</span>`;
+          
+          const schoolsItem = document.getElementById('schoolsMenuItem');
+          const usersItem = document.getElementById('usersMenuItem');
+          const adminItem = document.getElementById('adminMenuItem');
+          
+          // Admin items are always visible in sidebar but only accessible if admin
+          // We keep them visible but will check access when clicked
+          schoolsItem.style.display = 'flex';
+          usersItem.style.display = 'flex';
+          adminItem.style.display = 'flex';
+          
+          // If not admin and on admin page, redirect to dashboard
+          if (!currentUser.isAdmin) {
+            const activePage = document.querySelector('.page.active-page');
+            if (activePage && (activePage.id === 'pageSchools' || activePage.id === 'pageUsers' || activePage.id === 'pageAdmin')) {
+              switchPage('pageDashboard');
+            }
+          }
         } else {
           userDisplay.style.display = 'none';
           logoutBtn.style.display = 'none';
           document.getElementById('loginBtn').style.display = 'inline-flex';
           document.getElementById('registerBtn').style.display = 'inline-flex';
-        }
-        const userTab = document.querySelector('.page-tab[data-page="pageUsers"]');
-        if (currentUser && currentUser.email === ADMIN_EMAIL) {
-          userTab.style.display = 'inline-flex';
-        } else {
-          userTab.style.display = 'none';
-          if (document.getElementById('pageUsers').classList.contains('active-page') && !(currentUser && currentUser.email === ADMIN_EMAIL)) {
-            switchTab('pageDashboard');
-          }
-        }
-        // Show dashboard only if logged in
-        const dashboardTab = document.querySelector('.page-tab[data-page="pageDashboard"]');
-        if (currentUser) {
-          dashboardTab.style.display = 'inline-flex';
-        } else {
-          dashboardTab.style.display = 'none';
-          // If on dashboard and not logged in, switch to books
-          if (document.getElementById('pageDashboard').classList.contains('active-page') && !currentUser) {
-            switchTab('pageBooks');
-          }
+          dashboardWrapper.style.display = 'none';
+          homepageContainer.style.display = 'flex';
         }
       }
 
+      // ---------- FILTER DATA BY INSTITUTION ----------
+      function getFilteredData() {
+        if (!currentUser) return { books: [], laptops: [], stationary: [] };
+        if (currentUser.isAdmin) {
+          return { books: books, laptops: laptops, stationary: stationary };
+        }
+        const inst = currentUser.institution;
+        return {
+          books: books.filter(b => b.institution === inst),
+          laptops: laptops.filter(l => l.institution === inst),
+          stationary: stationary.filter(s => s.institution === inst)
+        };
+      }
+
       // ---------- TAB SWITCHING ----------
-      function switchTab(pageId) {
-        document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
-        document.querySelector(`.page-tab[data-page="${pageId}"]`)?.classList.add('active');
+      function switchPage(pageId) {
+        document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+        document.querySelector(`.sidebar-item[data-page="${pageId}"]`)?.classList.add('active');
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
         document.getElementById(pageId)?.classList.add('active-page');
       }
+
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const pageId = this.dataset.page;
+          // Check admin access for restricted pages
+          if ((pageId === 'pageSchools' || pageId === 'pageUsers' || pageId === 'pageAdmin') && (!currentUser || !currentUser.isAdmin)) {
+            alert('⚠️ Admin access required. Please login with admin credentials.\n\nAdmin: onyangocelestino@gmail.com\nPassword: Cele.Dev2026');
+            return;
+          }
+          switchPage(pageId);
+        });
+      });
 
       // ---------- ACTIVITY LOG ----------
       function addActivity(msg) {
@@ -891,27 +1156,30 @@
 
       // ---------- RENDER ALL ----------
       function renderAll() {
-        renderBooksPage();
-        renderLaptopsPage();
-        renderStationaryPage();
-        renderBorrowedBooksPage();
-        renderBorrowedLaptopsPage();
+        const data = getFilteredData();
+        renderBooksPage(data.books);
+        renderLaptopsPage(data.laptops);
+        renderStationaryPage(data.stationary);
+        renderBorrowedBooksPage(data.books);
+        renderBorrowedLaptopsPage(data.laptops);
         renderSchoolsPage();
         renderUsersPage();
-        renderDashboard();
-        updateCounts();
+        renderDashboard(data);
+        renderAdminPanel();
+        updateCounts(data);
         renderActivityLog();
       }
 
-      function renderBooksPage() {
+      function renderBooksPage(filteredBooks) {
         const list = document.getElementById('bookListPage');
-        list.innerHTML = books.map(b => `
+        list.innerHTML = filteredBooks.map(b => `
           <li>
             <span>
               <strong>${b.title}</strong> by ${b.author} (${b.acc})
               <span class="status-badge ${b.borrowed ? 'status-borrowed' : 'status-available'}">
                 ${b.borrowed ? '🔴 Borrowed' : '🟢 Available'}
               </span>
+              ${currentUser?.isAdmin ? `<span class="text-muted">(${b.institution})</span>` : ''}
             </span>
             <span class="koha-item-actions">
               <button onclick="editBook(${b.id})"><i class="fas fa-edit"></i></button>
@@ -921,15 +1189,16 @@
         `).join('');
       }
 
-      function renderLaptopsPage() {
+      function renderLaptopsPage(filteredLaptops) {
         const list = document.getElementById('laptopListPage');
-        list.innerHTML = laptops.map(l => `
+        list.innerHTML = filteredLaptops.map(l => `
           <li>
             <span>
               ${l.owner} · ${l.type} · ${l.date}
               <span class="status-badge ${l.borrowed ? 'status-borrowed' : 'status-available'}">
                 ${l.borrowed ? '🔴 Borrowed' : '🟢 Available'}
               </span>
+              ${currentUser?.isAdmin ? `<span class="text-muted">(${l.institution})</span>` : ''}
             </span>
             <span class="koha-item-actions">
               <button onclick="editLaptop(${l.id})"><i class="fas fa-edit"></i></button>
@@ -939,11 +1208,11 @@
         `).join('');
       }
 
-      function renderStationaryPage() {
+      function renderStationaryPage(filteredStationary) {
         const list = document.getElementById('stationaryListPage');
-        list.innerHTML = stationary.map(s => `
+        list.innerHTML = filteredStationary.map(s => `
           <li>
-            <span>${s.name} (x${s.quantity})</span>
+            <span>${s.name} (x${s.quantity}) ${currentUser?.isAdmin ? `<span class="text-muted">(${s.institution})</span>` : ''}</span>
             <span class="koha-item-actions">
               <button onclick="editStationary(${s.id})"><i class="fas fa-edit"></i></button>
               <button onclick="deleteStationary(${s.id})"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
@@ -952,9 +1221,9 @@
         `).join('');
       }
 
-      function renderBorrowedBooksPage() {
+      function renderBorrowedBooksPage(filteredBooks) {
         const list = document.getElementById('borrowedBookListPage');
-        const borrowed = books.filter(b => b.borrowed);
+        const borrowed = filteredBooks.filter(b => b.borrowed);
         list.innerHTML = borrowed.length ? borrowed.map(b => `
           <li class="borrowed-item">
             <span><strong>${b.borrower}</strong> · ${b.title} (${b.acc}) <span class="text-muted">${new Date().toLocaleString()}</span></span>
@@ -963,9 +1232,9 @@
         `).join('') : '<li class="text-muted">No books currently borrowed</li>';
       }
 
-      function renderBorrowedLaptopsPage() {
+      function renderBorrowedLaptopsPage(filteredLaptops) {
         const list = document.getElementById('borrowedLaptopListPage');
-        const borrowed = laptops.filter(l => l.borrowed);
+        const borrowed = filteredLaptops.filter(l => l.borrowed);
         list.innerHTML = borrowed.length ? borrowed.map(l => `
           <li class="borrowed-item">
             <span><strong>${l.borrower}</strong> · ${l.owner} (${l.type}) <span class="text-muted">${new Date().toLocaleString()}</span></span>
@@ -984,39 +1253,57 @@
         document.getElementById('userCountPage').textContent = users.length;
         list.innerHTML = users.map(u => `
           <li>
-            <span><strong>${u.email}</strong> · ${u.school} <span class="text-muted">${new Date(u.registered).toLocaleDateString()}</span></span>
+            <span><strong>${u.email}</strong> · ${u.school} ${u.isAdmin ? '👑' : ''} <span class="text-muted">${new Date(u.registered).toLocaleDateString()}</span></span>
           </li>
         `).join('');
       }
 
-      function renderDashboard() {
+      function renderDashboard(data) {
         if (!currentUser) return;
-        document.getElementById('dashBookCount').textContent = books.length;
-        document.getElementById('dashLaptopCount').textContent = laptops.length;
-        document.getElementById('dashStationaryCount').textContent = stationary.reduce((sum, s) => sum + s.quantity, 0);
+        document.getElementById('dashBookCount').textContent = data.books.length;
+        document.getElementById('dashLaptopCount').textContent = data.laptops.length;
+        document.getElementById('dashStationaryCount').textContent = data.stationary.reduce((sum, s) => sum + s.quantity, 0);
         document.getElementById('dashUserCount').textContent = users.length;
         document.getElementById('dashboardStats').textContent = `Welcome ${currentUser.email}`;
       }
 
-      function updateCounts() {
-        document.getElementById('bookCountPage').textContent = books.length;
-        document.getElementById('laptopCountPage').textContent = laptops.length;
-        document.getElementById('stationaryCountPage').textContent = stationary.reduce((sum, s) => sum + s.quantity, 0);
+      function renderAdminPanel() {
+        if (!currentUser || !currentUser.isAdmin) return;
+        document.getElementById('adminBookCount').textContent = books.length;
+        document.getElementById('adminLaptopCount').textContent = laptops.length;
+        document.getElementById('adminStationaryCount').textContent = stationary.reduce((sum, s) => sum + s.quantity, 0);
+        document.getElementById('adminUserCount').textContent = users.length;
+        document.getElementById('adminSchoolCount').textContent = schools.length;
+        const borrowedTotal = books.filter(b => b.borrowed).length + laptops.filter(l => l.borrowed).length;
+        document.getElementById('adminBorrowedCount').textContent = borrowedTotal;
+      }
+
+      function updateCounts(data) {
+        document.getElementById('bookCountPage').textContent = data.books.length;
+        document.getElementById('laptopCountPage').textContent = data.laptops.length;
+        document.getElementById('stationaryCountPage').textContent = data.stationary.reduce((sum, s) => sum + s.quantity, 0);
       }
 
       // ---------- CRUD (global) ----------
       window.deleteBook = function(id) {
         if (!currentUser) return alert('Please login first');
         const book = books.find(b => b.id === id);
-        if (book && book.borrowed) return alert('Cannot delete a borrowed book');
+        if (!book) return;
+        if (book.borrowed) return alert('Cannot delete a borrowed book');
+        if (!currentUser.isAdmin && book.institution !== currentUser.institution) {
+          return alert('You can only delete items from your institution');
+        }
         books = books.filter(b => b.id !== id);
-        addActivity(`Book deleted: ${book?.title || 'Unknown'}`);
+        addActivity(`Book deleted: ${book.title}`);
         renderAll();
       };
       window.editBook = function(id) {
         if (!currentUser) return alert('Please login first');
         const b = books.find(x => x.id === id);
         if (!b) return;
+        if (!currentUser.isAdmin && b.institution !== currentUser.institution) {
+          return alert('You can only edit items from your institution');
+        }
         if (b.borrowed) return alert('Cannot edit a borrowed book');
         const newTitle = prompt('Edit title:', b.title);
         if (newTitle !== null) b.title = newTitle || b.title;
@@ -1030,15 +1317,22 @@
       window.deleteLaptop = function(id) {
         if (!currentUser) return alert('Please login first');
         const laptop = laptops.find(l => l.id === id);
-        if (laptop && laptop.borrowed) return alert('Cannot delete a borrowed laptop');
+        if (!laptop) return;
+        if (laptop.borrowed) return alert('Cannot delete a borrowed laptop');
+        if (!currentUser.isAdmin && laptop.institution !== currentUser.institution) {
+          return alert('You can only delete items from your institution');
+        }
         laptops = laptops.filter(l => l.id !== id);
-        addActivity(`Laptop deleted: ${laptop?.owner || 'Unknown'}`);
+        addActivity(`Laptop deleted: ${laptop.owner}`);
         renderAll();
       };
       window.editLaptop = function(id) {
         if (!currentUser) return alert('Please login first');
         const l = laptops.find(x => x.id === id);
         if (!l) return;
+        if (!currentUser.isAdmin && l.institution !== currentUser.institution) {
+          return alert('You can only edit items from your institution');
+        }
         if (l.borrowed) return alert('Cannot edit a borrowed laptop');
         const owner = prompt('Edit owner:', l.owner);
         if (owner !== null) l.owner = owner || l.owner;
@@ -1052,14 +1346,21 @@
       window.deleteStationary = function(id) {
         if (!currentUser) return alert('Please login first');
         const item = stationary.find(s => s.id === id);
+        if (!item) return;
+        if (!currentUser.isAdmin && item.institution !== currentUser.institution) {
+          return alert('You can only delete items from your institution');
+        }
         stationary = stationary.filter(s => s.id !== id);
-        addActivity(`Stationary deleted: ${item?.name || 'Unknown'}`);
+        addActivity(`Stationary deleted: ${item.name}`);
         renderAll();
       };
       window.editStationary = function(id) {
         if (!currentUser) return alert('Please login first');
         const s = stationary.find(x => x.id === id);
         if (!s) return;
+        if (!currentUser.isAdmin && s.institution !== currentUser.institution) {
+          return alert('You can only edit items from your institution');
+        }
         const name = prompt('Edit name:', s.name);
         if (name !== null) s.name = name || s.name;
         const qty = prompt('Edit quantity:', s.quantity);
@@ -1073,6 +1374,9 @@
         if (!currentUser) return alert('Please login first');
         const book = books.find(b => b.id === id);
         if (!book || !book.borrowed) return alert('Book is not borrowed');
+        if (!currentUser.isAdmin && book.institution !== currentUser.institution) {
+          return alert('You can only return items from your institution');
+        }
         book.borrowed = false;
         book.borrower = '';
         addActivity(`Book returned: ${book.title} by ${currentUser.email}`);
@@ -1083,6 +1387,9 @@
         if (!currentUser) return alert('Please login first');
         const laptop = laptops.find(l => l.id === id);
         if (!laptop || !laptop.borrowed) return alert('Laptop is not borrowed');
+        if (!currentUser.isAdmin && laptop.institution !== currentUser.institution) {
+          return alert('You can only return items from your institution');
+        }
         laptop.borrowed = false;
         laptop.borrower = '';
         addActivity(`Laptop returned: ${laptop.owner} by ${currentUser.email}`);
@@ -1096,11 +1403,12 @@
         const author = document.getElementById('bookAuthorPage').value.trim();
         const acc = document.getElementById('bookAccPage').value.trim();
         if (!title || !author || !acc) return alert('Fill all fields');
-        books.push({ id: Date.now() + Math.random()*1000, title, author, acc, borrowed: false, borrower: '' });
+        const institution = currentUser.isAdmin ? prompt('Enter institution for this book:', currentUser.institution) || currentUser.institution : currentUser.institution;
+        books.push({ id: Date.now() + Math.random()*1000, title, author, acc, borrowed: false, borrower: '', institution });
         document.getElementById('bookTitlePage').value = '';
         document.getElementById('bookAuthorPage').value = '';
         document.getElementById('bookAccPage').value = '';
-        addActivity(`Book added: ${title}`);
+        addActivity(`Book added: ${title} (${institution})`);
         renderAll();
       });
 
@@ -1110,11 +1418,12 @@
         const type = document.getElementById('laptopTypePage').value.trim();
         const date = document.getElementById('laptopDatePage').value;
         if (!owner || !type || !date) return alert('Fill all fields');
-        laptops.push({ id: Date.now() + Math.random()*1000, owner, type, date, borrowed: false, borrower: '' });
+        const institution = currentUser.isAdmin ? prompt('Enter institution for this laptop:', currentUser.institution) || currentUser.institution : currentUser.institution;
+        laptops.push({ id: Date.now() + Math.random()*1000, owner, type, date, borrowed: false, borrower: '', institution });
         document.getElementById('laptopOwnerPage').value = '';
         document.getElementById('laptopTypePage').value = '';
         document.getElementById('laptopDatePage').value = '';
-        addActivity(`Laptop added: ${owner} (${type})`);
+        addActivity(`Laptop added: ${owner} (${type}) (${institution})`);
         renderAll();
       });
 
@@ -1123,10 +1432,11 @@
         const name = document.getElementById('stationaryNamePage').value.trim();
         const qty = parseInt(document.getElementById('stationaryQtyPage').value) || 1;
         if (!name) return alert('Enter item name');
-        stationary.push({ id: Date.now() + Math.random()*1000, name, quantity: qty });
+        const institution = currentUser.isAdmin ? prompt('Enter institution for this item:', currentUser.institution) || currentUser.institution : currentUser.institution;
+        stationary.push({ id: Date.now() + Math.random()*1000, name, quantity: qty, institution });
         document.getElementById('stationaryNamePage').value = '';
         document.getElementById('stationaryQtyPage').value = '1';
-        addActivity(`Stationary added: ${name} (x${qty})`);
+        addActivity(`Stationary added: ${name} (x${qty}) (${institution})`);
         renderAll();
       });
 
@@ -1135,12 +1445,16 @@
         if (!currentUser) return alert('Please login first');
         const acc = prompt('Enter Accession number of book to borrow:');
         if (!acc) return;
-        const book = books.find(b => b.acc === acc && !b.borrowed);
+        const data = getFilteredData();
+        const book = data.books.find(b => b.acc === acc && !b.borrowed);
         if (!book) return alert('Book not available or already borrowed');
         const borrower = prompt('Enter borrower name:');
         if (!borrower) return;
-        book.borrowed = true;
-        book.borrower = borrower;
+        const fullBook = books.find(b => b.id === book.id);
+        if (fullBook) {
+          fullBook.borrowed = true;
+          fullBook.borrower = borrower;
+        }
         addActivity(`Book borrowed: ${book.title} by ${borrower}`);
         renderAll();
       });
@@ -1149,10 +1463,14 @@
         if (!currentUser) return alert('Please login first');
         const acc = prompt('Enter Accession number of book to return:');
         if (!acc) return;
-        const book = books.find(b => b.acc === acc && b.borrowed);
+        const data = getFilteredData();
+        const book = data.books.find(b => b.acc === acc && b.borrowed);
         if (!book) return alert('Book not found or not borrowed');
-        book.borrowed = false;
-        book.borrower = '';
+        const fullBook = books.find(b => b.id === book.id);
+        if (fullBook) {
+          fullBook.borrowed = false;
+          fullBook.borrower = '';
+        }
         addActivity(`Book returned: ${book.title}`);
         renderAll();
       });
@@ -1161,12 +1479,16 @@
         if (!currentUser) return alert('Please login first');
         const owner = prompt('Enter Laptop owner (identifier):');
         if (!owner) return;
-        const laptop = laptops.find(l => l.owner === owner && !l.borrowed);
+        const data = getFilteredData();
+        const laptop = data.laptops.find(l => l.owner === owner && !l.borrowed);
         if (!laptop) return alert('Laptop not available or already borrowed');
         const borrower = prompt('Enter borrower name:');
         if (!borrower) return;
-        laptop.borrowed = true;
-        laptop.borrower = borrower;
+        const fullLaptop = laptops.find(l => l.id === laptop.id);
+        if (fullLaptop) {
+          fullLaptop.borrowed = true;
+          fullLaptop.borrower = borrower;
+        }
         addActivity(`Laptop borrowed: ${laptop.owner} by ${borrower}`);
         renderAll();
       });
@@ -1175,23 +1497,30 @@
         if (!currentUser) return alert('Please login first');
         const owner = prompt('Enter Laptop owner to return:');
         if (!owner) return;
-        const laptop = laptops.find(l => l.owner === owner && l.borrowed);
+        const data = getFilteredData();
+        const laptop = data.laptops.find(l => l.owner === owner && l.borrowed);
         if (!laptop) return alert('Laptop not found or not borrowed');
-        laptop.borrowed = false;
-        laptop.borrower = '';
+        const fullLaptop = laptops.find(l => l.id === laptop.id);
+        if (fullLaptop) {
+          fullLaptop.borrowed = false;
+          fullLaptop.borrower = '';
+        }
         addActivity(`Laptop returned: ${laptop.owner}`);
         renderAll();
       });
 
-      // ---------- CLEAR RETURNED (Remove borrowers who have returned) ----------
+      // ---------- CLEAR RETURNED ----------
       document.getElementById('clearReturnedBooksBtn').addEventListener('click', function() {
         if (!currentUser) return alert('Please login first');
-        const borrowed = books.filter(b => b.borrowed);
+        const data = getFilteredData();
+        const borrowed = data.books.filter(b => b.borrowed);
         if (borrowed.length === 0) return alert('No borrowed books to clear');
-        // Clear all borrowed status (mark as returned)
         borrowed.forEach(b => {
-          b.borrowed = false;
-          b.borrower = '';
+          const fullBook = books.find(book => book.id === b.id);
+          if (fullBook) {
+            fullBook.borrowed = false;
+            fullBook.borrower = '';
+          }
         });
         addActivity(`Cleared all borrowed books (${borrowed.length} items)`);
         renderAll();
@@ -1200,11 +1529,15 @@
 
       document.getElementById('clearReturnedLaptopsBtn').addEventListener('click', function() {
         if (!currentUser) return alert('Please login first');
-        const borrowed = laptops.filter(l => l.borrowed);
+        const data = getFilteredData();
+        const borrowed = data.laptops.filter(l => l.borrowed);
         if (borrowed.length === 0) return alert('No borrowed laptops to clear');
         borrowed.forEach(l => {
-          l.borrowed = false;
-          l.borrower = '';
+          const fullLaptop = laptops.find(lap => lap.id === l.id);
+          if (fullLaptop) {
+            fullLaptop.borrowed = false;
+            fullLaptop.borrower = '';
+          }
         });
         addActivity(`Cleared all borrowed laptops (${borrowed.length} items)`);
         renderAll();
@@ -1214,15 +1547,19 @@
       // ---------- STATIONARY GIVE ----------
       document.getElementById('giveStationaryPageBtn').addEventListener('click', function() {
         if (!currentUser) return alert('Please login first');
+        const data = getFilteredData();
         const name = prompt('Enter stationary item name to give:');
         if (!name) return;
-        const item = stationary.find(s => s.name.toLowerCase() === name.toLowerCase());
+        const item = data.stationary.find(s => s.name.toLowerCase() === name.toLowerCase());
         if (!item) return alert('Item not found');
         const qty = parseInt(prompt(`How many ${item.name} to give? (available ${item.quantity})`));
         if (isNaN(qty) || qty <= 0) return alert('Invalid quantity');
         if (qty > item.quantity) return alert('Not enough quantity');
-        item.quantity -= qty;
-        if (item.quantity === 0) stationary = stationary.filter(s => s.id !== item.id);
+        const fullItem = stationary.find(s => s.id === item.id);
+        if (fullItem) {
+          fullItem.quantity -= qty;
+          if (fullItem.quantity === 0) stationary = stationary.filter(s => s.id !== item.id);
+        }
         addActivity(`Stationary given: ${qty} x ${item.name} to staff`);
         alert(`Given ${qty} ${item.name} to staff.`);
         renderAll();
@@ -1230,30 +1567,58 @@
 
       // ---------- SCHOOL REGISTER ----------
       document.getElementById('addSchoolPageBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
+        if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
         const name = document.getElementById('schoolNamePage').value.trim();
         if (!name) return alert('Enter school name');
-        schools.push(name);
+        if (!schools.includes(name)) {
+          schools.push(name);
+        }
         document.getElementById('schoolNamePage').value = '';
         addActivity(`School registered: ${name}`);
         renderAll();
       });
 
-      // ---------- TAB NAVIGATION ----------
-      document.querySelectorAll('.page-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-          const pageId = this.dataset.page;
-          if (pageId === 'pageDashboard' && !currentUser) {
-            alert('Please login first to access the dashboard');
-            return;
-          }
-          switchTab(pageId);
-        });
+      // ---------- ADMIN PANEL ACTIONS ----------
+      document.getElementById('adminResetAllBtn').addEventListener('click', function() {
+        if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
+        if (!confirm('Reset ALL borrowed items across ALL institutions? This action cannot be undone.')) return;
+        books.forEach(b => { b.borrowed = false; b.borrower = ''; });
+        laptops.forEach(l => { l.borrowed = false; l.borrower = ''; });
+        addActivity('Admin: Reset all borrowed items');
+        renderAll();
+        alert('All borrowed items have been reset.');
+      });
+
+      document.getElementById('adminExportAllBtn').addEventListener('click', function() {
+        if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
+        const data = {
+          books, laptops, stationary, schools, users,
+          activityLog: activityLog.slice(0, 20),
+          exportedAt: new Date().toISOString()
+        };
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cele_dev_ils_export_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        addActivity('Admin: Exported all data');
+        alert('Data exported successfully!');
+      });
+
+      document.getElementById('adminRefreshBtn').addEventListener('click', function() {
+        if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
+        renderAll();
+        alert('Stats refreshed!');
       });
 
       // ---------- AUTH EVENTS ----------
       document.getElementById('loginBtn').addEventListener('click', () => openModal('login'));
       document.getElementById('registerBtn').addEventListener('click', () => openModal('register'));
+      document.getElementById('homepageLoginBtn').addEventListener('click', () => openModal('login'));
+      document.getElementById('homepageRegisterBtn').addEventListener('click', () => openModal('register'));
       modalClose.addEventListener('click', closeModal);
       modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
@@ -1282,7 +1647,6 @@
 
       logoutBtn.addEventListener('click', logout);
 
-      // Enter key support
       document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && modal.classList.contains('show')) {
           if (authForm.style.display !== 'none') {
@@ -1327,25 +1691,30 @@
       }
 
       document.getElementById('pdfBooksPageBtn').addEventListener('click', function() {
-        const rows = books.map(b => [b.title, b.author, b.acc, b.borrowed ? 'Borrowed' : 'Available']);
+        const data = getFilteredData();
+        const rows = data.books.map(b => [b.title, b.author, b.acc, b.borrowed ? 'Borrowed' : 'Available']);
         generatePDF('Books Catalog', ['Title', 'Author', 'Accession', 'Status'], rows, 'books_catalog.pdf');
       });
       document.getElementById('pdfLaptopsPageBtn').addEventListener('click', function() {
-        const rows = laptops.map(l => [l.owner, l.type, l.date, l.borrowed ? 'Borrowed' : 'Available']);
+        const data = getFilteredData();
+        const rows = data.laptops.map(l => [l.owner, l.type, l.date, l.borrowed ? 'Borrowed' : 'Available']);
         generatePDF('Laptops Registered', ['Owner', 'Type', 'Date Registered', 'Status'], rows, 'laptops_registered.pdf');
       });
       document.getElementById('pdfStationaryPageBtn').addEventListener('click', function() {
-        const rows = stationary.map(s => [s.name, String(s.quantity)]);
+        const data = getFilteredData();
+        const rows = data.stationary.map(s => [s.name, String(s.quantity)]);
         generatePDF('Stationary Inventory', ['Item', 'Quantity'], rows, 'stationary_inventory.pdf');
       });
       document.getElementById('pdfBorrowedBooksPageBtn').addEventListener('click', function() {
-        const borrowed = books.filter(b => b.borrowed);
+        const data = getFilteredData();
+        const borrowed = data.books.filter(b => b.borrowed);
         if (borrowed.length === 0) return alert('No borrowed books.');
         const rows = borrowed.map(b => [b.title, b.author, b.acc, b.borrower, new Date().toLocaleString()]);
         generatePDF('Borrowed Books', ['Title', 'Author', 'Accession', 'Borrower', 'Date/Time'], rows, 'borrowed_books.pdf');
       });
       document.getElementById('pdfBorrowedLaptopsPageBtn').addEventListener('click', function() {
-        const borrowed = laptops.filter(l => l.borrowed);
+        const data = getFilteredData();
+        const borrowed = data.laptops.filter(l => l.borrowed);
         if (borrowed.length === 0) return alert('No borrowed laptops.');
         const rows = borrowed.map(l => [l.owner, l.type, l.date, l.borrower, new Date().toLocaleString()]);
         generatePDF('Borrowed Laptops', ['Owner', 'Type', 'Date Reg.', 'Borrower', 'Date/Time'], rows, 'borrowed_laptops.pdf');
@@ -1353,7 +1722,7 @@
 
       // ---------- INIT ----------
       if (!users.some(u => u.email === ADMIN_EMAIL)) {
-        users.push({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', registered: new Date().toISOString() });
+        users.push({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', institution: 'Admin', registered: new Date().toISOString(), isAdmin: true });
         saveUsers();
       }
       updateUIForLoggedIn();
