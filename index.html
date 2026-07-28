@@ -337,6 +337,19 @@
     .status-available { background: #c8e6c9; color: #1a4d2e; }
     .status-borrowed { background: #ffcdd2; color: #c62828; }
 
+    /* Book category badge */
+    .category-badge {
+      display: inline-block;
+      padding: 0.1rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: 700;
+    }
+    .cat-textbook { background: #e3f2fd; color: #0d47a1; }
+    .cat-novel { background: #fce4ec; color: #880e4f; }
+    .cat-dictionary { background: #e8f5e9; color: #1b5e20; }
+    .cat-atlas { background: #fff3e0; color: #e65100; }
+
     /* Stats grid for dashboard */
     .stats-grid {
       display: grid;
@@ -697,11 +710,31 @@
               <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBooksPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
             </div>
           </div>
+          
+          <!-- Category Filter -->
+          <div class="koha-input-group" style="margin-bottom: 0.8rem;">
+            <label style="font-weight:600; color:var(--text-dark); margin-right:6px;">Filter:</label>
+            <select id="bookCategoryFilter" style="flex:0 0 auto; padding:0.3rem 1rem; border-radius:30px; border:1px solid var(--border-color); background:white; font-family:'Times New Roman', Times, serif;">
+              <option value="all">📚 All Books</option>
+              <option value="textbook">📖 Textbooks</option>
+              <option value="novel">📕 Novels</option>
+              <option value="dictionary">📗 Dictionaries</option>
+              <option value="atlas">🌍 Atlases</option>
+            </select>
+            <span class="text-muted" style="margin-left:auto; font-size:0.8rem;">Click category badge to filter</span>
+          </div>
+          
           <ul class="koha-item-list" id="bookListPage"></ul>
           <div class="koha-input-group">
             <input type="text" id="bookTitlePage" placeholder="Title">
             <input type="text" id="bookAuthorPage" placeholder="Author">
             <input type="text" id="bookAccPage" placeholder="Accession">
+            <select id="bookCategoryPage" style="flex:0 0 auto; padding:0.3rem 1rem; border-radius:30px; border:1px solid var(--border-color); background:white;">
+              <option value="textbook">📖 Textbook</option>
+              <option value="novel">📕 Novel</option>
+              <option value="dictionary">📗 Dictionary/Kamusi</option>
+              <option value="atlas">🌍 Atlas</option>
+            </select>
             <button class="koha-btn koha-btn-success koha-btn-sm" id="addBookPageBtn"><i class="fas fa-plus"></i> Add</button>
           </div>
         </div>
@@ -919,9 +952,12 @@
     (function() {
       // ---------- DATA ----------
       let books = [
-        { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', acc: 'A101', borrowed: false, borrower: '', institution: 'Springfield University' },
-        { id: 2, title: '1984', author: 'George Orwell', acc: 'A102', borrowed: false, borrower: '', institution: 'Springfield University' },
-        { id: 3, title: 'To Kill a Mockingbird', author: 'Harper Lee', acc: 'A103', borrowed: false, borrower: '', institution: 'Springfield University' }
+        { id: 1, title: 'Advanced Mathematics', author: 'John Smith', acc: 'MATH101', category: 'textbook', borrowed: false, borrower: '', institution: 'Springfield University' },
+        { id: 2, title: 'Physics for Scientists', author: 'Robert Brown', acc: 'PHYS202', category: 'textbook', borrowed: false, borrower: '', institution: 'Springfield University' },
+        { id: 3, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', acc: 'NOV001', category: 'novel', borrowed: false, borrower: '', institution: 'Springfield University' },
+        { id: 4, title: 'Oxford English Dictionary', author: 'Oxford Press', acc: 'DIC001', category: 'dictionary', borrowed: false, borrower: '', institution: 'Springfield University' },
+        { id: 5, title: 'World Atlas 2024', author: 'National Geographic', acc: 'ATL001', category: 'atlas', borrowed: false, borrower: '', institution: 'Springfield University' },
+        { id: 6, title: 'Things Fall Apart', author: 'Chinua Achebe', acc: 'NOV002', category: 'novel', borrowed: false, borrower: '', institution: 'Springfield University' }
       ];
       let laptops = [
         { id: 1, owner: 'IT Dept', type: 'Dell XPS', date: '2025-01-10', borrowed: false, borrower: '', institution: 'Springfield University' },
@@ -933,7 +969,7 @@
       ];
       let schools = ['Springfield University', 'Westside Academy'];
       let activityLog = [];
-      let adminSelectedSchool = '__all__'; // '__all__' or specific school name
+      let adminSelectedSchool = '__all__';
 
       // ---------- USER SYSTEM ----------
       const ADMIN_EMAIL = 'onyangocelestino@gmail.com';
@@ -942,6 +978,7 @@
       let users = [];
       let currentUser = null;
       let resetTokens = {};
+      let currentCategoryFilter = 'all';
 
       // DOM refs
       const modal = document.getElementById('authModal');
@@ -971,6 +1008,7 @@
       const institutionTitle = document.getElementById('institutionTitle');
       const adminSchoolSelector = document.getElementById('adminSchoolSelector');
       const adminSchoolSelect = document.getElementById('adminSchoolSelect');
+      const bookCategoryFilter = document.getElementById('bookCategoryFilter');
 
       let isLoginMode = true;
 
@@ -987,13 +1025,11 @@
             isAdmin: true 
           });
           saveUsers();
-          console.log('✅ Admin account created');
         } else {
           const admin = users.find(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
           if (admin && admin.password !== ADMIN_PASSWORD) {
             admin.password = ADMIN_PASSWORD;
             saveUsers();
-            console.log('✅ Admin password reset');
           }
         }
       }
@@ -1001,9 +1037,7 @@
       function saveUsers() {
         try {
           localStorage.setItem('cele_lms_users', JSON.stringify(users));
-        } catch(e) {
-          console.warn('Could not save users to localStorage');
-        }
+        } catch(e) {}
       }
 
       function loadUsers() {
@@ -1235,12 +1269,10 @@
           const usersItem = document.getElementById('usersMenuItem');
           const adminItem = document.getElementById('adminMenuItem');
           
-          // Show/Hide admin items based on user role
           if (currentUser.isAdmin) {
             schoolsItem.style.display = 'flex';
             usersItem.style.display = 'flex';
             adminItem.style.display = 'flex';
-            // Show admin school selector, hide institution title
             institutionTitle.classList.add('hidden');
             adminSchoolSelector.style.display = 'inline-flex';
             populateSchoolSelector();
@@ -1288,11 +1320,16 @@
         addActivity(`Admin switched to view: ${adminSelectedSchool === '__all__' ? 'All Schools' : adminSelectedSchool}`);
       });
 
+      // ---------- CATEGORY FILTER ----------
+      bookCategoryFilter.addEventListener('change', function() {
+        currentCategoryFilter = this.value;
+        renderBooksPage(getFilteredData().books);
+      });
+
       // ---------- FILTER DATA BY INSTITUTION ----------
       function getFilteredData() {
         if (!currentUser) return { books: [], laptops: [], stationary: [] };
         
-        // If admin and monitoring a specific school
         if (currentUser.isAdmin && adminSelectedSchool !== '__all__') {
           const inst = adminSelectedSchool;
           return {
@@ -1302,7 +1339,6 @@
           };
         }
         
-        // Admin viewing all schools OR regular user
         if (currentUser.isAdmin) {
           return { books: books, laptops: laptops, stationary: stationary };
         }
@@ -1353,6 +1389,27 @@
         }
       }
 
+      // ---------- CATEGORY HELPER ----------
+      function getCategoryLabel(category) {
+        const labels = {
+          'textbook': '📖 Textbook',
+          'novel': '📕 Novel',
+          'dictionary': '📗 Dictionary/Kamusi',
+          'atlas': '🌍 Atlas'
+        };
+        return labels[category] || category;
+      }
+
+      function getCategoryClass(category) {
+        const classes = {
+          'textbook': 'cat-textbook',
+          'novel': 'cat-novel',
+          'dictionary': 'cat-dictionary',
+          'atlas': 'cat-atlas'
+        };
+        return classes[category] || '';
+      }
+
       // ---------- RENDER ALL ----------
       function renderAll() {
         const data = getFilteredData();
@@ -1370,11 +1427,18 @@
       }
 
       function renderBooksPage(filteredBooks) {
+        // Apply category filter
+        let booksToShow = filteredBooks;
+        if (currentCategoryFilter !== 'all') {
+          booksToShow = filteredBooks.filter(b => b.category === currentCategoryFilter);
+        }
+        
         const list = document.getElementById('bookListPage');
-        list.innerHTML = filteredBooks.map(b => `
+        list.innerHTML = booksToShow.map(b => `
           <li>
             <span>
               <strong>${b.title}</strong> by ${b.author} (${b.acc})
+              <span class="category-badge ${getCategoryClass(b.category)}">${getCategoryLabel(b.category)}</span>
               <span class="status-badge ${b.borrowed ? 'status-borrowed' : 'status-available'}">
                 ${b.borrowed ? '🔴 Borrowed' : '🟢 Available'}
               </span>
@@ -1386,6 +1450,9 @@
             </span>
           </li>
         `).join('');
+        
+        // Update book count with filter
+        document.getElementById('bookCountPage').textContent = booksToShow.length;
       }
 
       function renderLaptopsPage(filteredLaptops) {
@@ -1425,7 +1492,7 @@
         const borrowed = filteredBooks.filter(b => b.borrowed);
         list.innerHTML = borrowed.length ? borrowed.map(b => `
           <li class="borrowed-item">
-            <span><strong>${b.borrower}</strong> · ${b.title} (${b.acc}) <span class="text-muted">${new Date().toLocaleString()}</span></span>
+            <span><strong>${b.borrower}</strong> · ${b.title} (${b.acc}) <span class="category-badge ${getCategoryClass(b.category)}">${getCategoryLabel(b.category)}</span> <span class="text-muted">${new Date().toLocaleString()}</span></span>
             <button class="koha-btn koha-btn-success koha-btn-sm" onclick="returnBookById(${b.id})"><i class="fas fa-undo-alt"></i> Return</button>
           </li>
         `).join('') : '<li class="text-muted">No books currently borrowed</li>';
@@ -1478,7 +1545,7 @@
       }
 
       function updateCounts(data) {
-        document.getElementById('bookCountPage').textContent = data.books.length;
+        // Book count is updated in renderBooksPage
         document.getElementById('laptopCountPage').textContent = data.laptops.length;
         document.getElementById('stationaryCountPage').textContent = data.stationary.reduce((sum, s) => sum + s.quantity, 0);
       }
@@ -1510,6 +1577,10 @@
         if (newAuthor !== null) b.author = newAuthor || b.author;
         const newAcc = prompt('Edit accession:', b.acc);
         if (newAcc !== null) b.acc = newAcc || b.acc;
+        const newCategory = prompt('Edit category (textbook/novel/dictionary/atlas):', b.category);
+        if (newCategory !== null && ['textbook','novel','dictionary','atlas'].includes(newCategory)) {
+          b.category = newCategory;
+        }
         addActivity(`Book edited: ${b.title}`);
         renderAll();
       };
@@ -1601,16 +1672,17 @@
         const title = document.getElementById('bookTitlePage').value.trim();
         const author = document.getElementById('bookAuthorPage').value.trim();
         const acc = document.getElementById('bookAccPage').value.trim();
+        const category = document.getElementById('bookCategoryPage').value;
         if (!title || !author || !acc) return alert('Fill all fields');
         let institution = currentUser.institution;
         if (currentUser.isAdmin) {
           institution = prompt('Enter institution for this book:', adminSelectedSchool === '__all__' ? 'Springfield University' : adminSelectedSchool) || 'Springfield University';
         }
-        books.push({ id: Date.now() + Math.random()*1000, title, author, acc, borrowed: false, borrower: '', institution });
+        books.push({ id: Date.now() + Math.random()*1000, title, author, acc, category, borrowed: false, borrower: '', institution });
         document.getElementById('bookTitlePage').value = '';
         document.getElementById('bookAuthorPage').value = '';
         document.getElementById('bookAccPage').value = '';
-        addActivity(`Book added: ${title} (${institution})`);
+        addActivity(`Book added: ${title} (${getCategoryLabel(category)}) (${institution})`);
         renderAll();
       });
 
@@ -1780,7 +1852,6 @@
         if (!name) return alert('Enter school name');
         if (!schools.includes(name)) {
           schools.push(name);
-          // Update the school selector
           populateSchoolSelector();
         }
         document.getElementById('schoolNamePage').value = '';
@@ -1903,8 +1974,8 @@
 
       document.getElementById('pdfBooksPageBtn').addEventListener('click', function() {
         const data = getFilteredData();
-        const rows = data.books.map(b => [b.title, b.author, b.acc, b.borrowed ? 'Borrowed' : 'Available']);
-        generatePDF('Books Catalog', ['Title', 'Author', 'Accession', 'Status'], rows, 'books_catalog.pdf');
+        const rows = data.books.map(b => [b.title, b.author, b.acc, getCategoryLabel(b.category), b.borrowed ? 'Borrowed' : 'Available']);
+        generatePDF('Books Catalog', ['Title', 'Author', 'Accession', 'Category', 'Status'], rows, 'books_catalog.pdf');
       });
       document.getElementById('pdfLaptopsPageBtn').addEventListener('click', function() {
         const data = getFilteredData();
@@ -1920,8 +1991,8 @@
         const data = getFilteredData();
         const borrowed = data.books.filter(b => b.borrowed);
         if (borrowed.length === 0) return alert('No borrowed books.');
-        const rows = borrowed.map(b => [b.title, b.author, b.acc, b.borrower, new Date().toLocaleString()]);
-        generatePDF('Borrowed Books', ['Title', 'Author', 'Accession', 'Borrower', 'Date/Time'], rows, 'borrowed_books.pdf');
+        const rows = borrowed.map(b => [b.title, b.author, b.acc, getCategoryLabel(b.category), b.borrower, new Date().toLocaleString()]);
+        generatePDF('Borrowed Books', ['Title', 'Author', 'Accession', 'Category', 'Borrower', 'Date/Time'], rows, 'borrowed_books.pdf');
       });
       document.getElementById('pdfBorrowedLaptopsPageBtn').addEventListener('click', function() {
         const data = getFilteredData();
