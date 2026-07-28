@@ -10,7 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
-    /* All styles remain the same */
+    /* All styles remain the same as before */
     * {
       margin: 0;
       padding: 0;
@@ -943,7 +943,6 @@
         </div>
         <button class="koha-btn koha-btn-primary" id="authSubmitBtn"><i class="fas fa-arrow-right"></i> Login</button>
         
-        <!-- Google Sign-In Button -->
         <div class="google-divider">
           <hr><span>or continue with</span><hr>
         </div>
@@ -990,6 +989,34 @@
       <div style="margin-top:12px; text-align:center;">
         <button class="koha-btn koha-btn-danger koha-btn-sm" id="onboardingCancelBtn">
           <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN SETUP MODAL -->
+  <div class="modal-overlay" id="adminSetupModal">
+    <div class="modal-box">
+      <button class="modal-close" id="adminSetupClose">&times;</button>
+      <h2><i class="fas fa-crown" style="color:var(--yellow-gold);"></i> Admin Setup</h2>
+      <p style="margin-bottom:1rem; color:var(--text-dark); font-family:'Times New Roman', Times, serif;">
+        The admin account doesn't exist yet. Please create it now.
+      </p>
+      <div class="koha-input-group">
+        <input type="email" id="adminSetupEmail" value="onyangocelestino@gmail.com" readonly style="background:#f5f5f5;">
+      </div>
+      <div class="koha-input-group">
+        <input type="password" id="adminSetupPassword" placeholder="Choose a password" required>
+      </div>
+      <div class="koha-input-group">
+        <input type="password" id="adminSetupConfirmPassword" placeholder="Confirm password" required>
+      </div>
+      <button class="koha-btn koha-btn-primary" id="adminSetupSubmitBtn" style="width:100%;">
+        <i class="fas fa-user-plus"></i> Create Admin Account
+      </button>
+      <div style="margin-top:12px; text-align:center;">
+        <button class="koha-btn koha-btn-outline koha-btn-sm" id="adminSetupCancelBtn" style="background:var(--primary-dark); color:white;">
+          <i class="fas fa-arrow-left"></i> Back to Login
         </button>
       </div>
     </div>
@@ -1058,7 +1085,8 @@
       onAuthStateChanged,
       sendPasswordResetEmail,
       GoogleAuthProvider,
-      signInWithPopup
+      signInWithPopup,
+      fetchSignInMethodsForEmail
     } from "firebase/auth";
 
     // Initialize Firebase
@@ -1069,7 +1097,6 @@
 
     console.log('✅ Firebase initialized successfully!');
     console.log('📁 Project ID:', firebaseConfig.projectId);
-    console.log('🔐 Auth Domain:', firebaseConfig.authDomain);
 
     // ============================================================
     // APPLICATION CODE
@@ -1085,9 +1112,9 @@
     let currentUser = null;
     let adminSelectedSchool = '__all__';
     let currentCategoryFilter = 'all';
-    let pendingGoogleUser = null; // Store pending Google user for onboarding
+    let pendingGoogleUser = null;
 
-    // Unsubscribe functions for real-time listeners
+    // Unsubscribe functions
     let unsubscribeBooks = null;
     let unsubscribeLaptops = null;
     let unsubscribeStationary = null;
@@ -1099,6 +1126,7 @@
     const loadingOverlay = document.getElementById('loadingOverlay');
     const modal = document.getElementById('authModal');
     const onboardingModal = document.getElementById('onboardingModal');
+    const adminSetupModal = document.getElementById('adminSetupModal');
     const modalTitle = document.getElementById('authModalTitle');
     const authForm = document.getElementById('authForm');
     const forgotForm = document.getElementById('forgotForm');
@@ -1130,6 +1158,12 @@
     const onboardingSchool = document.getElementById('onboardingSchool');
     const onboardingSubmitBtn = document.getElementById('onboardingSubmitBtn');
     const onboardingCancelBtn = document.getElementById('onboardingCancelBtn');
+    const adminSetupEmail = document.getElementById('adminSetupEmail');
+    const adminSetupPassword = document.getElementById('adminSetupPassword');
+    const adminSetupConfirmPassword = document.getElementById('adminSetupConfirmPassword');
+    const adminSetupSubmitBtn = document.getElementById('adminSetupSubmitBtn');
+    const adminSetupCancelBtn = document.getElementById('adminSetupCancelBtn');
+    const adminSetupClose = document.getElementById('adminSetupClose');
 
     let isLoginMode = true;
 
@@ -1143,26 +1177,23 @@
     
     const ADMIN_EMAIL = 'onyangocelestino@gmail.com';
 
-    // Register new user with Firebase Auth and Firestore
+    // Register new user
     async function registerUser(email, password, school) {
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         
-        // Save user profile to Firestore with UID as document ID
         const userProfile = {
           uid: user.uid,
           email: email,
           school: school,
           institution: school,
-          isAdmin: false,
+          isAdmin: email === ADMIN_EMAIL,
           registered: new Date().toISOString()
         };
         
-        // Store user profile using UID as document ID for easy retrieval
         await setDoc(doc(db, 'users', user.uid), userProfile);
         
-        // Also add school to schools collection if it doesn't exist
         const schoolQuery = query(collection(db, 'schools'), where('name', '==', school));
         const schoolSnapshot = await getDocs(schoolQuery);
         if (schoolSnapshot.empty) {
@@ -1176,13 +1207,12 @@
       }
     }
 
-    // Login user with Firebase Auth
+    // Login user
     async function loginUser(email, password) {
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const firebaseUser = userCredential.user;
         
-        // Fetch user profile from Firestore
         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
@@ -1195,7 +1225,6 @@
             } 
           };
         } else {
-          // Fallback if user doc doesn't exist
           const fallbackUser = {
             email: firebaseUser.email,
             school: 'Unknown',
@@ -1212,6 +1241,85 @@
       }
     }
 
+    // Check if admin account exists
+    async function checkAdminExists() {
+      try {
+        const methods = await fetchSignInMethodsForEmail(auth, ADMIN_EMAIL);
+        return methods.length > 0;
+      } catch (error) {
+        console.error('Error checking admin existence:', error);
+        return false;
+      }
+    }
+
+    // Handle admin login with setup flow
+    async function handleAdminLogin() {
+      const adminPassword = prompt('Enter admin password:');
+      if (!adminPassword) return;
+      
+      showLoading();
+      
+      // Check if admin account exists
+      const adminExists = await checkAdminExists();
+      
+      if (!adminExists) {
+        hideLoading();
+        // Show admin setup modal
+        adminSetupModal.classList.add('show');
+        adminSetupPassword.value = '';
+        adminSetupConfirmPassword.value = '';
+        return;
+      }
+      
+      // Try to login
+      const result = await loginUser(ADMIN_EMAIL, adminPassword);
+      hideLoading();
+      
+      if (result.success) {
+        closeModal();
+        alert('👑 Welcome Admin! You have full system access.');
+      } else {
+        alert('❌ Admin login failed: ' + result.message);
+      }
+    }
+
+    // Create admin account
+    async function createAdminAccount() {
+      const password = adminSetupPassword.value.trim();
+      const confirmPassword = adminSetupConfirmPassword.value.trim();
+      
+      if (!password || password.length < 6) {
+        alert('Password must be at least 6 characters.');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        alert('Passwords do not match.');
+        return;
+      }
+      
+      showLoading();
+      const result = await registerUser(ADMIN_EMAIL, password, 'Admin');
+      hideLoading();
+      
+      if (result.success) {
+        adminSetupModal.classList.remove('show');
+        alert('✅ Admin account created successfully! Please login.');
+        // Try to login automatically
+        const loginResult = await loginUser(ADMIN_EMAIL, password);
+        if (loginResult.success) {
+          closeModal();
+          alert('👑 Welcome Admin! You have full system access.');
+        } else {
+          openModal('login');
+          authEmail.value = ADMIN_EMAIL;
+          authPassword.value = password;
+        }
+      } else {
+        alert('❌ Failed to create admin account: ' + result.message);
+      }
+    }
+
     // Google Sign-In
     async function signInWithGoogle() {
       try {
@@ -1219,11 +1327,9 @@
         const result = await signInWithPopup(auth, googleProvider);
         const firebaseUser = result.user;
         
-        // Check if user profile exists in Firestore
         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
         
         if (userDoc.exists()) {
-          // User already has a profile - proceed with login
           const userData = userDoc.data();
           currentUser = { 
             id: firebaseUser.uid, 
@@ -1235,7 +1341,6 @@
           await addActivityToCloud(`User ${currentUser.email} logged in with Google`);
           alert(`✅ Welcome ${currentUser.email}!`);
         } else {
-          // New Google user - show onboarding modal
           pendingGoogleUser = {
             uid: firebaseUser.uid,
             email: firebaseUser.email,
@@ -1249,7 +1354,6 @@
         hideLoading();
         console.error('Google Sign-In error:', error);
         if (error.code === 'auth/popup-closed-by-user') {
-          // User closed the popup, nothing to do
           return;
         }
         alert('❌ Google Sign-In failed: ' + error.message);
@@ -1271,17 +1375,14 @@
           registered: new Date().toISOString()
         };
         
-        // Save user profile to Firestore
         await setDoc(doc(db, 'users', pendingGoogleUser.uid), userProfile);
         
-        // Add school to schools collection if it doesn't exist
         const schoolQuery = query(collection(db, 'schools'), where('name', '==', school));
         const schoolSnapshot = await getDocs(schoolQuery);
         if (schoolSnapshot.empty) {
           await addDoc(collection(db, 'schools'), { name: school });
         }
         
-        // Set current user
         currentUser = { id: pendingGoogleUser.uid, ...userProfile };
         pendingGoogleUser = null;
         
@@ -1296,28 +1397,10 @@
       hideLoading();
     }
 
-    // Admin quick login
-    async function handleAdminQuickLogin() {
-      const adminPassword = prompt('Enter admin password:');
-      if (!adminPassword) return;
-      
-      showLoading();
-      const result = await loginUser(ADMIN_EMAIL, adminPassword);
-      hideLoading();
-      
-      if (result.success) {
-        closeModal();
-        alert('👑 Welcome Admin! You have full system access.');
-      } else {
-        alert('❌ Admin login failed: ' + result.message);
-      }
-    }
-
     // Logout user
     async function logoutUser() {
       try {
         await signOut(auth);
-        // Clean up all listeners
         cleanupListeners();
         currentUser = null;
         pendingGoogleUser = null;
@@ -1380,7 +1463,7 @@
 
       console.log('📡 Setting up Firestore listeners for:', currentUser.isAdmin ? 'Admin' : currentUser.institution);
 
-      // ---------- BOOKS LISTENER ----------
+      // Books Listener
       let booksQuery;
       if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
         booksQuery = collection(db, "books");
@@ -1399,7 +1482,7 @@
         console.error('Books listener error:', error);
       });
 
-      // ---------- LAPTOPS LISTENER ----------
+      // Laptops Listener
       let laptopsQuery;
       if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
         laptopsQuery = collection(db, "laptops");
@@ -1418,7 +1501,7 @@
         console.error('Laptops listener error:', error);
       });
 
-      // ---------- STATIONARY LISTENER ----------
+      // Stationary Listener
       let stationaryQuery;
       if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
         stationaryQuery = collection(db, "stationary");
@@ -1436,7 +1519,7 @@
         console.error('Stationary listener error:', error);
       });
 
-      // ---------- SCHOOLS LISTENER ----------
+      // Schools Listener
       const schoolsQuery = collection(db, "schools");
       unsubscribeSchools = onSnapshot(schoolsQuery, (snapshot) => {
         schools = [];
@@ -1450,7 +1533,7 @@
         console.error('Schools listener error:', error);
       });
 
-      // ---------- USERS LISTENER (Admin only) ----------
+      // Users Listener (Admin only)
       if (currentUser.isAdmin) {
         const usersQuery = collection(db, "users");
         unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
@@ -1465,7 +1548,7 @@
         });
       }
 
-      // ---------- ACTIVITY LOG LISTENER ----------
+      // Activity Log Listener
       let activityQuery;
       if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
         activityQuery = query(
@@ -2230,10 +2313,25 @@
     document.getElementById('registerBtn').addEventListener('click', () => openModal('register'));
     document.getElementById('homepageLoginBtn').addEventListener('click', () => openModal('login'));
     document.getElementById('homepageRegisterBtn').addEventListener('click', () => openModal('register'));
-    adminQuickLoginBtn.addEventListener('click', handleAdminQuickLogin);
+    adminQuickLoginBtn.addEventListener('click', handleAdminLogin);
     googleSignInBtn.addEventListener('click', signInWithGoogle);
     modalClose.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    // Admin Setup Modal
+    adminSetupClose.addEventListener('click', () => {
+      adminSetupModal.classList.remove('show');
+    });
+    adminSetupCancelBtn.addEventListener('click', () => {
+      adminSetupModal.classList.remove('show');
+    });
+    adminSetupSubmitBtn.addEventListener('click', createAdminAccount);
+    adminSetupPassword.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') adminSetupConfirmPassword.focus();
+    });
+    adminSetupConfirmPassword.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') adminSetupSubmitBtn.click();
+    });
 
     // Onboarding modal
     onboardingSubmitBtn.addEventListener('click', async () => {
@@ -2248,7 +2346,6 @@
     onboardingCancelBtn.addEventListener('click', async () => {
       if (pendingGoogleUser) {
         try {
-          // Delete the user account if they cancel onboarding
           const user = auth.currentUser;
           if (user) {
             await user.delete();
@@ -2317,9 +2414,13 @@
       if (e.key === 'Enter' && onboardingModal.classList.contains('show')) {
         onboardingSubmitBtn.click();
       }
+      if (e.key === 'Enter' && adminSetupModal.classList.contains('show')) {
+        adminSetupSubmitBtn.click();
+      }
       if (e.key === 'Escape') {
         closeModal();
         closeOnboardingModal();
+        adminSetupModal.classList.remove('show');
       }
     });
 
@@ -2336,7 +2437,7 @@
       addActivityToCloud(`Admin switched to view: ${adminSelectedSchool === '__all__' ? 'All Schools' : adminSelectedSchool}`);
     });
 
-    // --- ADD/EDIT/DELETE BUTTONS ---
+    // --- ADD/EDIT/DELETE BUTTONS (All the same as before) ---
     
     // Add Book
     document.getElementById('addBookPageBtn').addEventListener('click', async function() {
@@ -2709,7 +2810,6 @@
               email: firebaseUser.email,
               displayName: firebaseUser.displayName || firebaseUser.email
             };
-            // Show onboarding modal instead of logging in
             showOnboardingModal();
             hideLoading();
           }
@@ -2744,7 +2844,7 @@
     
     console.log('🚀 Cele.Dev ILS initialized with Firebase Authentication');
     console.log('🔐 Google Sign-In enabled');
-    console.log('📡 Real-time listeners with institution-based filtering');
+    console.log('👑 Admin auto-setup enabled');
   </script>
 </body>
 </html>
