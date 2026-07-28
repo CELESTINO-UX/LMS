@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Koha ILS · Multi‑page Library</title>
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+    body {
+      background: #f2f4f8;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ----- Koha-style header / navigation ----- */
+    .koha-header {
+      background: #1e2b3c;
+      color: #f0f4fa;
+      padding: 0.7rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 4px solid #b68b5c;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .koha-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+    .koha-logo i {
+      color: #d4a373;
+      font-size: 1.8rem;
+    }
+    .koha-logo span {
+      background: #b68b5c;
+      padding: 0.1rem 0.8rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #1e2b3c;
+      margin-left: 6px;
+    }
+    .koha-nav-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .koha-btn {
+      padding: 0.4rem 1.2rem;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f0f4fa;
+      color: #1e2b3c;
+    }
+    .koha-btn-primary { background: #b68b5c; color: #1e2b3c; }
+    .koha-btn-primary:hover { background: #a0784a; transform: scale(1.02); }
+    .koha-btn-outline { background: transparent; border: 2px solid #d4a373; color: #f0f4fa; }
+    .koha-btn-outline:hover { background: #d4a373; color: #1e2b3c; }
+    .koha-btn-success { background: #2a7f6e; color: white; }
+    .koha-btn-danger { background: #b34a3c; color: white; }
+    .koha-btn-warning { background: #c9a24b; color: #1e2b3c; }
+    .koha-btn-pdf { background: #b34a3c; color: white; }
+    .koha-btn-sm { padding: 0.2rem 0.9rem; font-size: 0.75rem; }
+    .institution-title {
+      background: #eef3f9;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      color: #1e2b3c;
+      border: 1px solid #ccd3df;
+    }
+    .institution-title input {
+      background: transparent;
+      border: none;
+      border-bottom: 2px dashed #b68b5c;
+      font-weight: 600;
+      color: #1e2b3c;
+      padding: 0.1rem 0.3rem;
+      width: 180px;
+      font-size: 0.9rem;
+    }
+    .institution-title input:focus { outline: none; border-bottom: 2px solid #b68b5c; }
+
+    /* ----- PAGE NAVIGATION TABS ----- */
+    .page-tabs {
+      background: white;
+      padding: 0.6rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      border-bottom: 2px solid #dfe4ec;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .page-tab {
+      padding: 0.4rem 1.5rem;
+      border-radius: 40px;
+      background: #eef2f7;
+      color: #1e2b3c;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .page-tab i { color: #b68b5c; }
+    .page-tab.active {
+      background: #1e2b3c;
+      color: white;
+    }
+    .page-tab.active i { color: #d4a373; }
+    .page-tab:hover { background: #d4a373; color: #1e2b3c; }
+
+    /* ----- PAGES (show/hide) ----- */
+    .page {
+      display: none;
+      padding: 2rem;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .page.active-page { display: block; }
+
+    /* ----- CARDS (inside pages) ----- */
+    .koha-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem 1.2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      border: 1px solid #dfe4ec;
+      margin-bottom: 1.8rem;
+    }
+    .koha-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e8ecf3;
+      padding-bottom: 0.6rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .koha-card-header h3 {
+      font-weight: 600;
+      color: #1e2b3c;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.2rem;
+    }
+    .koha-card-header h3 i { color: #b68b5c; width: 1.6rem; }
+    .koha-badge {
+      background: #e2e8f0;
+      padding: 0.2rem 0.9rem;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .koha-item-list {
+      list-style: none;
+      max-height: 350px;
+      overflow-y: auto;
+      margin-bottom: 0.8rem;
+    }
+    .koha-item-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.2rem;
+      border-bottom: 1px solid #eff2f8;
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .koha-item-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .koha-item-actions button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0 4px;
+      color: #4a5a72;
+    }
+    .koha-item-actions button:hover { color: #b68b5c; }
+    .text-muted { color: #6f7d93; font-size: 0.8rem; }
+    .mt-2 { margin-top: 0.8rem; }
+    .flex { display: flex; gap: 8px; flex-wrap: wrap; }
+    .koha-input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 6px 0;
+    }
+    .koha-input-group input, .koha-input-group select {
+      padding: 0.4rem 0.8rem;
+      border: 1px solid #ccd3df;
+      border-radius: 30px;
+      background: white;
+      flex: 1 0 100px;
+      font-size: 0.85rem;
+    }
+    .koha-input-group input:focus { border-color: #b68b5c; outline: none; }
+    .borrowed-item {
+      background: #f4f8fc;
+      border-left: 4px solid #2a7f6e;
+      padding-left: 8px;
+    }
+    .stationary-give {
+      background: #fdf7ed;
+      border-left: 4px solid #c9a24b;
+    }
+    .koha-school-card {
+      background: #eef3f9;
+      border-radius: 40px;
+      padding: 1rem 1.2rem;
+      margin-top: 0.8rem;
+    }
+    .koha-footer {
+      text-align: center;
+      padding: 1.2rem;
+      color: #5a6f87;
+      border-top: 1px solid #d6dce6;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      background: #fafcfd;
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #edf0f5; }
+    ::-webkit-scrollbar-thumb { background: #b68b5c; border-radius: 20px; }
+
+    /* responsive */
+    @media (max-width: 700px) {
+      .koha-header, .page-tabs { padding: 0.6rem 1rem; }
+      .page { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="koha-header">
+    <div class="koha-logo">
+      <i class="fas fa-book-open"></i>
+      <span>Koha<span style="font-weight:300; margin-left:4px;">ILS</span></span>
+      <span style="background:#3f4f62; color:white;">Library</span>
+    </div>
+    <div class="koha-nav-actions">
+      <div class="institution-title">
+        <i class="fas fa-university"></i>
+        <input type="text" id="institutionName" value="Springfield University Library" placeholder="Institution">
+      </div>
+      <button class="koha-btn koha-btn-outline" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+      <button class="koha-btn koha-btn-primary" id="registerBtn"><i class="fas fa-user-plus"></i> Register</button>
+    </div>
+  </header>
+
+  <!-- PAGE TABS -->
+  <div class="page-tabs">
+    <button class="page-tab active" data-page="pageBooks"><i class="fas fa-book"></i> Books</button>
+    <button class="page-tab" data-page="pageLaptops"><i class="fas fa-laptop"></i> Laptops</button>
+    <button class="page-tab" data-page="pageStationary"><i class="fas fa-pencil-alt"></i> Stationary</button>
+    <button class="page-tab" data-page="pageBorrowing"><i class="fas fa-hand-holding-heart"></i> Borrowing</button>
+    <button class="page-tab" data-page="pageSchools"><i class="fas fa-school"></i> Schools</button>
+  </div>
+
+  <!-- ========== PAGES ========== -->
+
+  <!-- PAGE: BOOKS -->
+  <div id="pageBooks" class="page active-page">
+    <div class="koha-card">
+      <div class="koha-card-header">
+        <h3><i class="fas fa-book"></i> Book Catalog</h3>
+        <div>
+          <span class="koha-badge" id="bookCountPage">0</span>
+          <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBooksPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+        </div>
+      </div>
+      <ul class="koha-item-list" id="bookListPage"></ul>
+      <div class="koha-input-group">
+        <input type="text" id="bookTitlePage" placeholder="Title">
+        <input type="text" id="bookAuthorPage" placeholder="Author">
+        <input type="text" id="bookAccPage" placeholder="Accession">
+        <button class="koha-btn koha-btn-success koha-btn-sm" id="addBookPageBtn"><i class="fas fa-plus"></i> Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: LAPTOPS -->
+  <div id="pageLaptops" class="page">
+    <div class="koha-card">
+      <div class="koha-card-header">
+        <h3><i class="fas fa-laptop"></i> Laptops Registered</h3>
+        <div>
+          <span class="koha-badge" id="laptopCountPage">0</span>
+          <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfLaptopsPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+        </div>
+      </div>
+      <ul class="koha-item-list" id="laptopListPage"></ul>
+      <div class="koha-input-group">
+        <input type="text" id="laptopOwnerPage" placeholder="Owner">
+        <input type="text" id="laptopTypePage" placeholder="Type">
+        <input type="date" id="laptopDatePage">
+        <button class="koha-btn koha-btn-success koha-btn-sm" id="addLaptopPageBtn"><i class="fas fa-plus"></i> Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: STATIONARY -->
+  <div id="pageStationary" class="page">
+    <div class="koha-card">
+      <div class="koha-card-header">
+        <h3><i class="fas fa-pencil-alt"></i> Stationary Inventory</h3>
+        <div>
+          <span class="koha-badge" id="stationaryCountPage">0</span>
+          <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfStationaryPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+        </div>
+      </div>
+      <ul class="koha-item-list" id="stationaryListPage"></ul>
+      <div class="koha-input-group">
+        <input type="text" id="stationaryNamePage" placeholder="Item name">
+        <input type="number" id="stationaryQtyPage" placeholder="Qty" value="1">
+        <button class="koha-btn koha-btn-success koha-btn-sm" id="addStationaryPageBtn"><i class="fas fa-plus"></i> Add</button>
+      </div>
+      <div class="mt-2">
+        <button class="koha-btn koha-btn-warning koha-btn-sm" id="giveStationaryPageBtn"><i class="fas fa-hand-holding"></i> Give to Staff</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: BORROWING -->
+  <div id="pageBorrowing" class="page">
+    <div class="koha-card">
+      <div class="koha-card-header">
+        <h3><i class="fas fa-hand-holding-heart"></i> Borrowed Books</h3>
+        <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBorrowedBooksPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+      </div>
+      <ul class="koha-item-list" id="borrowedBookListPage"></ul>
+      <div class="flex mt-2">
+        <button class="koha-btn koha-btn-warning koha-btn-sm" id="borrowBookPageBtn"><i class="fas fa-hand-holding"></i> Borrow Book</button>
+        <button class="koha-btn koha-btn-success koha-btn-sm" id="returnBookPageBtn"><i class="fas fa-undo-alt"></i> Return Book</button>
+      </div>
+    </div>
+    <div class="koha-card">
+      <div class="koha-card-header">
+        <h3><i class="fas fa-laptop-code"></i> Borrowed Laptops</h3>
+        <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBorrowedLaptopsPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+      </div>
+      <ul class="koha-item-list" id="borrowedLaptopListPage"></ul>
+      <div class="flex mt-2">
+        <button class="koha-btn koha-btn-warning koha-btn-sm" id="borrowLaptopPageBtn"><i class="fas fa-hand-holding"></i> Borrow Laptop</button>
+        <button class="koha-btn koha-btn-success koha-btn-sm" id="returnLaptopPageBtn"><i class="fas fa-undo-alt"></i> Return Laptop</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: SCHOOLS -->
+  <div id="pageSchools" class="page">
+    <div class="koha-card koha-school-card">
+      <div class="koha-card-header"><h3><i class="fas fa-school"></i> Adopting Schools</h3></div>
+      <ul class="koha-item-list" id="schoolListPage"></ul>
+      <div class="koha-input-group">
+        <input type="text" id="schoolNamePage" placeholder="School name">
+        <button class="koha-btn koha-btn-primary koha-btn-sm" id="addSchoolPageBtn"><i class="fas fa-plus"></i> Register</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="koha-footer">Koha ILS · Multi‑page Library Management</footer>
+
+  <script>
+    (function() {
+      // ---------- DATA ----------
+      let books = [
+        { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', acc: 'A101', borrowed: false, borrower: '' },
+        { id: 2, title: '1984', author: 'George Orwell', acc: 'A102', borrowed: false, borrower: '' },
+        { id: 3, title: 'To Kill a Mockingbird', author: 'Harper Lee', acc: 'A103', borrowed: false, borrower: '' }
+      ];
+      let laptops = [
+        { id: 1, owner: 'IT Dept', type: 'Dell XPS', date: '2025-01-10', borrowed: false, borrower: '' },
+        { id: 2, owner: 'Library', type: 'MacBook Pro', date: '2025-02-15', borrowed: false, borrower: '' }
+      ];
+      let stationary = [
+        { id: 1, name: 'Stapler', quantity: 5 },
+        { id: 2, name: 'Whiteboard markers', quantity: 12 }
+      ];
+      let schools = ['Springfield High', 'Westside Academy'];
+
+      function generateId() { return Date.now() + Math.floor(Math.random() * 1000); }
+
+      // ---------- RENDER ALL PAGES ----------
+      function renderAll() {
+        renderBooksPage();
+        renderLaptopsPage();
+        renderStationaryPage();
+        renderBorrowedBooksPage();
+        renderBorrowedLaptopsPage();
+        renderSchoolsPage();
+        updateCounts();
+      }
+
+      function renderBooksPage() {
+        const list = document.getElementById('bookListPage');
+        list.innerHTML = books.map(b => `
+          <li>
+            <span><strong>${b.title}</strong> by ${b.author} (${b.acc}) ${b.borrowed ? '🔴' : '🟢'}</span>
+            <span class="koha-item-actions">
+              <button onclick="editBook(${b.id})"><i class="fas fa-edit"></i></button>
+              <button onclick="deleteBook(${b.id})"><i class="fas fa-trash-alt" style="color:#b34a3c;"></i></button>
+            </span>
+          </li>
+        `).join('');
+      }
+
+      function renderLaptopsPage() {
+        const list = document.getElementById('laptopListPage');
+        list.innerHTML = laptops.map(l => `
+          <li>
+            <span>${l.owner} · ${l.type} · ${l.date} ${l.borrowed ? '🔴' : '🟢'}</span>
+            <span class="koha-item-actions">
+              <button onclick="editLaptop(${l.id})"><i class="fas fa-edit"></i></button>
+              <button onclick="deleteLaptop(${l.id})"><i class="fas fa-trash-alt" style="color:#b34a3c;"></i></button>
+            </span>
+          </li>
+        `).join('');
+      }
+
+      function renderStationaryPage() {
+        const list = document.getElementById('stationaryListPage');
+        list.innerHTML = stationary.map(s => `
+          <li>
+            <span>${s.name} (x${s.quantity})</span>
+            <span class="koha-item-actions">
+              <button onclick="editStationary(${s.id})"><i class="fas fa-edit"></i></button>
+              <button onclick="deleteStationary(${s.id})"><i class="fas fa-trash-alt" style="color:#b34a3c;"></i></button>
+            </span>
+          </li>
+        `).join('');
+      }
+
+      function renderBorrowedBooksPage() {
+        const list = document.getElementById('borrowedBookListPage');
+        const borrowed = books.filter(b => b.borrowed);
+        list.innerHTML = borrowed.length ? borrowed.map(b => `
+          <li class="borrowed-item">
+            <span><strong>${b.borrower}</strong> · ${b.title} (${b.acc}) <span class="text-muted">${new Date().toLocaleString()}</span></span>
+          </li>
+        `).join('') : '<li class="text-muted">No books borrowed</li>';
+      }
+
+      function renderBorrowedLaptopsPage() {
+        const list = document.getElementById('borrowedLaptopListPage');
+        const borrowed = laptops.filter(l => l.borrowed);
+        list.innerHTML = borrowed.length ? borrowed.map(l => `
+          <li class="borrowed-item">
+            <span><strong>${l.borrower}</strong> · ${l.owner} ${l.type} <span class="text-muted">${new Date().toLocaleString()}</span></span>
+          </li>
+        `).join('') : '<li class="text-muted">No laptops borrowed</li>';
+      }
+
+      function renderSchoolsPage() {
+        const list = document.getElementById('schoolListPage');
+        list.innerHTML = schools.map(s => `<li><i class="fas fa-school"></i> ${s}</li>`).join('');
+      }
+
+      function updateCounts() {
+        document.getElementById('bookCountPage').textContent = books.length;
+        document.getElementById('laptopCountPage').textContent = laptops.length;
+        document.getElementById('stationaryCountPage').textContent = stationary.reduce((sum, s) => sum + s.quantity, 0);
+      }
+
+      // ---------- CRUD (global) ----------
+      window.deleteBook = function(id) {
+        books = books.filter(b => b.id !== id);
+        renderAll();
+      };
+      window.editBook = function(id) {
+        const b = books.find(x => x.id === id);
+        if (!b) return;
+        const newTitle = prompt('Edit title:', b.title);
+        if (newTitle !== null) b.title = newTitle || b.title;
+        const newAuthor = prompt('Edit author:', b.author);
+        if (newAuthor !== null) b.author = newAuthor || b.author;
+        const newAcc = prompt('Edit accession:', b.acc);
+        if (newAcc !== null) b.acc = newAcc || b.acc;
+        renderAll();
+      };
+      window.deleteLaptop = function(id) {
+        laptops = laptops.filter(l => l.id !== id);
+        renderAll();
+      };
+      window.editLaptop = function(id) {
+        const l = laptops.find(x => x.id === id);
+        if (!l) return;
+        const owner = prompt('Edit owner:', l.owner);
+        if (owner !== null) l.owner = owner || l.owner;
+        const type = prompt('Edit type:', l.type);
+        if (type !== null) l.type = type || l.type;
+        const date = prompt('Edit date (YYYY-MM-DD):', l.date);
+        if (date !== null) l.date = date || l.date;
+        renderAll();
+      };
+      window.deleteStationary = function(id) {
+        stationary = stationary.filter(s => s.id !== id);
+        renderAll();
+      };
+      window.editStationary = function(id) {
+        const s = stationary.find(x => x.id === id);
+        if (!s) return;
+        const name = prompt('Edit name:', s.name);
+        if (name !== null) s.name = name || s.name;
+        const qty = prompt('Edit quantity:', s.quantity);
+        if (qty !== null) s.quantity = parseInt(qty) || 1;
+        renderAll();
+      };
+
+      // ---------- ADD (page-specific) ----------
+      document.getElementById('addBookPageBtn').addEventListener('click', function() {
+        const title = document.getElementById('bookTitlePage').value.trim();
+        const author = document.getElementById('bookAuthorPage').value.trim();
+        const acc = document.getElementById('bookAccPage').value.trim();
+        if (!title || !author || !acc) return alert('Fill all fields');
+        books.push({ id: generateId(), title, author, acc, borrowed: false, borrower: '' });
+        document.getElementById('bookTitlePage').value = '';
+        document.getElementById('bookAuthorPage').value = '';
+        document.getElementById('bookAccPage').value = '';
+        renderAll();
+      });
+
+      document.getElementById('addLaptopPageBtn').addEventListener('click', function() {
+        const owner = document.getElementById('laptopOwnerPage').value.trim();
+        const type = document.getElementById('laptopTypePage').value.trim();
+        const date = document.getElementById('laptopDatePage').value;
+        if (!owner || !type || !date) return alert('Fill all fields');
+        laptops.push({ id: generateId(), owner, type, date, borrowed: false, borrower: '' });
+        document.getElementById('laptopOwnerPage').value = '';
+        document.getElementById('laptopTypePage').value = '';
+        document.getElementById('laptopDatePage').value = '';
+        renderAll();
+      });
+
+      document.getElementById('addStationaryPageBtn').addEventListener('click', function() {
+        const name = document.getElementById('stationaryNamePage').value.trim();
+        const qty = parseInt(document.getElementById('stationaryQtyPage').value) || 1;
+        if (!name) return alert('Enter item name');
+        stationary.push({ id: generateId(), name, quantity: qty });
+        document.getElementById('stationaryNamePage').value = '';
+        document.getElementById('stationaryQtyPage').value = '1';
+        renderAll();
+      });
+
+      // ---------- BORROW / RETURN (page) ----------
+      document.getElementById('borrowBookPageBtn').addEventListener('click', function() {
+        const acc = prompt('Enter Accession number of book to borrow:');
+        if (!acc) return;
+        const book = books.find(b => b.acc === acc && !b.borrowed);
+        if (!book) return alert('Book not available or already borrowed');
+        const borrower = prompt('Enter borrower name:');
+        if (!borrower) return;
+        book.borrowed = true;
+        book.borrower = borrower;
+        renderAll();
+      });
+
+      document.getElementById('returnBookPageBtn').addEventListener('click', function() {
+        const acc = prompt('Enter Accession number of book to return:');
+        if (!acc) return;
+        const book = books.find(b => b.acc === acc && b.borrowed);
+        if (!book) return alert('Book not found or not borrowed');
+        book.borrowed = false;
+        book.borrower = '';
+        renderAll();
+      });
+
+      document.getElementById('borrowLaptopPageBtn').addEventListener('click', function() {
+        const id = prompt('Enter Laptop owner (identifier):');
+        if (!id) return;
+        const laptop = laptops.find(l => l.owner === id && !l.borrowed);
+        if (!laptop) return alert('Laptop not available or already borrowed');
+        const borrower = prompt('Enter borrower name:');
+        if (!borrower) return;
+        laptop.borrowed = true;
+        laptop.borrower = borrower;
+        renderAll();
+      });
+
+      document.getElementById('returnLaptopPageBtn').addEventListener('click', function() {
+        const id = prompt('Enter Laptop owner to return:');
+        if (!id) return;
+        const laptop = laptops.find(l => l.owner === id && l.borrowed);
+        if (!laptop) return alert('Laptop not found or not borrowed');
+        laptop.borrowed = false;
+        laptop.borrower = '';
+        renderAll();
+      });
+
+      // ---------- STATIONARY GIVE ----------
+      document.getElementById('giveStationaryPageBtn').addEventListener('click', function() {
+        const name = prompt('Enter stationary item name to give:');
+        if (!name) return;
+        const item = stationary.find(s => s.name.toLowerCase() === name.toLowerCase());
+        if (!item) return alert('Item not found');
+        const qty = parseInt(prompt(`How many ${item.name} to give? (available ${item.quantity})`));
+        if (isNaN(qty) || qty <= 0) return alert('Invalid quantity');
+        if (qty > item.quantity) return alert('Not enough quantity');
+        item.quantity -= qty;
+        if (item.quantity === 0) stationary = stationary.filter(s => s.id !== item.id);
+        alert(`Given ${qty} ${item.name} to staff.`);
+        renderAll();
+      });
+
+      // ---------- SCHOOL REGISTER ----------
+      document.getElementById('addSchoolPageBtn').addEventListener('click', function() {
+        const name = document.getElementById('schoolNamePage').value.trim();
+        if (!name) return alert('Enter school name');
+        schools.push(name);
+        document.getElementById('schoolNamePage').value = '';
+        renderAll();
+      });
+
+      // ---------- TAB NAVIGATION ----------
+      const tabs = document.querySelectorAll('.page-tab');
+      const pages = {
+        pageBooks: document.getElementById('pageBooks'),
+        pageLaptops: document.getElementById('pageLaptops'),
+        pageStationary: document.getElementById('pageStationary'),
+        pageBorrowing: document.getElementById('pageBorrowing'),
+        pageSchools: document.getElementById('pageSchools')
+      };
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          tabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          const pageId = this.dataset.page;
+          Object.keys(pages).forEach(key => {
+            pages[key].classList.toggle('active-page', key === pageId);
+          });
+        });
+      });
+
+      // ---------- LOGIN / REGISTER (demo) ----------
+      document.getElementById('loginBtn').addEventListener('click', () => alert('Login demo: logged in as admin'));
+      document.getElementById('registerBtn').addEventListener('click', () => alert('Register demo: new account created'));
+
+      // ---------- PDF EXPORT (with institution) ----------
+      function getInstitution() {
+        return document.getElementById('institutionName').value.trim() || 'Institution';
+      }
+      function generatePDF(title, headers, rows, filename) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+        const inst = getInstitution();
+        doc.setFontSize(18);
+        doc.text(inst, 14, 20);
+        doc.setFontSize(14);
+        doc.text(title, 14, 30);
+        doc.setFontSize(10);
+        let y = 40;
+        const colWidths = headers.map(() => 45);
+        doc.setFont('helvetica', 'bold');
+        let x = 14;
+        headers.forEach((h, i) => { doc.text(h, x, y); x += colWidths[i] || 45; });
+        doc.setFont('helvetica', 'normal');
+        y += 6;
+        rows.forEach(row => {
+          if (y > 270) { doc.addPage(); y = 20; }
+          let xPos = 14;
+          row.forEach((cell, i) => {
+            doc.text(String(cell), xPos, y);
+            xPos += colWidths[i] || 45;
+          });
+          y += 6;
+        });
+        doc.save(filename);
+      }
+
+      document.getElementById('pdfBooksPageBtn').addEventListener('click', function() {
+        const rows = books.map(b => [b.title, b.author, b.acc, b.borrowed ? 'Borrowed' : 'Available']);
+        generatePDF('Books Catalog', ['Title', 'Author', 'Accession', 'Status'], rows, 'books_catalog.pdf');
+      });
+      document.getElementById('pdfLaptopsPageBtn').addEventListener('click', function() {
+        const rows = laptops.map(l => [l.owner, l.type, l.date, l.borrowed ? 'Borrowed' : 'Available']);
+        generatePDF('Laptops Registered', ['Owner', 'Type', 'Date Registered', 'Status'], rows, 'laptops_registered.pdf');
+      });
+      document.getElementById('pdfStationaryPageBtn').addEventListener('click', function() {
+        const rows = stationary.map(s => [s.name, String(s.quantity)]);
+        generatePDF('Stationary Inventory', ['Item', 'Quantity'], rows, 'stationary_inventory.pdf');
+      });
+      document.getElementById('pdfBorrowedBooksPageBtn').addEventListener('click', function() {
+        const borrowed = books.filter(b => b.borrowed);
+        if (borrowed.length === 0) return alert('No borrowed books.');
+        const rows = borrowed.map(b => [b.title, b.author, b.acc, b.borrower, new Date().toLocaleString()]);
+        generatePDF('Borrowed Books', ['Title', 'Author', 'Accession', 'Borrower', 'Date/Time'], rows, 'borrowed_books.pdf');
+      });
+      document.getElementById('pdfBorrowedLaptopsPageBtn').addEventListener('click', function() {
+        const borrowed = laptops.filter(l => l.borrowed);
+        if (borrowed.length === 0) return alert('No borrowed laptops.');
+        const rows = borrowed.map(l => [l.owner, l.type, l.date, l.borrower, new Date().toLocaleString()]);
+        generatePDF('Borrowed Laptops', ['Owner', 'Type', 'Date Reg.', 'Borrower', 'Date/Time'], rows, 'borrowed_laptops.pdf');
+      });
+
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
