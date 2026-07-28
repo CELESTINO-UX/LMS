@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Koha ILS · Library Management</title>
+  <title>Cele.Dev ILS · Library Management</title>
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <!-- jsPDF -->
@@ -13,25 +13,39 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      font-family: 'Times New Roman', Times, serif;
     }
     body {
-      background: #f2f4f8;
+      background: #f0f5f0;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
+    /* ----- Theme Colors: Green & Yellow ----- */
+    :root {
+      --primary-dark: #1a4d2e;
+      --primary-green: #2e7d32;
+      --primary-light: #4caf50;
+      --yellow-gold: #f9a825;
+      --yellow-light: #ffd54f;
+      --yellow-pale: #fff8e1;
+      --bg-light: #f1f8e9;
+      --card-shadow: 0 4px 12px rgba(0, 40, 0, 0.1);
+      --border-color: #c8e6c9;
+      --text-dark: #1a2e1a;
+    }
+
     /* ----- Header ----- */
     .koha-header {
-      background: #1e2b3c;
+      background: var(--primary-dark);
       color: #f0f4fa;
       padding: 0.7rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      border-bottom: 4px solid #b68b5c;
+      border-bottom: 4px solid var(--yellow-gold);
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
     .koha-logo {
@@ -40,16 +54,18 @@
       gap: 12px;
       font-size: 1.5rem;
       font-weight: 500;
+      font-family: 'Times New Roman', Times, serif;
     }
-    .koha-logo i { color: #d4a373; font-size: 1.8rem; }
+    .koha-logo i { color: var(--yellow-gold); font-size: 1.8rem; }
     .koha-logo span {
-      background: #b68b5c;
+      background: var(--yellow-gold);
       padding: 0.1rem 0.8rem;
       border-radius: 30px;
       font-size: 0.7rem;
       font-weight: 700;
-      color: #1e2b3c;
+      color: var(--primary-dark);
       margin-left: 6px;
+      font-family: 'Times New Roman', Times, serif;
     }
     .koha-nav-actions {
       display: flex;
@@ -69,41 +85,48 @@
       align-items: center;
       gap: 6px;
       background: #f0f4fa;
-      color: #1e2b3c;
+      color: var(--text-dark);
+      font-family: 'Times New Roman', Times, serif;
     }
-    .koha-btn-primary { background: #b68b5c; color: #1e2b3c; }
-    .koha-btn-primary:hover { background: #a0784a; transform: scale(1.02); }
-    .koha-btn-outline { background: transparent; border: 2px solid #d4a373; color: #f0f4fa; }
-    .koha-btn-outline:hover { background: #d4a373; color: #1e2b3c; }
-    .koha-btn-success { background: #2a7f6e; color: white; }
-    .koha-btn-danger { background: #b34a3c; color: white; }
-    .koha-btn-warning { background: #c9a24b; color: #1e2b3c; }
-    .koha-btn-pdf { background: #b34a3c; color: white; }
+    .koha-btn-primary { background: var(--yellow-gold); color: var(--primary-dark); }
+    .koha-btn-primary:hover { background: var(--yellow-light); transform: scale(1.02); }
+    .koha-btn-outline { background: transparent; border: 2px solid var(--yellow-gold); color: #f0f4fa; }
+    .koha-btn-outline:hover { background: var(--yellow-gold); color: var(--primary-dark); }
+    .koha-btn-success { background: var(--primary-green); color: white; }
+    .koha-btn-success:hover { background: var(--primary-light); }
+    .koha-btn-danger { background: #c62828; color: white; }
+    .koha-btn-danger:hover { background: #b71c1c; }
+    .koha-btn-warning { background: var(--yellow-gold); color: var(--primary-dark); }
+    .koha-btn-warning:hover { background: var(--yellow-light); }
+    .koha-btn-pdf { background: #c62828; color: white; }
+    .koha-btn-pdf:hover { background: #b71c1c; }
     .koha-btn-sm { padding: 0.2rem 0.9rem; font-size: 0.75rem; }
 
     /* ----- Institution title ----- */
     .institution-title {
-      background: #eef3f9;
+      background: var(--yellow-pale);
       padding: 0.2rem 1rem;
       border-radius: 40px;
       display: inline-flex;
       align-items: center;
       gap: 8px;
       font-weight: 500;
-      color: #1e2b3c;
-      border: 1px solid #ccd3df;
+      color: var(--text-dark);
+      border: 1px solid var(--yellow-gold);
+      font-family: 'Times New Roman', Times, serif;
     }
     .institution-title input {
       background: transparent;
       border: none;
-      border-bottom: 2px dashed #b68b5c;
+      border-bottom: 2px dashed var(--yellow-gold);
       font-weight: 600;
-      color: #1e2b3c;
+      color: var(--text-dark);
       padding: 0.1rem 0.3rem;
       width: 180px;
       font-size: 0.9rem;
+      font-family: 'Times New Roman', Times, serif;
     }
-    .institution-title input:focus { outline: none; border-bottom: 2px solid #b68b5c; }
+    .institution-title input:focus { outline: none; border-bottom: 2px solid var(--primary-green); }
 
     /* ----- Page Tabs ----- */
     .page-tabs {
@@ -112,14 +135,14 @@
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
-      border-bottom: 2px solid #dfe4ec;
+      border-bottom: 2px solid var(--border-color);
       box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
     .page-tab {
       padding: 0.4rem 1.5rem;
       border-radius: 40px;
-      background: #eef2f7;
-      color: #1e2b3c;
+      background: var(--bg-light);
+      color: var(--text-dark);
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
@@ -128,11 +151,12 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      font-family: 'Times New Roman', Times, serif;
     }
-    .page-tab i { color: #b68b5c; }
-    .page-tab.active { background: #1e2b3c; color: white; }
-    .page-tab.active i { color: #d4a373; }
-    .page-tab:hover { background: #d4a373; color: #1e2b3c; }
+    .page-tab i { color: var(--primary-green); }
+    .page-tab.active { background: var(--primary-dark); color: white; }
+    .page-tab.active i { color: var(--yellow-gold); }
+    .page-tab:hover { background: var(--yellow-gold); color: var(--primary-dark); }
 
     /* ----- Pages (show/hide) ----- */
     .page { display: none; padding: 2rem; max-width: 1600px; margin: 0 auto; width: 100%; }
@@ -143,34 +167,37 @@
       background: white;
       border-radius: 12px;
       padding: 1.5rem 1.2rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-      border: 1px solid #dfe4ec;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border-color);
       margin-bottom: 1.8rem;
     }
     .koha-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #e8ecf3;
+      border-bottom: 2px solid var(--border-color);
       padding-bottom: 0.6rem;
       margin-bottom: 1rem;
       flex-wrap: wrap;
     }
     .koha-card-header h3 {
       font-weight: 600;
-      color: #1e2b3c;
+      color: var(--text-dark);
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 1.2rem;
+      font-family: 'Times New Roman', Times, serif;
     }
-    .koha-card-header h3 i { color: #b68b5c; width: 1.6rem; }
+    .koha-card-header h3 i { color: var(--primary-green); width: 1.6rem; }
     .koha-badge {
-      background: #e2e8f0;
+      background: var(--bg-light);
       padding: 0.2rem 0.9rem;
       border-radius: 40px;
       font-size: 0.7rem;
       font-weight: 700;
+      border: 1px solid var(--border-color);
+      font-family: 'Times New Roman', Times, serif;
     }
     .koha-item-list {
       list-style: none;
@@ -183,9 +210,10 @@
       justify-content: space-between;
       align-items: center;
       padding: 0.5rem 0.2rem;
-      border-bottom: 1px solid #eff2f8;
+      border-bottom: 1px solid #e8f0e8;
       font-size: 0.9rem;
       flex-wrap: wrap;
+      font-family: 'Times New Roman', Times, serif;
     }
     .koha-item-actions {
       display: flex;
@@ -197,10 +225,10 @@
       cursor: pointer;
       font-size: 0.9rem;
       padding: 0 4px;
-      color: #4a5a72;
+      color: var(--text-dark);
     }
-    .koha-item-actions button:hover { color: #b68b5c; }
-    .text-muted { color: #6f7d93; font-size: 0.8rem; }
+    .koha-item-actions button:hover { color: var(--primary-green); }
+    .text-muted { color: #5a7a5a; font-size: 0.8rem; }
     .mt-2 { margin-top: 0.8rem; }
     .flex { display: flex; gap: 8px; flex-wrap: wrap; }
     .koha-input-group {
@@ -211,23 +239,25 @@
     }
     .koha-input-group input, .koha-input-group select {
       padding: 0.4rem 0.8rem;
-      border: 1px solid #ccd3df;
+      border: 1px solid var(--border-color);
       border-radius: 30px;
       background: white;
       flex: 1 0 100px;
       font-size: 0.85rem;
+      font-family: 'Times New Roman', Times, serif;
     }
-    .koha-input-group input:focus { border-color: #b68b5c; outline: none; }
+    .koha-input-group input:focus { border-color: var(--primary-green); outline: none; box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2); }
     .borrowed-item {
-      background: #f4f8fc;
-      border-left: 4px solid #2a7f6e;
+      background: var(--yellow-pale);
+      border-left: 4px solid var(--yellow-gold);
       padding-left: 8px;
     }
     .koha-school-card {
-      background: #eef3f9;
+      background: var(--bg-light);
       border-radius: 40px;
       padding: 1rem 1.2rem;
       margin-top: 0.8rem;
+      border: 1px solid var(--border-color);
     }
 
     /* ----- Login/Register modal ----- */
@@ -235,7 +265,7 @@
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 30, 0, 0.6);
       justify-content: center;
       align-items: center;
       z-index: 1000;
@@ -249,9 +279,10 @@
       width: 90%;
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
       position: relative;
+      border: 2px solid var(--yellow-gold);
     }
-    .modal-box h2 { margin-bottom: 1.2rem; color: #1e2b3c; display: flex; align-items: center; gap: 10px; }
-    .modal-box h2 i { color: #b68b5c; }
+    .modal-box h2 { margin-bottom: 1.2rem; color: var(--text-dark); display: flex; align-items: center; gap: 10px; font-family: 'Times New Roman', Times, serif; }
+    .modal-box h2 i { color: var(--primary-green); }
     .modal-close {
       position: absolute;
       top: 12px; right: 16px;
@@ -261,38 +292,41 @@
       cursor: pointer;
       color: #6f7d93;
     }
-    .modal-close:hover { color: #b34a3c; }
+    .modal-close:hover { color: #c62828; }
     .modal-box .koha-input-group { margin-bottom: 12px; }
     .modal-box .koha-input-group input {
       flex: 1 1 100%;
       padding: 0.6rem 1rem;
       border-radius: 30px;
-      border: 1px solid #ccd3df;
+      border: 1px solid var(--border-color);
+      font-family: 'Times New Roman', Times, serif;
     }
-    .modal-box .koha-input-group input:focus { border-color: #b68b5c; outline: none; }
+    .modal-box .koha-input-group input:focus { border-color: var(--primary-green); outline: none; }
     .modal-box .koha-btn { width: 100%; justify-content: center; margin-top: 6px; }
     .modal-box .switch-action {
       text-align: center;
       margin-top: 12px;
       font-size: 0.9rem;
-      color: #4a5a72;
+      color: var(--text-dark);
+      font-family: 'Times New Roman', Times, serif;
     }
     .modal-box .switch-action a {
-      color: #b68b5c;
+      color: var(--primary-green);
       cursor: pointer;
       font-weight: 600;
       text-decoration: underline;
     }
-    .modal-box .switch-action a:hover { color: #a0784a; }
+    .modal-box .switch-action a:hover { color: var(--primary-dark); }
     .forgot-link {
       text-align: right;
       font-size: 0.8rem;
       margin-top: -6px;
     }
     .forgot-link a {
-      color: #b68b5c;
+      color: var(--primary-green);
       cursor: pointer;
       text-decoration: none;
+      font-family: 'Times New Roman', Times, serif;
     }
     .forgot-link a:hover { text-decoration: underline; }
 
@@ -300,11 +334,12 @@
     .koha-footer {
       text-align: center;
       padding: 1.2rem;
-      color: #5a6f87;
-      border-top: 1px solid #d6dce6;
+      color: var(--text-dark);
+      border-top: 2px solid var(--border-color);
       margin-top: 1rem;
       font-size: 0.9rem;
-      background: #fafcfd;
+      background: var(--yellow-pale);
+      font-family: 'Times New Roman', Times, serif;
     }
     .footer-contact {
       display: flex;
@@ -315,25 +350,26 @@
       font-size: 0.9rem;
     }
     .footer-contact a {
-      color: #1e2b3c;
+      color: var(--text-dark);
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #eef3f9;
+      background: white;
       padding: 0.2rem 1rem;
       border-radius: 30px;
-      border: 1px solid #d6dce6;
+      border: 1px solid var(--border-color);
       transition: 0.15s;
+      font-family: 'Times New Roman', Times, serif;
     }
-    .footer-contact a:hover { background: #d4a373; color: white; border-color: #d4a373; }
-    .footer-contact i { color: #b68b5c; }
+    .footer-contact a:hover { background: var(--primary-green); color: white; border-color: var(--primary-green); }
+    .footer-contact i { color: var(--primary-green); }
     .footer-contact a:hover i { color: white; }
 
     /* scroll */
     ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: #edf0f5; }
-    ::-webkit-scrollbar-thumb { background: #b68b5c; border-radius: 20px; }
+    ::-webkit-scrollbar-track { background: var(--bg-light); }
+    ::-webkit-scrollbar-thumb { background: var(--primary-green); border-radius: 20px; }
 
     @media (max-width: 700px) {
       .koha-header, .page-tabs { padding: 0.6rem 1rem; }
@@ -347,7 +383,7 @@
   <header class="koha-header">
     <div class="koha-logo">
       <i class="fas fa-book-open"></i>
-      <span>Koha<span style="font-weight:300; margin-left:4px;">ILS</span></span>
+      <span>Cele.Dev <span style="font-weight:300; margin-left:4px;">ILS</span></span>
       <span style="background:#3f4f62; color:white;">Library</span>
     </div>
     <div class="koha-nav-actions">
@@ -357,7 +393,7 @@
       </div>
       <button class="koha-btn koha-btn-outline" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
       <button class="koha-btn koha-btn-primary" id="registerBtn"><i class="fas fa-user-plus"></i> Register</button>
-      <span id="userDisplay" style="display:none; color:#d4a373; font-weight:600;"></span>
+      <span id="userDisplay" style="display:none; color:var(--yellow-gold); font-weight:600; font-family:'Times New Roman', Times, serif;"></span>
       <button class="koha-btn koha-btn-danger koha-btn-sm" id="logoutBtn" style="display:none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
   </header>
@@ -510,7 +546,7 @@
         </div>
       </div>
       <div id="forgotForm" style="display:none;">
-        <p style="margin-bottom:12px; color:#4a5a72;">Enter your email to receive a password reset link.</p>
+        <p style="margin-bottom:12px; color:var(--text-dark); font-family:'Times New Roman', Times, serif;">Enter your email to receive a password reset link.</p>
         <div class="koha-input-group">
           <input type="email" id="forgotEmail" placeholder="Email" required>
         </div>
@@ -519,13 +555,13 @@
           <a id="forgotBackLink">← Back to Login</a>
         </div>
       </div>
-      <div id="resetMessage" style="display:none; text-align:center; padding:10px; background:#eef3f9; border-radius:30px; margin-top:10px;"></div>
+      <div id="resetMessage" style="display:none; text-align:center; padding:10px; background:var(--bg-light); border-radius:30px; margin-top:10px; border:1px solid var(--border-color);"></div>
     </div>
   </div>
 
   <!-- FOOTER with contact info -->
   <footer class="koha-footer">
-    <div>Koha ILS · Library Management System</div>
+    <div>Cele.Dev ILS · Library Management System</div>
     <div class="footer-contact">
       <a href="mailto:onyangocelestino@gmail.com"><i class="fas fa-envelope"></i> onyangocelestino@gmail.com</a>
       <a href="tel:+254714019736"><i class="fas fa-phone"></i> 0714019736</a>
@@ -552,16 +588,13 @@
       let schools = ['Springfield High', 'Westside Academy'];
 
       // ---------- USER SYSTEM ----------
-      // Admin account (hardcoded)
       const ADMIN_EMAIL = 'onyangocelestino@gmail.com';
-      const ADMIN_PASSWORD = 'admin123'; // In real system, this would be hashed
+      const ADMIN_PASSWORD = 'admin123';
 
       let users = [
         { email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', registered: new Date().toISOString() }
       ];
-      let currentUser = null; // { email, school }
-
-      // For password reset: store reset tokens (simulated)
+      let currentUser = null;
       let resetTokens = {};
 
       // DOM refs
@@ -590,18 +623,16 @@
 
       // ---------- AUTH FUNCTIONS ----------
       function saveUsers() {
-        // In a real app, this would be a server call. We'll store in localStorage for demo persistence.
         try {
-          localStorage.setItem('lms_users', JSON.stringify(users));
+          localStorage.setItem('cele_lms_users', JSON.stringify(users));
         } catch(e) {}
       }
 
       function loadUsers() {
         try {
-          const data = localStorage.getItem('lms_users');
+          const data = localStorage.getItem('cele_lms_users');
           if (data) {
             const parsed = JSON.parse(data);
-            // Ensure admin is always present
             const adminExists = parsed.some(u => u.email === ADMIN_EMAIL);
             if (!adminExists) {
               parsed.push({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', registered: new Date().toISOString() });
@@ -635,10 +666,8 @@
       function resetPassword(email) {
         const user = findUser(email);
         if (!user) return { success: false, message: 'Email not found' };
-        // Generate a random token (simulated)
         const token = Math.random().toString(36).substring(2, 10);
         resetTokens[email] = token;
-        // In real system, send email. Here we show in alert.
         alert(`Password reset link sent to ${email}.\n\n[Demo] Reset token: ${token}\nUse this to reset your password. (In production, this would be emailed.)`);
         return { success: true, token };
       }
@@ -718,13 +747,12 @@
         const result = resetPassword(email);
         if (result.success) {
           resetMessage.style.display = 'block';
-          resetMessage.innerHTML = `<i class="fas fa-check-circle" style="color:#2a7f6e;"></i> Reset link sent to ${email}. Check your email (demo).`;
-          // In demo, we also offer a quick reset via prompt
+          resetMessage.innerHTML = `<i class="fas fa-check-circle" style="color:var(--primary-green);"></i> Reset link sent to ${email}. Check your email (demo).`;
           const newPwd = prompt(`[DEMO] Enter new password for ${email}:`);
           if (newPwd && newPwd.length >= 4) {
             const resetResult = completeReset(email, newPwd);
             if (resetResult.success) {
-              resetMessage.innerHTML = `<i class="fas fa-check-circle" style="color:#2a7f6e;"></i> Password updated successfully! You can now login.`;
+              resetMessage.innerHTML = `<i class="fas fa-check-circle" style="color:var(--primary-green);"></i> Password updated successfully! You can now login.`;
             } else {
               alert(resetResult.message);
             }
@@ -754,13 +782,11 @@
           document.getElementById('loginBtn').style.display = 'inline-flex';
           document.getElementById('registerBtn').style.display = 'inline-flex';
         }
-        // Show Users tab only for admin
         const userTab = document.querySelector('.page-tab[data-page="pageUsers"]');
         if (currentUser && currentUser.email === ADMIN_EMAIL) {
           userTab.style.display = 'inline-flex';
         } else {
           userTab.style.display = 'none';
-          // If on users page and not admin, switch to books
           if (document.getElementById('pageUsers').classList.contains('active-page') && !(currentUser && currentUser.email === ADMIN_EMAIL)) {
             switchTab('pageBooks');
           }
@@ -794,7 +820,7 @@
             <span><strong>${b.title}</strong> by ${b.author} (${b.acc}) ${b.borrowed ? '🔴' : '🟢'}</span>
             <span class="koha-item-actions">
               <button onclick="editBook(${b.id})"><i class="fas fa-edit"></i></button>
-              <button onclick="deleteBook(${b.id})"><i class="fas fa-trash-alt" style="color:#b34a3c;"></i></button>
+              <button onclick="deleteBook(${b.id})"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
             </span>
           </li>
         `).join('');
@@ -807,7 +833,7 @@
             <span>${l.owner} · ${l.type} · ${l.date} ${l.borrowed ? '🔴' : '🟢'}</span>
             <span class="koha-item-actions">
               <button onclick="editLaptop(${l.id})"><i class="fas fa-edit"></i></button>
-              <button onclick="deleteLaptop(${l.id})"><i class="fas fa-trash-alt" style="color:#b34a3c;"></i></button>
+              <button onclick="deleteLaptop(${l.id})"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
             </span>
           </li>
         `).join('');
@@ -820,7 +846,7 @@
             <span>${s.name} (x${s.quantity})</span>
             <span class="koha-item-actions">
               <button onclick="editStationary(${s.id})"><i class="fas fa-edit"></i></button>
-              <button onclick="deleteStationary(${s.id})"><i class="fas fa-trash-alt" style="color:#b34a3c;"></i></button>
+              <button onclick="deleteStationary(${s.id})"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
             </span>
           </li>
         `).join('');
@@ -848,7 +874,7 @@
 
       function renderSchoolsPage() {
         const list = document.getElementById('schoolListPage');
-        list.innerHTML = schools.map(s => `<li><i class="fas fa-school"></i> ${s}</li>`).join('');
+        list.innerHTML = schools.map(s => `<li><i class="fas fa-school" style="color:var(--primary-green);"></i> ${s}</li>`).join('');
       }
 
       function renderUsersPage() {
@@ -1140,7 +1166,6 @@
       });
 
       // ---------- INIT ----------
-      // Check if admin is already in users
       if (!users.some(u => u.email === ADMIN_EMAIL)) {
         users.push({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', registered: new Date().toISOString() });
         saveUsers();
