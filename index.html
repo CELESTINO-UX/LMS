@@ -8,7 +8,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
+    /* All styles remain the same as in the original code */
     * {
       margin: 0;
       padding: 0;
@@ -24,7 +26,6 @@
       flex-direction: column;
     }
 
-    /* ----- Theme Colors: Green & Yellow ----- */
     :root {
       --primary-dark: #1a4d2e;
       --primary-green: #2e7d32;
@@ -38,7 +39,6 @@
       --text-dark: #1a2e1a;
     }
 
-    /* ----- Header ----- */
     .koha-header {
       background: var(--primary-dark);
       color: #f0f4fa;
@@ -107,7 +107,6 @@
     .koha-btn-admin { background: #ff6f00; color: white; border: 2px solid var(--yellow-gold); }
     .koha-btn-admin:hover { background: #e65100; transform: scale(1.02); }
 
-    /* ----- Institution title (hidden for admin) ----- */
     .institution-title {
       background: var(--yellow-pale);
       padding: 0.2rem 1rem;
@@ -134,7 +133,6 @@
     .institution-title input:focus { outline: none; border-bottom: 2px solid var(--primary-green); }
     .institution-title.hidden { display: none; }
 
-    /* Admin school selector */
     .admin-school-selector {
       background: var(--yellow-pale);
       padding: 0.2rem 1rem;
@@ -161,14 +159,12 @@
     .admin-school-selector select:focus { outline: none; }
     .admin-school-selector i { color: var(--yellow-gold); }
 
-    /* ----- Dashboard Wrapper (flex grow) ----- */
     .dashboard-wrapper {
       display: flex;
       flex: 1;
       min-height: 0;
     }
 
-    /* ----- Dashboard Sidebar ----- */
     .dashboard-sidebar {
       width: 220px;
       background: var(--primary-dark);
@@ -219,7 +215,6 @@
       color: var(--yellow-gold);
     }
 
-    /* ----- Dashboard Content ----- */
     .dashboard-content {
       flex: 1;
       padding: 2rem;
@@ -230,7 +225,6 @@
     .page { display: none; }
     .page.active-page { display: block; }
 
-    /* ----- Cards ----- */
     .koha-card {
       background: white;
       border-radius: 12px;
@@ -337,7 +331,6 @@
     .status-available { background: #c8e6c9; color: #1a4d2e; }
     .status-borrowed { background: #ffcdd2; color: #c62828; }
 
-    /* Book category badge */
     .category-badge {
       display: inline-block;
       padding: 0.1rem 0.6rem;
@@ -350,7 +343,6 @@
     .cat-dictionary { background: #e8f5e9; color: #1b5e20; }
     .cat-atlas { background: #fff3e0; color: #e65100; }
 
-    /* Stats grid for dashboard */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -367,7 +359,6 @@
     .stat-card h4 { color: var(--primary-dark); font-family: 'Times New Roman', Times, serif; }
     .stat-card p { font-size: 1.8rem; font-weight: bold; color: var(--primary-green); font-family: 'Times New Roman', Times, serif; }
 
-    /* Admin badge */
     .admin-badge {
       background: var(--yellow-gold);
       color: var(--primary-dark);
@@ -378,7 +369,32 @@
       margin-left: 6px;
     }
 
-    /* ----- HOMEPAGE STYLING (before login) ----- */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      color: white;
+      font-size: 1.5rem;
+    }
+    .loading-overlay.show {
+      display: flex;
+    }
+    .loading-overlay i {
+      margin-right: 15px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     .homepage-hero {
       flex: 1;
       display: flex;
@@ -461,7 +477,6 @@
       50% { transform: translateY(-12px); }
     }
 
-    /* ----- Login/Register modal ----- */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -547,7 +562,6 @@
       opacity: 0.6;
     }
 
-    /* ----- Footer (pushed to bottom) ----- */
     .koha-footer {
       text-align: center;
       padding: 1.2rem;
@@ -584,7 +598,6 @@
     .footer-contact i { color: var(--primary-green); }
     .footer-contact a:hover i { color: white; }
 
-    /* scroll */
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg-light); }
     ::-webkit-scrollbar-thumb { background: var(--primary-green); border-radius: 20px; }
@@ -602,6 +615,11 @@
 </head>
 <body>
 
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <i class="fas fa-spinner"></i> Loading...
+  </div>
+
   <!-- HEADER -->
   <header class="koha-header">
     <div class="koha-logo">
@@ -610,12 +628,10 @@
       <span style="background:#3f4f62; color:white;">Library</span>
     </div>
     <div class="koha-nav-actions">
-      <!-- Institution title - hidden for admin -->
       <div class="institution-title" id="institutionTitle">
         <i class="fas fa-university"></i>
         <input type="text" id="institutionName" value="Springfield University Library" placeholder="Institution">
       </div>
-      <!-- Admin school selector - only visible to admin -->
       <div class="admin-school-selector" id="adminSchoolSelector" style="display:none;">
         <i class="fas fa-eye"></i>
         <span>Monitoring:</span>
@@ -630,28 +646,16 @@
     </div>
   </header>
 
-  <!-- HOMEPAGE (shown when not logged in) -->
+  <!-- HOMEPAGE -->
   <div id="homepageContainer" class="homepage-hero">
     <div class="hero-icon"><i class="fas fa-book-open"></i></div>
     <h1>Cele.Dev <span class="highlight">Integrated</span> Library<br>Management System</h1>
     <p class="subtitle"><i class="fas fa-quote-left" style="color:var(--yellow-gold); opacity:0.6;"></i> Empowering knowledge, one book at a time <i class="fas fa-quote-right" style="color:var(--yellow-gold); opacity:0.6;"></i></p>
     <div class="hero-images">
-      <div class="img-placeholder">
-        <i class="fas fa-book"></i>
-        <span>Books Catalog</span>
-      </div>
-      <div class="img-placeholder">
-        <i class="fas fa-laptop"></i>
-        <span>Laptops</span>
-      </div>
-      <div class="img-placeholder">
-        <i class="fas fa-pencil-alt"></i>
-        <span>Stationary</span>
-      </div>
-      <div class="img-placeholder">
-        <i class="fas fa-school"></i>
-        <span>Schools</span>
-      </div>
+      <div class="img-placeholder"><i class="fas fa-book"></i><span>Books Catalog</span></div>
+      <div class="img-placeholder"><i class="fas fa-laptop"></i><span>Laptops</span></div>
+      <div class="img-placeholder"><i class="fas fa-pencil-alt"></i><span>Stationary</span></div>
+      <div class="img-placeholder"><i class="fas fa-school"></i><span>Schools</span></div>
     </div>
     <div style="margin-top: 2rem;">
       <button class="koha-btn koha-btn-primary" style="font-size:1.1rem; padding:0.6rem 2rem;" id="homepageLoginBtn"><i class="fas fa-sign-in-alt"></i> Login to Dashboard</button>
@@ -659,9 +663,8 @@
     </div>
   </div>
 
-  <!-- DASHBOARD WRAPPER (hidden when not logged in) -->
+  <!-- DASHBOARD WRAPPER -->
   <div class="dashboard-wrapper" id="dashboardWrapper" style="display:none;">
-    <!-- Sidebar -->
     <nav class="dashboard-sidebar" id="dashboardSidebar">
       <div class="sidebar-user" id="sidebarUser">Not logged in</div>
       <div class="sidebar-item active" data-page="pageDashboard"><i class="fas fa-home"></i> Dashboard</div>
@@ -675,9 +678,7 @@
       <div class="sidebar-item" data-page="pageAdmin" id="adminMenuItem" style="background: rgba(249, 168, 37, 0.15); border-left: 4px solid var(--yellow-gold);"><i class="fas fa-crown" style="color:var(--yellow-gold);"></i> <span style="color:var(--yellow-gold);">Admin Panel</span> <span class="admin-badge">FULL</span></div>
     </nav>
 
-    <!-- Content -->
     <div class="dashboard-content">
-
       <!-- PAGE: DASHBOARD -->
       <div id="pageDashboard" class="page active-page">
         <div class="koha-card">
@@ -710,8 +711,6 @@
               <button class="koha-btn koha-btn-pdf koha-btn-sm" id="pdfBooksPageBtn"><i class="fas fa-file-pdf"></i> PDF</button>
             </div>
           </div>
-          
-          <!-- Category Filter -->
           <div class="koha-input-group" style="margin-bottom: 0.8rem;">
             <label style="font-weight:600; color:var(--text-dark); margin-right:6px;">Filter:</label>
             <select id="bookCategoryFilter" style="flex:0 0 auto; padding:0.3rem 1rem; border-radius:30px; border:1px solid var(--border-color); background:white; font-family:'Times New Roman', Times, serif;">
@@ -723,7 +722,6 @@
             </select>
             <span class="text-muted" style="margin-left:auto; font-size:0.8rem;">Click category badge to filter</span>
           </div>
-          
           <ul class="koha-item-list" id="bookListPage"></ul>
           <div class="koha-input-group">
             <input type="text" id="bookTitlePage" placeholder="Title">
@@ -814,7 +812,7 @@
         </div>
       </div>
 
-      <!-- PAGE: SCHOOLS (admin only) -->
+      <!-- PAGE: SCHOOLS -->
       <div id="pageSchools" class="page">
         <div class="koha-card koha-school-card">
           <div class="koha-card-header"><h3><i class="fas fa-school"></i> Adopting Schools</h3></div>
@@ -826,7 +824,7 @@
         </div>
       </div>
 
-      <!-- PAGE: USERS (admin only) -->
+      <!-- PAGE: USERS -->
       <div id="pageUsers" class="page">
         <div class="koha-card">
           <div class="koha-card-header">
@@ -837,7 +835,7 @@
         </div>
       </div>
 
-      <!-- PAGE: ADMIN PANEL (full system access) -->
+      <!-- PAGE: ADMIN PANEL -->
       <div id="pageAdmin" class="page">
         <div class="koha-card" style="border: 2px solid var(--yellow-gold);">
           <div class="koha-card-header">
@@ -845,7 +843,6 @@
             <span class="koha-badge" style="background:var(--yellow-gold); color:var(--primary-dark);">System Control</span>
           </div>
           <p style="margin-bottom:1rem; color:var(--text-dark);"><i class="fas fa-info-circle" style="color:var(--primary-green);"></i> As admin, you have full access to all system data across all institutions.</p>
-          
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
             <div style="background:var(--bg-light); padding:1rem; border-radius:12px; border:1px solid var(--border-color);">
               <h4 style="color:var(--primary-dark);"><i class="fas fa-book"></i> Books</h4>
@@ -878,7 +875,6 @@
               <span class="text-muted">Books + Laptops</span>
             </div>
           </div>
-
           <div style="background:var(--yellow-pale); padding:1rem; border-radius:12px; border:1px solid var(--yellow-gold); margin-top:0.5rem;">
             <h4><i class="fas fa-tools" style="color:var(--yellow-gold);"></i> Admin Actions</h4>
             <div class="flex" style="margin-top:0.8rem;">
@@ -889,11 +885,10 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- ========== LOGIN / REGISTER MODAL ========== -->
+  <!-- LOGIN MODAL -->
   <div class="modal-overlay" id="authModal">
     <div class="modal-box">
       <button class="modal-close" id="authModalClose">&times;</button>
@@ -912,13 +907,10 @@
           <a id="forgotPasswordLink">Forgot password?</a>
         </div>
         <button class="koha-btn koha-btn-primary" id="authSubmitBtn"><i class="fas fa-arrow-right"></i> Login</button>
-        
-        <!-- Admin Quick Login -->
         <div class="admin-login-divider">
           <hr><span>OR</span><hr>
         </div>
         <button class="koha-btn koha-btn-admin" id="adminQuickLoginBtn"><i class="fas fa-crown"></i> Login as Admin</button>
-        
         <div class="switch-action">
           <span id="authSwitchText">Don't have an account?</span>
           <a id="authSwitchLink">Register</a>
@@ -938,7 +930,7 @@
     </div>
   </div>
 
-  <!-- FOOTER (pushed to bottom) -->
+  <!-- FOOTER -->
   <footer class="koha-footer">
     <div>Cele.Dev ILS · Integrated Library Management System</div>
     <div class="footer-contact">
@@ -948,1066 +940,1624 @@
     </div>
   </footer>
 
-  <script>
-    (function() {
-      // ---------- DATA ----------
-      let books = [
-        { id: 1, title: 'Advanced Mathematics', author: 'John Smith', acc: 'MATH101', category: 'textbook', borrowed: false, borrower: '', institution: 'Springfield University' },
-        { id: 2, title: 'Physics for Scientists', author: 'Robert Brown', acc: 'PHYS202', category: 'textbook', borrowed: false, borrower: '', institution: 'Springfield University' },
-        { id: 3, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', acc: 'NOV001', category: 'novel', borrowed: false, borrower: '', institution: 'Springfield University' },
-        { id: 4, title: 'Oxford English Dictionary', author: 'Oxford Press', acc: 'DIC001', category: 'dictionary', borrowed: false, borrower: '', institution: 'Springfield University' },
-        { id: 5, title: 'World Atlas 2024', author: 'National Geographic', acc: 'ATL001', category: 'atlas', borrowed: false, borrower: '', institution: 'Springfield University' },
-        { id: 6, title: 'Things Fall Apart', author: 'Chinua Achebe', acc: 'NOV002', category: 'novel', borrowed: false, borrower: '', institution: 'Springfield University' }
-      ];
-      let laptops = [
-        { id: 1, owner: 'IT Dept', type: 'Dell XPS', date: '2025-01-10', borrowed: false, borrower: '', institution: 'Springfield University' },
-        { id: 2, owner: 'Library', type: 'MacBook Pro', date: '2025-02-15', borrowed: false, borrower: '', institution: 'Springfield University' }
-      ];
-      let stationary = [
-        { id: 1, name: 'Stapler', quantity: 5, institution: 'Springfield University' },
-        { id: 2, name: 'Whiteboard markers', quantity: 12, institution: 'Springfield University' }
-      ];
-      let schools = ['Springfield University', 'Westside Academy'];
-      let activityLog = [];
-      let adminSelectedSchool = '__all__';
+  <!-- ============================================================ -->
+  <!-- SCRIPT: ES Module with Firebase SDK v9 (Modular) -->
+  <!-- ============================================================ -->
+  <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js",
+        "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"
+      }
+    }
+  </script>
 
-      // ---------- USER SYSTEM ----------
-      const ADMIN_EMAIL = 'onyangocelestino@gmail.com';
-      const ADMIN_PASSWORD = 'Cele.Dev2026';
+  <script type="module">
+    // ============================================================
+    // FIREBASE CONFIGURATION - Replace with your actual config
+    // ============================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzY-2q7v7Fj9wQp3rX9uZ8kLmN0oP1qR2sT3uV4wX5yZ6",
+      authDomain: "cele-e2104.firebaseapp.com",
+      projectId: "cele-e2104",
+      storageBucket: "cele-e2104.firebasestorage.app",
+      messagingSenderId: "351126477464",
+      appId: "1:351126477464:web:abc123def456ghi789jkl"
+    };
 
-      let users = [];
-      let currentUser = null;
-      let resetTokens = {};
-      let currentCategoryFilter = 'all';
+    // Import Firebase SDKs
+    import { initializeApp } from "firebase/app";
+    import { 
+      getFirestore, 
+      collection, 
+      onSnapshot, 
+      query, 
+      where, 
+      addDoc, 
+      doc, 
+      deleteDoc, 
+      updateDoc,
+      orderBy,
+      limit,
+      getDoc,
+      getDocs,
+      setDoc
+    } from "firebase/firestore";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged,
+      sendPasswordResetEmail
+    } from "firebase/auth";
 
-      // DOM refs
-      const modal = document.getElementById('authModal');
-      const modalTitle = document.getElementById('authModalTitle');
-      const authForm = document.getElementById('authForm');
-      const forgotForm = document.getElementById('forgotForm');
-      const resetMessage = document.getElementById('resetMessage');
-      const authEmail = document.getElementById('authEmail');
-      const authPassword = document.getElementById('authPassword');
-      const authSchool = document.getElementById('authSchool');
-      const schoolField = document.getElementById('schoolField');
-      const authSubmitBtn = document.getElementById('authSubmitBtn');
-      const authSwitchLink = document.getElementById('authSwitchLink');
-      const authSwitchText = document.getElementById('authSwitchText');
-      const forgotLinkWrap = document.getElementById('forgotLinkWrap');
-      const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-      const forgotEmail = document.getElementById('forgotEmail');
-      const forgotSubmitBtn = document.getElementById('forgotSubmitBtn');
-      const forgotBackLink = document.getElementById('forgotBackLink');
-      const modalClose = document.getElementById('authModalClose');
-      const userDisplay = document.getElementById('userDisplay');
-      const logoutBtn = document.getElementById('logoutBtn');
-      const dashboardWrapper = document.getElementById('dashboardWrapper');
-      const homepageContainer = document.getElementById('homepageContainer');
-      const sidebarUser = document.getElementById('sidebarUser');
-      const adminQuickLoginBtn = document.getElementById('adminQuickLoginBtn');
-      const institutionTitle = document.getElementById('institutionTitle');
-      const adminSchoolSelector = document.getElementById('adminSchoolSelector');
-      const adminSchoolSelect = document.getElementById('adminSchoolSelect');
-      const bookCategoryFilter = document.getElementById('bookCategoryFilter');
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-      let isLoginMode = true;
+    // ============================================================
+    // APPLICATION CODE
+    // ============================================================
+    
+    // ---------- STATE ----------
+    let books = [];
+    let laptops = [];
+    let stationary = [];
+    let schools = [];
+    let users = [];
+    let activityLog = [];
+    let currentUser = null;
+    let adminSelectedSchool = '__all__';
+    let currentCategoryFilter = 'all';
 
-      // ---------- AUTH FUNCTIONS ----------
-      function ensureAdminExists() {
-        const adminExists = users.some(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
-        if (!adminExists) {
-          users.push({ 
-            email: ADMIN_EMAIL, 
-            password: ADMIN_PASSWORD, 
-            school: 'Admin', 
-            institution: 'Admin', 
-            registered: new Date().toISOString(), 
-            isAdmin: true 
-          });
-          saveUsers();
+    // Unsubscribe functions for real-time listeners
+    let unsubscribeBooks = null;
+    let unsubscribeLaptops = null;
+    let unsubscribeStationary = null;
+    let unsubscribeSchools = null;
+    let unsubscribeUsers = null;
+    let unsubscribeActivity = null;
+
+    // DOM refs
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const modal = document.getElementById('authModal');
+    const modalTitle = document.getElementById('authModalTitle');
+    const authForm = document.getElementById('authForm');
+    const forgotForm = document.getElementById('forgotForm');
+    const resetMessage = document.getElementById('resetMessage');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authSchool = document.getElementById('authSchool');
+    const schoolField = document.getElementById('schoolField');
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
+    const authSwitchLink = document.getElementById('authSwitchLink');
+    const authSwitchText = document.getElementById('authSwitchText');
+    const forgotLinkWrap = document.getElementById('forgotLinkWrap');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const forgotEmail = document.getElementById('forgotEmail');
+    const forgotSubmitBtn = document.getElementById('forgotSubmitBtn');
+    const forgotBackLink = document.getElementById('forgotBackLink');
+    const modalClose = document.getElementById('authModalClose');
+    const userDisplay = document.getElementById('userDisplay');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const dashboardWrapper = document.getElementById('dashboardWrapper');
+    const homepageContainer = document.getElementById('homepageContainer');
+    const sidebarUser = document.getElementById('sidebarUser');
+    const adminQuickLoginBtn = document.getElementById('adminQuickLoginBtn');
+    const institutionTitle = document.getElementById('institutionTitle');
+    const adminSchoolSelector = document.getElementById('adminSchoolSelector');
+    const adminSchoolSelect = document.getElementById('adminSchoolSelect');
+    const bookCategoryFilter = document.getElementById('bookCategoryFilter');
+
+    let isLoginMode = true;
+
+    // ---------- LOADING ----------
+    function showLoading() { loadingOverlay.classList.add('show'); }
+    function hideLoading() { loadingOverlay.classList.remove('show'); }
+
+    // ============================================================
+    // FIREBASE AUTH FUNCTIONS
+    // ============================================================
+    
+    const ADMIN_EMAIL = 'onyangocelestino@gmail.com';
+
+    // Register new user with Firebase Auth and Firestore
+    async function registerUser(email, password, school) {
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Save user profile to Firestore with UID as document ID
+        const userProfile = {
+          uid: user.uid,
+          email: email,
+          school: school,
+          institution: school,
+          isAdmin: false,
+          registered: new Date().toISOString()
+        };
+        
+        // Store user profile using UID as document ID for easy retrieval
+        await setDoc(doc(db, 'users', user.uid), userProfile);
+        
+        // Also add school to schools collection if it doesn't exist
+        const schoolQuery = query(collection(db, 'schools'), where('name', '==', school));
+        const schoolSnapshot = await getDocs(schoolQuery);
+        if (schoolSnapshot.empty) {
+          await addDoc(collection(db, 'schools'), { name: school });
+        }
+        
+        return { success: true, user: { id: user.uid, ...userProfile } };
+      } catch (error) {
+        console.error('Registration error:', error);
+        return { success: false, message: error.message };
+      }
+    }
+
+    // Login user with Firebase Auth
+    async function loginUser(email, password) {
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const firebaseUser = userCredential.user;
+        
+        // Fetch user profile from Firestore
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          return { 
+            success: true, 
+            user: { 
+              id: firebaseUser.uid, 
+              email: firebaseUser.email, 
+              ...userData 
+            } 
+          };
         } else {
-          const admin = users.find(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
-          if (admin && admin.password !== ADMIN_PASSWORD) {
-            admin.password = ADMIN_PASSWORD;
-            saveUsers();
-          }
+          // Fallback if user doc doesn't exist
+          const fallbackUser = {
+            email: firebaseUser.email,
+            school: 'Unknown',
+            institution: 'Unknown',
+            isAdmin: email === ADMIN_EMAIL,
+            registered: new Date().toISOString()
+          };
+          await setDoc(doc(db, 'users', firebaseUser.uid), fallbackUser);
+          return { success: true, user: { id: firebaseUser.uid, ...fallbackUser } };
         }
+      } catch (error) {
+        console.error('Login error:', error);
+        return { success: false, message: error.message };
       }
+    }
 
-      function saveUsers() {
-        try {
-          localStorage.setItem('cele_lms_users', JSON.stringify(users));
-        } catch(e) {}
-      }
-
-      function loadUsers() {
-        try {
-          const data = localStorage.getItem('cele_lms_users');
-          if (data) {
-            const parsed = JSON.parse(data);
-            if (Array.isArray(parsed)) {
-              users = parsed;
-            } else {
-              users = [];
-            }
-          } else {
-            users = [];
-          }
-        } catch(e) {
-          users = [];
-        }
-        ensureAdminExists();
-      }
+    // Admin quick login - uses Firebase Auth
+    async function handleAdminQuickLogin() {
+      const adminPassword = prompt('Enter admin password:');
+      if (!adminPassword) return;
       
-      loadUsers();
-
-      function findUser(email) {
-        return users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      const result = await loginUser(ADMIN_EMAIL, adminPassword);
+      if (result.success) {
+        // The onAuthStateChanged listener will handle the rest
+        closeModal();
+        alert('Welcome Admin! You have full system access.');
+      } else {
+        alert('Admin login failed: ' + result.message);
       }
+    }
 
-      function loginUser(email, password) {
-        if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-          const admin = users.find(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
-          if (admin) {
-            if (admin.password === password) {
-              return { success: true, user: admin };
-            } else {
-              admin.password = ADMIN_PASSWORD;
-              saveUsers();
-              if (admin.password === password) {
-                return { success: true, user: admin };
-              }
-              return { success: false, message: 'Incorrect password. Please use: Cele.Dev2026' };
-            }
-          } else {
-            const newAdmin = { 
-              email: ADMIN_EMAIL, 
-              password: ADMIN_PASSWORD, 
-              school: 'Admin', 
-              institution: 'Admin', 
-              registered: new Date().toISOString(), 
-              isAdmin: true 
-            };
-            users.push(newAdmin);
-            saveUsers();
-            if (password === ADMIN_PASSWORD) {
-              return { success: true, user: newAdmin };
-            }
-            return { success: false, message: 'Admin created. Please use password: Cele.Dev2026' };
-          }
-        }
-
-        const user = findUser(email);
-        if (!user) return { success: false, message: 'User not found' };
-        if (user.password !== password) return { success: false, message: 'Incorrect password' };
-        return { success: true, user };
-      }
-
-      function registerUser(email, password, school) {
-        if (findUser(email)) return { success: false, message: 'Email already registered' };
-        if (!email || !password || !school) return { success: false, message: 'All fields required' };
-        if (!schools.includes(school)) {
-          schools.push(school);
-        }
-        users.push({ email, password, school, institution: school, registered: new Date().toISOString(), isAdmin: false });
-        saveUsers();
-        return { success: true };
-      }
-
-      function resetPassword(email) {
-        const user = findUser(email);
-        if (!user) return { success: false, message: 'Email not found' };
-        const token = Math.random().toString(36).substring(2, 10);
-        resetTokens[email] = token;
-        alert(`Password reset link sent to ${email}.\n\n[Demo] Reset token: ${token}\nUse this to reset your password. (In production, this would be emailed.)`);
-        return { success: true, token };
-      }
-
-      function completeReset(email, newPassword) {
-        const user = findUser(email);
-        if (!user) return { success: false, message: 'User not found' };
-        user.password = newPassword;
-        saveUsers();
-        delete resetTokens[email];
-        return { success: true };
-      }
-
-      // ---------- UI AUTH ----------
-      function openModal(mode) {
-        isLoginMode = (mode === 'login');
-        modal.classList.add('show');
-        authForm.style.display = 'block';
-        forgotForm.style.display = 'none';
-        resetMessage.style.display = 'none';
-        if (isLoginMode) {
-          modalTitle.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-          authSubmitBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Login';
-          authSwitchText.textContent = "Don't have an account?";
-          authSwitchLink.textContent = 'Register';
-          schoolField.style.display = 'none';
-          forgotLinkWrap.style.display = 'block';
-        } else {
-          modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Register';
-          authSubmitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
-          authSwitchText.textContent = 'Already have an account?';
-          authSwitchLink.textContent = 'Login';
-          schoolField.style.display = 'flex';
-          forgotLinkWrap.style.display = 'none';
-        }
-        authEmail.value = '';
-        authPassword.value = '';
-        authSchool.value = '';
-      }
-
-      function closeModal() {
-        modal.classList.remove('show');
-      }
-
-      function performLogin(email, password) {
-        const result = loginUser(email, password);
-        if (result.success) {
-          currentUser = { 
-            email: result.user.email, 
-            school: result.user.school, 
-            institution: result.user.institution, 
-            isAdmin: result.user.isAdmin || false 
-          };
-          updateUIForLoggedIn();
-          closeModal();
-          renderAll();
-          addActivity(`User ${currentUser.email} logged in`);
-          alert(`Welcome ${currentUser.email}!`);
-          return true;
-        } else {
-          alert(result.message);
-          return false;
-        }
-      }
-
-      function handleAuthSubmit() {
-        const email = authEmail.value.trim();
-        const password = authPassword.value.trim();
-        if (!email || !password) return alert('Please fill in all fields');
-
-        if (isLoginMode) {
-          performLogin(email, password);
-        } else {
-          const school = authSchool.value.trim();
-          if (!school) return alert('Please enter your school/institution');
-          const result = registerUser(email, password, school);
-          if (result.success) {
-            addActivity(`New user registered: ${email} (${school})`);
-            alert('Registration successful! Please login.');
-            openModal('login');
-          } else {
-            alert(result.message);
-          }
-        }
-      }
-
-      function handleAdminQuickLogin() {
-        ensureAdminExists();
-        const result = loginUser(ADMIN_EMAIL, ADMIN_PASSWORD);
-        if (result.success) {
-          currentUser = { 
-            email: result.user.email, 
-            school: result.user.school, 
-            institution: result.user.institution, 
-            isAdmin: result.user.isAdmin || true 
-          };
-          updateUIForLoggedIn();
-          closeModal();
-          renderAll();
-          addActivity(`Admin ${currentUser.email} logged in`);
-          alert(`Welcome Admin! You have full system access.`);
-        } else {
-          alert('Admin login failed: ' + result.message);
-        }
-      }
-
-      function handleForgotPassword() {
-        const email = forgotEmail.value.trim();
-        if (!email) return alert('Enter your email');
-        const result = resetPassword(email);
-        if (result.success) {
-          resetMessage.style.display = 'block';
-          resetMessage.innerHTML = `<i class="fas fa-check-circle" style="color:var(--primary-green);"></i> Reset link sent to ${email}. Check your email (demo).`;
-          const newPwd = prompt(`[DEMO] Enter new password for ${email}:`);
-          if (newPwd && newPwd.length >= 4) {
-            const resetResult = completeReset(email, newPwd);
-            if (resetResult.success) {
-              resetMessage.innerHTML = `<i class="fas fa-check-circle" style="color:var(--primary-green);"></i> Password updated successfully! You can now login.`;
-            } else {
-              alert(resetResult.message);
-            }
-          }
-        } else {
-          alert(result.message);
-        }
-      }
-
-      function logout() {
-        if (currentUser) addActivity(`User ${currentUser.email} logged out`);
+    // Logout user
+    async function logoutUser() {
+      try {
+        await signOut(auth);
+        // Clean up all listeners
+        cleanupListeners();
         currentUser = null;
-        updateUIForLoggedIn();
+        books = [];
+        laptops = [];
+        stationary = [];
+        schools = [];
+        users = [];
+        activityLog = [];
+        updateUIForLoggedOut();
+        alert('Logged out successfully');
+      } catch (error) {
+        console.error('Logout error:', error);
+        alert('Error logging out: ' + error.message);
+      }
+    }
+
+    // Clean up all Firestore listeners
+    function cleanupListeners() {
+      if (unsubscribeBooks) { unsubscribeBooks(); unsubscribeBooks = null; }
+      if (unsubscribeLaptops) { unsubscribeLaptops(); unsubscribeLaptops = null; }
+      if (unsubscribeStationary) { unsubscribeStationary(); unsubscribeStationary = null; }
+      if (unsubscribeSchools) { unsubscribeSchools(); unsubscribeSchools = null; }
+      if (unsubscribeUsers) { unsubscribeUsers(); unsubscribeUsers = null; }
+      if (unsubscribeActivity) { unsubscribeActivity(); unsubscribeActivity = null; }
+    }
+
+    // ============================================================
+    // FIRESTORE REAL-TIME LISTENERS WITH FILTERED QUERIES
+    // ============================================================
+    
+    function setupFirestoreListeners() {
+      // First, clean up any existing listeners
+      cleanupListeners();
+
+      if (!currentUser) {
+        // No user - clear data and render empty states
+        books = [];
+        laptops = [];
+        stationary = [];
+        schools = [];
+        users = [];
+        activityLog = [];
         renderAll();
-        alert('Logged out');
+        return;
       }
 
-      function updateUIForLoggedIn() {
-        if (currentUser) {
-          userDisplay.textContent = `👤 ${currentUser.email}`;
-          userDisplay.style.display = 'inline';
-          logoutBtn.style.display = 'inline-flex';
-          document.getElementById('loginBtn').style.display = 'none';
-          document.getElementById('registerBtn').style.display = 'none';
-          dashboardWrapper.style.display = 'flex';
-          homepageContainer.style.display = 'none';
-          sidebarUser.innerHTML = `<strong>${currentUser.email}</strong><br><span style="font-size:0.8rem; color:#aab8a8;">${currentUser.isAdmin ? '👑 Admin' : currentUser.institution}</span>`;
-          
-          const schoolsItem = document.getElementById('schoolsMenuItem');
-          const usersItem = document.getElementById('usersMenuItem');
-          const adminItem = document.getElementById('adminMenuItem');
-          
-          if (currentUser.isAdmin) {
-            schoolsItem.style.display = 'flex';
-            usersItem.style.display = 'flex';
-            adminItem.style.display = 'flex';
-            institutionTitle.classList.add('hidden');
-            adminSchoolSelector.style.display = 'inline-flex';
-            populateSchoolSelector();
-          } else {
-            schoolsItem.style.display = 'none';
-            usersItem.style.display = 'none';
-            adminItem.style.display = 'none';
-            institutionTitle.classList.remove('hidden');
-            adminSchoolSelector.style.display = 'none';
-          }
-          
-          if (!currentUser.isAdmin) {
-            const activePage = document.querySelector('.page.active-page');
-            if (activePage && (activePage.id === 'pageSchools' || activePage.id === 'pageUsers' || activePage.id === 'pageAdmin')) {
-              switchPage('pageDashboard');
-            }
-          }
+      // ---------- BOOKS LISTENER ----------
+      let booksQuery;
+      if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
+        booksQuery = collection(db, "books");
+      } else {
+        const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
+        booksQuery = query(
+          collection(db, "books"), 
+          where("institution", "==", filterSchool)
+        );
+      }
+
+      unsubscribeBooks = onSnapshot(booksQuery, (snapshot) => {
+        books = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderBooksPage(books);
+        renderBorrowedBooksPage(books);
+        updateDashboardStats({ books });
+        updateAdminPanel();
+      }, (error) => {
+        console.error('Books listener error:', error);
+      });
+
+      // ---------- LAPTOPS LISTENER ----------
+      let laptopsQuery;
+      if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
+        laptopsQuery = collection(db, "laptops");
+      } else {
+        const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
+        laptopsQuery = query(
+          collection(db, "laptops"), 
+          where("institution", "==", filterSchool)
+        );
+      }
+
+      unsubscribeLaptops = onSnapshot(laptopsQuery, (snapshot) => {
+        laptops = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderLaptopsPage(laptops);
+        renderBorrowedLaptopsPage(laptops);
+        updateDashboardStats({ laptops });
+        updateAdminPanel();
+      }, (error) => {
+        console.error('Laptops listener error:', error);
+      });
+
+      // ---------- STATIONARY LISTENER ----------
+      let stationaryQuery;
+      if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
+        stationaryQuery = collection(db, "stationary");
+      } else {
+        const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
+        stationaryQuery = query(
+          collection(db, "stationary"), 
+          where("institution", "==", filterSchool)
+        );
+      }
+
+      unsubscribeStationary = onSnapshot(stationaryQuery, (snapshot) => {
+        stationary = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderStationaryPage(stationary);
+        updateDashboardStats({ stationary });
+        updateAdminPanel();
+      }, (error) => {
+        console.error('Stationary listener error:', error);
+      });
+
+      // ---------- SCHOOLS LISTENER ----------
+      const schoolsQuery = collection(db, "schools");
+      unsubscribeSchools = onSnapshot(schoolsQuery, (snapshot) => {
+        schools = [];
+        snapshot.forEach(doc => {
+          schools.push(doc.data().name);
+        });
+        populateSchoolSelector();
+        renderSchoolsPage();
+        updateAdminPanel();
+      }, (error) => {
+        console.error('Schools listener error:', error);
+      });
+
+      // ---------- USERS LISTENER (Admin only) ----------
+      if (currentUser.isAdmin) {
+        const usersQuery = collection(db, "users");
+        unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
+          users = [];
+          snapshot.forEach(doc => {
+            users.push({ id: doc.id, ...doc.data() });
+          });
+          renderUsersPage();
+          updateAdminPanel();
+        }, (error) => {
+          console.error('Users listener error:', error);
+        });
+      }
+
+      // ---------- ACTIVITY LOG LISTENER ----------
+      let activityQuery;
+      if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
+        activityQuery = query(
+          collection(db, "activityLog"),
+          orderBy("timestamp", "desc"),
+          limit(50)
+        );
+      } else {
+        const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
+        activityQuery = query(
+          collection(db, "activityLog"),
+          where("institution", "==", filterSchool),
+          orderBy("timestamp", "desc"),
+          limit(50)
+        );
+      }
+
+      unsubscribeActivity = onSnapshot(activityQuery, (snapshot) => {
+        activityLog = [];
+        snapshot.forEach(doc => {
+          activityLog.push({ id: doc.id, ...doc.data() });
+        });
+        renderActivityLog();
+      }, (error) => {
+        console.error('Activity log listener error:', error);
+      });
+    }
+
+    // ============================================================
+    // FIRESTORE OPERATIONS
+    // ============================================================
+    
+    // All CRUD operations remain the same as before
+    // (Add, Delete, Update functions for books, laptops, stationary)
+    
+    async function addBookToCloud(bookData) {
+      try {
+        const docRef = await addDoc(collection(db, 'books'), bookData);
+        return docRef.id;
+      } catch (error) {
+        console.error('Error adding book:', error);
+        throw error;
+      }
+    }
+
+    async function deleteBookFromCloud(bookId) {
+      try {
+        await deleteDoc(doc(db, 'books', bookId));
+      } catch (error) {
+        console.error('Error deleting book:', error);
+        throw error;
+      }
+    }
+
+    async function updateBookInCloud(bookId, updateData) {
+      try {
+        await updateDoc(doc(db, 'books', bookId), updateData);
+      } catch (error) {
+        console.error('Error updating book:', error);
+        throw error;
+      }
+    }
+
+    async function borrowBookInCloud(bookId, borrowerName) {
+      try {
+        await updateDoc(doc(db, 'books', bookId), {
+          borrowed: true,
+          borrower: borrowerName
+        });
+      } catch (error) {
+        console.error('Error borrowing book:', error);
+        throw error;
+      }
+    }
+
+    async function returnBookInCloud(bookId) {
+      try {
+        await updateDoc(doc(db, 'books', bookId), {
+          borrowed: false,
+          borrower: ''
+        });
+      } catch (error) {
+        console.error('Error returning book:', error);
+        throw error;
+      }
+    }
+
+    async function addLaptopToCloud(laptopData) {
+      try {
+        const docRef = await addDoc(collection(db, 'laptops'), laptopData);
+        return docRef.id;
+      } catch (error) {
+        console.error('Error adding laptop:', error);
+        throw error;
+      }
+    }
+
+    async function deleteLaptopFromCloud(laptopId) {
+      try {
+        await deleteDoc(doc(db, 'laptops', laptopId));
+      } catch (error) {
+        console.error('Error deleting laptop:', error);
+        throw error;
+      }
+    }
+
+    async function updateLaptopInCloud(laptopId, updateData) {
+      try {
+        await updateDoc(doc(db, 'laptops', laptopId), updateData);
+      } catch (error) {
+        console.error('Error updating laptop:', error);
+        throw error;
+      }
+    }
+
+    async function borrowLaptopInCloud(laptopId, borrowerName) {
+      try {
+        await updateDoc(doc(db, 'laptops', laptopId), {
+          borrowed: true,
+          borrower: borrowerName
+        });
+      } catch (error) {
+        console.error('Error borrowing laptop:', error);
+        throw error;
+      }
+    }
+
+    async function returnLaptopInCloud(laptopId) {
+      try {
+        await updateDoc(doc(db, 'laptops', laptopId), {
+          borrowed: false,
+          borrower: ''
+        });
+      } catch (error) {
+        console.error('Error returning laptop:', error);
+        throw error;
+      }
+    }
+
+    async function addStationaryToCloud(stationaryData) {
+      try {
+        const docRef = await addDoc(collection(db, 'stationary'), stationaryData);
+        return docRef.id;
+      } catch (error) {
+        console.error('Error adding stationary:', error);
+        throw error;
+      }
+    }
+
+    async function deleteStationaryFromCloud(stationaryId) {
+      try {
+        await deleteDoc(doc(db, 'stationary', stationaryId));
+      } catch (error) {
+        console.error('Error deleting stationary:', error);
+        throw error;
+      }
+    }
+
+    async function updateStationaryInCloud(stationaryId, updateData) {
+      try {
+        await updateDoc(doc(db, 'stationary', stationaryId), updateData);
+      } catch (error) {
+        console.error('Error updating stationary:', error);
+        throw error;
+      }
+    }
+
+    async function addSchoolToCloud(schoolName) {
+      try {
+        await addDoc(collection(db, 'schools'), { name: schoolName });
+      } catch (error) {
+        console.error('Error adding school:', error);
+        throw error;
+      }
+    }
+
+    async function addActivityToCloud(message) {
+      try {
+        const institution = currentUser?.institution || 'Unknown';
+        await addDoc(collection(db, 'activityLog'), {
+          msg: message,
+          institution: institution,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error adding activity:', error);
+      }
+    }
+
+    // ============================================================
+    // WRAPPER FUNCTIONS FOR UI ACTIONS (Keep all as before)
+    // ============================================================
+
+    // ... (All wrapper functions remain the same as in the original code)
+    // The wrapper functions (window.deleteBook, window.editBook, etc.) 
+    // are kept exactly as they were in the original code
+
+    // ============================================================
+    // UI UPDATE FUNCTIONS
+    // ============================================================
+    
+    function updateUIForLoggedIn() {
+      if (currentUser) {
+        userDisplay.textContent = `👤 ${currentUser.email}`;
+        userDisplay.style.display = 'inline';
+        logoutBtn.style.display = 'inline-flex';
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('registerBtn').style.display = 'none';
+        dashboardWrapper.style.display = 'flex';
+        homepageContainer.style.display = 'none';
+        sidebarUser.innerHTML = `<strong>${currentUser.email}</strong><br><span style="font-size:0.8rem; color:#aab8a8;">${currentUser.isAdmin ? '👑 Admin' : currentUser.institution}</span>`;
+        
+        const schoolsItem = document.getElementById('schoolsMenuItem');
+        const usersItem = document.getElementById('usersMenuItem');
+        const adminItem = document.getElementById('adminMenuItem');
+        
+        if (currentUser.isAdmin) {
+          schoolsItem.style.display = 'flex';
+          usersItem.style.display = 'flex';
+          adminItem.style.display = 'flex';
+          institutionTitle.classList.add('hidden');
+          adminSchoolSelector.style.display = 'inline-flex';
+          populateSchoolSelector();
         } else {
-          userDisplay.style.display = 'none';
-          logoutBtn.style.display = 'none';
-          document.getElementById('loginBtn').style.display = 'inline-flex';
-          document.getElementById('registerBtn').style.display = 'inline-flex';
-          dashboardWrapper.style.display = 'none';
-          homepageContainer.style.display = 'flex';
+          schoolsItem.style.display = 'none';
+          usersItem.style.display = 'none';
+          adminItem.style.display = 'none';
           institutionTitle.classList.remove('hidden');
           adminSchoolSelector.style.display = 'none';
         }
-      }
-
-      // ---------- SCHOOL SELECTOR ----------
-      function populateSchoolSelector() {
-        adminSchoolSelect.innerHTML = '<option value="__all__">📊 All Schools</option>';
-        schools.forEach(s => {
-          const option = document.createElement('option');
-          option.value = s;
-          option.textContent = '🏫 ' + s;
-          adminSchoolSelect.appendChild(option);
-        });
-        adminSchoolSelect.value = adminSelectedSchool;
-      }
-
-      adminSchoolSelect.addEventListener('change', function() {
-        adminSelectedSchool = this.value;
-        renderAll();
-        addActivity(`Admin switched to view: ${adminSelectedSchool === '__all__' ? 'All Schools' : adminSelectedSchool}`);
-      });
-
-      // ---------- CATEGORY FILTER ----------
-      bookCategoryFilter.addEventListener('change', function() {
-        currentCategoryFilter = this.value;
-        renderBooksPage(getFilteredData().books);
-      });
-
-      // ---------- FILTER DATA BY INSTITUTION ----------
-      function getFilteredData() {
-        if (!currentUser) return { books: [], laptops: [], stationary: [] };
         
-        if (currentUser.isAdmin && adminSelectedSchool !== '__all__') {
-          const inst = adminSelectedSchool;
-          return {
-            books: books.filter(b => b.institution === inst),
-            laptops: laptops.filter(l => l.institution === inst),
-            stationary: stationary.filter(s => s.institution === inst)
-          };
-        }
-        
-        if (currentUser.isAdmin) {
-          return { books: books, laptops: laptops, stationary: stationary };
-        }
-        
-        const inst = currentUser.institution;
-        return {
-          books: books.filter(b => b.institution === inst),
-          laptops: laptops.filter(l => l.institution === inst),
-          stationary: stationary.filter(s => s.institution === inst)
-        };
-      }
-
-      // ---------- TAB SWITCHING ----------
-      function switchPage(pageId) {
-        document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
-        document.querySelector(`.sidebar-item[data-page="${pageId}"]`)?.classList.add('active');
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
-        document.getElementById(pageId)?.classList.add('active-page');
-      }
-
-      document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.addEventListener('click', function() {
-          const pageId = this.dataset.page;
-          if ((pageId === 'pageSchools' || pageId === 'pageUsers' || pageId === 'pageAdmin') && (!currentUser || !currentUser.isAdmin)) {
-            alert('⚠️ Admin access required.');
-            return;
+        if (!currentUser.isAdmin) {
+          const activePage = document.querySelector('.page.active-page');
+          if (activePage && (activePage.id === 'pageSchools' || activePage.id === 'pageUsers' || activePage.id === 'pageAdmin')) {
+            switchPage('pageDashboard');
           }
-          switchPage(pageId);
-        });
+        }
+        
+        // Setup listeners with the new user context
+        setupFirestoreListeners();
+        hideLoading();
+      }
+    }
+
+    function updateUIForLoggedOut() {
+      userDisplay.style.display = 'none';
+      logoutBtn.style.display = 'none';
+      document.getElementById('loginBtn').style.display = 'inline-flex';
+      document.getElementById('registerBtn').style.display = 'inline-flex';
+      dashboardWrapper.style.display = 'none';
+      homepageContainer.style.display = 'flex';
+      institutionTitle.classList.remove('hidden');
+      adminSchoolSelector.style.display = 'none';
+      
+      // Clear data
+      books = [];
+      laptops = [];
+      stationary = [];
+      schools = [];
+      users = [];
+      activityLog = [];
+      renderAll();
+    }
+
+    // ============================================================
+    // RENDER FUNCTIONS (Keep all as before)
+    // ============================================================
+    
+    function getCategoryLabel(category) {
+      const labels = {
+        'textbook': '📖 Textbook',
+        'novel': '📕 Novel',
+        'dictionary': '📗 Dictionary/Kamusi',
+        'atlas': '🌍 Atlas'
+      };
+      return labels[category] || category;
+    }
+
+    function getCategoryClass(category) {
+      const classes = {
+        'textbook': 'cat-textbook',
+        'novel': 'cat-novel',
+        'dictionary': 'cat-dictionary',
+        'atlas': 'cat-atlas'
+      };
+      return classes[category] || '';
+    }
+
+    function renderAll() {
+      renderBooksPage(books);
+      renderLaptopsPage(laptops);
+      renderStationaryPage(stationary);
+      renderBorrowedBooksPage(books);
+      renderBorrowedLaptopsPage(laptops);
+      renderSchoolsPage();
+      renderUsersPage();
+      updateDashboardStats({ books, laptops, stationary });
+      renderActivityLog();
+      updateAdminPanel();
+    }
+
+    function renderBooksPage(filteredBooks) {
+      let booksToShow = filteredBooks || [];
+      if (currentCategoryFilter !== 'all') {
+        booksToShow = booksToShow.filter(b => b.category === currentCategoryFilter);
+      }
+      
+      const list = document.getElementById('bookListPage');
+      if (!list) return;
+      
+      list.innerHTML = booksToShow.map(b => `
+        <li>
+          <span>
+            <strong>${b.title || 'Untitled'}</strong> by ${b.author || 'Unknown'} (${b.acc || 'N/A'})
+            <span class="category-badge ${getCategoryClass(b.category)}">${getCategoryLabel(b.category)}</span>
+            <span class="status-badge ${b.borrowed ? 'status-borrowed' : 'status-available'}">
+              ${b.borrowed ? '🔴 Borrowed' : '🟢 Available'}
+            </span>
+            ${currentUser?.isAdmin ? `<span class="text-muted">(${b.institution})</span>` : ''}
+          </span>
+          <span class="koha-item-actions">
+            <button onclick="window.editBook('${b.id}')"><i class="fas fa-edit"></i></button>
+            <button onclick="window.deleteBook('${b.id}')"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
+          </span>
+        </li>
+      `).join('');
+      
+      document.getElementById('bookCountPage').textContent = booksToShow.length;
+    }
+
+    function renderLaptopsPage(filteredLaptops) {
+      const list = document.getElementById('laptopListPage');
+      if (!list) return;
+      
+      const laptopsToShow = filteredLaptops || [];
+      list.innerHTML = laptopsToShow.map(l => `
+        <li>
+          <span>
+            ${l.owner || 'Unknown'} · ${l.type || 'N/A'} · ${l.date || 'N/A'}
+            <span class="status-badge ${l.borrowed ? 'status-borrowed' : 'status-available'}">
+              ${l.borrowed ? '🔴 Borrowed' : '🟢 Available'}
+            </span>
+            ${currentUser?.isAdmin ? `<span class="text-muted">(${l.institution})</span>` : ''}
+          </span>
+          <span class="koha-item-actions">
+            <button onclick="window.editLaptop('${l.id}')"><i class="fas fa-edit"></i></button>
+            <button onclick="window.deleteLaptop('${l.id}')"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
+          </span>
+        </li>
+      `).join('');
+      document.getElementById('laptopCountPage').textContent = laptopsToShow.length;
+    }
+
+    function renderStationaryPage(filteredStationary) {
+      const list = document.getElementById('stationaryListPage');
+      if (!list) return;
+      
+      const stationaryToShow = filteredStationary || [];
+      list.innerHTML = stationaryToShow.map(s => `
+        <li>
+          <span>${s.name || 'Unnamed'} (x${s.quantity || 0}) ${currentUser?.isAdmin ? `<span class="text-muted">(${s.institution})</span>` : ''}</span>
+          <span class="koha-item-actions">
+            <button onclick="window.editStationary('${s.id}')"><i class="fas fa-edit"></i></button>
+            <button onclick="window.deleteStationary('${s.id}')"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
+          </span>
+        </li>
+      `).join('');
+      document.getElementById('stationaryCountPage').textContent = stationaryToShow.reduce((sum, s) => sum + (s.quantity || 0), 0);
+    }
+
+    function renderBorrowedBooksPage(filteredBooks) {
+      const list = document.getElementById('borrowedBookListPage');
+      if (!list) return;
+      
+      const borrowed = (filteredBooks || []).filter(b => b.borrowed);
+      list.innerHTML = borrowed.length ? borrowed.map(b => `
+        <li class="borrowed-item">
+          <span><strong>${b.borrower || 'Unknown'}</strong> · ${b.title || 'Untitled'} (${b.acc || 'N/A'}) <span class="category-badge ${getCategoryClass(b.category)}">${getCategoryLabel(b.category)}</span></span>
+          <button class="koha-btn koha-btn-success koha-btn-sm" onclick="window.returnBookById('${b.id}')"><i class="fas fa-undo-alt"></i> Return</button>
+        </li>
+      `).join('') : '<li class="text-muted">No books currently borrowed</li>';
+    }
+
+    function renderBorrowedLaptopsPage(filteredLaptops) {
+      const list = document.getElementById('borrowedLaptopListPage');
+      if (!list) return;
+      
+      const borrowed = (filteredLaptops || []).filter(l => l.borrowed);
+      list.innerHTML = borrowed.length ? borrowed.map(l => `
+        <li class="borrowed-item">
+          <span><strong>${l.borrower || 'Unknown'}</strong> · ${l.owner || 'Unknown'} (${l.type || 'N/A'})</span>
+          <button class="koha-btn koha-btn-success koha-btn-sm" onclick="window.returnLaptopById('${l.id}')"><i class="fas fa-undo-alt"></i> Return</button>
+        </li>
+      `).join('') : '<li class="text-muted">No laptops currently borrowed</li>';
+    }
+
+    function renderSchoolsPage() {
+      const list = document.getElementById('schoolListPage');
+      if (!list) return;
+      list.innerHTML = (schools || []).map(s => `<li><i class="fas fa-school" style="color:var(--primary-green);"></i> ${s}</li>`).join('');
+    }
+
+    function renderUsersPage() {
+      const list = document.getElementById('userListPage');
+      if (!list) return;
+      document.getElementById('userCountPage').textContent = (users || []).length;
+      list.innerHTML = (users || []).map(u => `
+        <li>
+          <span><strong>${u.email || 'Unknown'}</strong> · ${u.school || 'N/A'} ${u.isAdmin ? '👑' : ''} <span class="text-muted">${u.registered ? new Date(u.registered).toLocaleDateString() : ''}</span></span>
+        </li>
+      `).join('');
+    }
+
+    function updateDashboardStats(data) {
+      if (!currentUser) return;
+      const booksCount = data.books ? data.books.length : 0;
+      const laptopsCount = data.laptops ? data.laptops.length : 0;
+      const stationaryCount = data.stationary ? data.stationary.reduce((sum, s) => sum + (s.quantity || 0), 0) : 0;
+      
+      document.getElementById('dashBookCount').textContent = booksCount;
+      document.getElementById('dashLaptopCount').textContent = laptopsCount;
+      document.getElementById('dashStationaryCount').textContent = stationaryCount;
+      document.getElementById('dashUserCount').textContent = (users || []).length;
+      document.getElementById('dashboardStats').textContent = `Welcome ${currentUser.email}`;
+    }
+
+    function updateAdminPanel() {
+      if (!currentUser || !currentUser.isAdmin) return;
+      document.getElementById('adminBookCount').textContent = (books || []).length;
+      document.getElementById('adminLaptopCount').textContent = (laptops || []).length;
+      document.getElementById('adminStationaryCount').textContent = (stationary || []).reduce((sum, s) => sum + (s.quantity || 0), 0);
+      document.getElementById('adminUserCount').textContent = (users || []).length;
+      document.getElementById('adminSchoolCount').textContent = (schools || []).length;
+      const borrowedTotal = (books || []).filter(b => b.borrowed).length + (laptops || []).filter(l => l.borrowed).length;
+      document.getElementById('adminBorrowedCount').textContent = borrowedTotal;
+    }
+
+    function renderActivityLog() {
+      const list = document.getElementById('dashActivityList');
+      if (!list) return;
+      list.innerHTML = (activityLog || []).slice(0, 10).map(a => 
+        `<li style="padding:4px 0; border-bottom:1px solid #e8f0e8;"><i class="fas fa-circle" style="color:var(--primary-green); font-size:0.5rem; margin-right:6px;"></i> ${a.msg || 'Unknown activity'} <span class="text-muted" style="float:right;">${a.timestamp ? new Date(a.timestamp).toLocaleString() : ''}</span></li>`
+      ).join('');
+      if ((activityLog || []).length === 0) {
+        list.innerHTML = '<li class="text-muted">No recent activity</li>';
+      }
+    }
+
+    // ============================================================
+    // UI HELPERS
+    // ============================================================
+    
+    function populateSchoolSelector() {
+      adminSchoolSelect.innerHTML = '<option value="__all__">📊 All Schools</option>';
+      (schools || []).forEach(s => {
+        const option = document.createElement('option');
+        option.value = s;
+        option.textContent = '🏫 ' + s;
+        adminSchoolSelect.appendChild(option);
       });
+      adminSchoolSelect.value = adminSelectedSchool;
+    }
 
-      // ---------- ACTIVITY LOG ----------
-      function addActivity(msg) {
-        const timestamp = new Date().toLocaleString();
-        activityLog.unshift({ msg, timestamp });
-        if (activityLog.length > 50) activityLog.pop();
-        renderActivityLog();
+    function switchPage(pageId) {
+      document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+      document.querySelector(`.sidebar-item[data-page="${pageId}"]`)?.classList.add('active');
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+      document.getElementById(pageId)?.classList.add('active-page');
+    }
+
+    function openModal(mode) {
+      isLoginMode = (mode === 'login');
+      modal.classList.add('show');
+      authForm.style.display = 'block';
+      forgotForm.style.display = 'none';
+      resetMessage.style.display = 'none';
+      if (isLoginMode) {
+        modalTitle.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        authSubmitBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Login';
+        authSwitchText.textContent = "Don't have an account?";
+        authSwitchLink.textContent = 'Register';
+        schoolField.style.display = 'none';
+        forgotLinkWrap.style.display = 'block';
+      } else {
+        modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+        authSubmitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+        authSwitchText.textContent = 'Already have an account?';
+        authSwitchLink.textContent = 'Login';
+        schoolField.style.display = 'flex';
+        forgotLinkWrap.style.display = 'none';
       }
+      authEmail.value = '';
+      authPassword.value = '';
+      authSchool.value = '';
+    }
 
-      function renderActivityLog() {
-        const list = document.getElementById('dashActivityList');
-        if (!list) return;
-        list.innerHTML = activityLog.slice(0, 10).map(a => 
-          `<li style="padding:4px 0; border-bottom:1px solid #e8f0e8;"><i class="fas fa-circle" style="color:var(--primary-green); font-size:0.5rem; margin-right:6px;"></i> ${a.msg} <span class="text-muted" style="float:right;">${a.timestamp}</span></li>`
-        ).join('');
-        if (activityLog.length === 0) {
-          list.innerHTML = '<li class="text-muted">No recent activity</li>';
+    function closeModal() {
+      modal.classList.remove('show');
+    }
+
+    // ============================================================
+    // AUTH HANDLERS
+    // ============================================================
+    
+    // Handle auth form submission (Login/Register)
+    async function handleAuthSubmit() {
+      const email = authEmail.value.trim();
+      const password = authPassword.value.trim();
+      if (!email || !password) return alert('Please fill in all fields');
+
+      showLoading();
+      if (isLoginMode) {
+        // Login
+        const result = await loginUser(email, password);
+        if (result.success) {
+          // The onAuthStateChanged listener will handle the rest
+          closeModal();
+          await addActivityToCloud(`User ${result.user.email} logged in`);
+          alert(`Welcome ${result.user.email}!`);
+        } else {
+          alert('Login failed: ' + result.message);
+        }
+      } else {
+        // Register
+        const school = authSchool.value.trim();
+        if (!school) return alert('Please enter your school/institution');
+        const result = await registerUser(email, password, school);
+        if (result.success) {
+          await addActivityToCloud(`New user registered: ${email} (${school})`);
+          alert('Registration successful! Please login.');
+          openModal('login');
+        } else {
+          alert('Registration failed: ' + result.message);
         }
       }
+      hideLoading();
+    }
 
-      // ---------- CATEGORY HELPER ----------
-      function getCategoryLabel(category) {
-        const labels = {
-          'textbook': '📖 Textbook',
-          'novel': '📕 Novel',
-          'dictionary': '📗 Dictionary/Kamusi',
-          'atlas': '🌍 Atlas'
-        };
-        return labels[category] || category;
+    // ============================================================
+    // PDF EXPORT (Keep as before)
+    // ============================================================
+    
+    function getInstitution() {
+      return document.getElementById('institutionName').value.trim() || 'Institution';
+    }
+
+    function generatePDF(title, headers, rows, filename) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const inst = getInstitution();
+      doc.setFontSize(18);
+      doc.text(inst, 14, 20);
+      doc.setFontSize(14);
+      doc.text(title, 14, 30);
+      doc.setFontSize(10);
+      let y = 40;
+      const colWidths = headers.map(() => 45);
+      doc.setFont('helvetica', 'bold');
+      let x = 14;
+      headers.forEach((h, i) => { doc.text(h, x, y); x += colWidths[i] || 45; });
+      doc.setFont('helvetica', 'normal');
+      y += 6;
+      rows.forEach(row => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        let xPos = 14;
+        row.forEach((cell, i) => {
+          doc.text(String(cell), xPos, y);
+          xPos += colWidths[i] || 45;
+        });
+        y += 6;
+      });
+      doc.save(filename);
+    }
+
+    // ============================================================
+    // WINDOW FUNCTIONS FOR UI ACTIONS (Keep all as before)
+    // ============================================================
+
+    // Define wrapper functions for UI actions
+    window.deleteBook = async function(id) {
+      if (!currentUser) return alert('Please login first');
+      const book = books.find(b => b.id === id);
+      if (!book) return;
+      if (book.borrowed) return alert('Cannot delete a borrowed book');
+      if (!currentUser.isAdmin && book.institution !== currentUser.institution) {
+        return alert('You can only delete items from your institution');
       }
-
-      function getCategoryClass(category) {
-        const classes = {
-          'textbook': 'cat-textbook',
-          'novel': 'cat-novel',
-          'dictionary': 'cat-dictionary',
-          'atlas': 'cat-atlas'
-        };
-        return classes[category] || '';
+      showLoading();
+      try {
+        await deleteBookFromCloud(id);
+        await addActivityToCloud(`Book deleted: ${book.title}`);
+      } catch (error) {
+        alert('Error deleting book: ' + error.message);
       }
+      hideLoading();
+    };
 
-      // ---------- RENDER ALL ----------
-      function renderAll() {
-        const data = getFilteredData();
-        renderBooksPage(data.books);
-        renderLaptopsPage(data.laptops);
-        renderStationaryPage(data.stationary);
-        renderBorrowedBooksPage(data.books);
-        renderBorrowedLaptopsPage(data.laptops);
-        renderSchoolsPage();
-        renderUsersPage();
-        renderDashboard(data);
-        renderAdminPanel();
-        updateCounts(data);
-        renderActivityLog();
+    window.editBook = async function(id) {
+      if (!currentUser) return alert('Please login first');
+      const b = books.find(x => x.id === id);
+      if (!b) return;
+      if (!currentUser.isAdmin && b.institution !== currentUser.institution) {
+        return alert('You can only edit items from your institution');
       }
+      if (b.borrowed) return alert('Cannot edit a borrowed book');
+      
+      const newTitle = prompt('Edit title:', b.title);
+      const newAuthor = prompt('Edit author:', b.author);
+      const newAcc = prompt('Edit accession:', b.acc);
+      const newCategory = prompt('Edit category (textbook/novel/dictionary/atlas):', b.category);
+      
+      const updates = {};
+      if (newTitle !== null) updates.title = newTitle || b.title;
+      if (newAuthor !== null) updates.author = newAuthor || b.author;
+      if (newAcc !== null) updates.acc = newAcc || b.acc;
+      if (newCategory !== null && ['textbook','novel','dictionary','atlas'].includes(newCategory)) {
+        updates.category = newCategory;
+      }
+      
+      if (Object.keys(updates).length === 0) return;
+      
+      showLoading();
+      try {
+        await updateBookInCloud(id, updates);
+        await addActivityToCloud(`Book edited: ${b.title}`);
+      } catch (error) {
+        alert('Error updating book: ' + error.message);
+      }
+      hideLoading();
+    };
 
-      function renderBooksPage(filteredBooks) {
-        // Apply category filter
-        let booksToShow = filteredBooks;
-        if (currentCategoryFilter !== 'all') {
-          booksToShow = filteredBooks.filter(b => b.category === currentCategoryFilter);
+    window.returnBookById = async function(id) {
+      if (!currentUser) return alert('Please login first');
+      const book = books.find(b => b.id === id);
+      if (!book || !book.borrowed) return alert('Book is not borrowed');
+      if (!currentUser.isAdmin && book.institution !== currentUser.institution) {
+        return alert('You can only return items from your institution');
+      }
+      showLoading();
+      try {
+        await returnBookInCloud(id);
+        await addActivityToCloud(`Book returned: ${book.title} by ${currentUser.email}`);
+      } catch (error) {
+        alert('Error returning book: ' + error.message);
+      }
+      hideLoading();
+    };
+
+    window.deleteLaptop = async function(id) {
+      if (!currentUser) return alert('Please login first');
+      const laptop = laptops.find(l => l.id === id);
+      if (!laptop) return;
+      if (laptop.borrowed) return alert('Cannot delete a borrowed laptop');
+      if (!currentUser.isAdmin && laptop.institution !== currentUser.institution) {
+        return alert('You can only delete items from your institution');
+      }
+      showLoading();
+      try {
+        await deleteLaptopFromCloud(id);
+        await addActivityToCloud(`Laptop deleted: ${laptop.owner}`);
+      } catch (error) {
+        alert('Error deleting laptop: ' + error.message);
+      }
+      hideLoading();
+    };
+
+    window.editLaptop = async function(id) {
+      if (!currentUser) return alert('Please login first');
+      const l = laptops.find(x => x.id === id);
+      if (!l) return;
+      if (!currentUser.isAdmin && l.institution !== currentUser.institution) {
+        return alert('You can only edit items from your institution');
+      }
+      if (l.borrowed) return alert('Cannot edit a borrowed laptop');
+      
+      const owner = prompt('Edit owner:', l.owner);
+      const type = prompt('Edit type:', l.type);
+      const date = prompt('Edit date (YYYY-MM-DD):', l.date);
+      
+      const updates = {};
+      if (owner !== null) updates.owner = owner || l.owner;
+      if (type !== null) updates.type = type || l.type;
+      if (date !== null) updates.date = date || l.date;
+      
+      if (Object.keys(updates).length === 0) return;
+      
+      showLoading();
+      try {
+        await updateLaptopInCloud(id, updates);
+        await addActivityToCloud(`Laptop edited: ${l.owner}`);
+      } catch (error) {
+        alert('Error updating laptop: ' + error.message);
+      }
+      hideLoading();
+    };
+
+    window.returnLaptopById = async function(id) {
+      if (!currentUser) return alert('Please login first');
+      const laptop = laptops.find(l => l.id === id);
+      if (!laptop || !laptop.borrowed) return alert('Laptop is not borrowed');
+      if (!currentUser.isAdmin && laptop.institution !== currentUser.institution) {
+        return alert('You can only return items from your institution');
+      }
+      showLoading();
+      try {
+        await returnLaptopInCloud(id);
+        await addActivityToCloud(`Laptop returned: ${laptop.owner} by ${currentUser.email}`);
+      } catch (error) {
+        alert('Error returning laptop: ' + error.message);
+      }
+      hideLoading();
+    };
+
+    window.deleteStationary = async function(id) {
+      if (!currentUser) return alert('Please login first');
+      const item = stationary.find(s => s.id === id);
+      if (!item) return;
+      if (!currentUser.isAdmin && item.institution !== currentUser.institution) {
+        return alert('You can only delete items from your institution');
+      }
+      showLoading();
+      try {
+        await deleteStationaryFromCloud(id);
+        await addActivityToCloud(`Stationary deleted: ${item.name}`);
+      } catch (error) {
+        alert('Error deleting stationary: ' + error.message);
+      }
+      hideLoading();
+    };
+
+    window.editStationary = async function(id) {
+      if (!currentUser) return alert('Please login first');
+      const s = stationary.find(x => x.id === id);
+      if (!s) return;
+      if (!currentUser.isAdmin && s.institution !== currentUser.institution) {
+        return alert('You can only edit items from your institution');
+      }
+      
+      const name = prompt('Edit name:', s.name);
+      const qty = prompt('Edit quantity:', s.quantity);
+      
+      const updates = {};
+      if (name !== null) updates.name = name || s.name;
+      if (qty !== null) updates.quantity = parseInt(qty) || 1;
+      
+      if (Object.keys(updates).length === 0) return;
+      
+      showLoading();
+      try {
+        await updateStationaryInCloud(id, updates);
+        await addActivityToCloud(`Stationary edited: ${s.name}`);
+      } catch (error) {
+        alert('Error updating stationary: ' + error.message);
+      }
+      hideLoading();
+    };
+
+    // ============================================================
+    // EVENT LISTENERS
+    // ============================================================
+    
+    // Sidebar navigation
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const pageId = this.dataset.page;
+        if ((pageId === 'pageSchools' || pageId === 'pageUsers' || pageId === 'pageAdmin') && (!currentUser || !currentUser.isAdmin)) {
+          alert('⚠️ Admin access required.');
+          return;
         }
-        
-        const list = document.getElementById('bookListPage');
-        list.innerHTML = booksToShow.map(b => `
-          <li>
-            <span>
-              <strong>${b.title}</strong> by ${b.author} (${b.acc})
-              <span class="category-badge ${getCategoryClass(b.category)}">${getCategoryLabel(b.category)}</span>
-              <span class="status-badge ${b.borrowed ? 'status-borrowed' : 'status-available'}">
-                ${b.borrowed ? '🔴 Borrowed' : '🟢 Available'}
-              </span>
-              ${currentUser?.isAdmin ? `<span class="text-muted">(${b.institution})</span>` : ''}
-            </span>
-            <span class="koha-item-actions">
-              <button onclick="editBook(${b.id})"><i class="fas fa-edit"></i></button>
-              <button onclick="deleteBook(${b.id})"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
-            </span>
-          </li>
-        `).join('');
-        
-        // Update book count with filter
-        document.getElementById('bookCountPage').textContent = booksToShow.length;
+        switchPage(pageId);
+      });
+    });
+
+    // Auth buttons
+    document.getElementById('loginBtn').addEventListener('click', () => openModal('login'));
+    document.getElementById('registerBtn').addEventListener('click', () => openModal('register'));
+    document.getElementById('homepageLoginBtn').addEventListener('click', () => openModal('login'));
+    document.getElementById('homepageRegisterBtn').addEventListener('click', () => openModal('register'));
+    adminQuickLoginBtn.addEventListener('click', handleAdminQuickLogin);
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    // Auth form
+    authSubmitBtn.addEventListener('click', handleAuthSubmit);
+    authSwitchLink.addEventListener('click', function() {
+      if (isLoginMode) {
+        openModal('register');
+      } else {
+        openModal('login');
       }
+    });
 
-      function renderLaptopsPage(filteredLaptops) {
-        const list = document.getElementById('laptopListPage');
-        list.innerHTML = filteredLaptops.map(l => `
-          <li>
-            <span>
-              ${l.owner} · ${l.type} · ${l.date}
-              <span class="status-badge ${l.borrowed ? 'status-borrowed' : 'status-available'}">
-                ${l.borrowed ? '🔴 Borrowed' : '🟢 Available'}
-              </span>
-              ${currentUser?.isAdmin ? `<span class="text-muted">(${l.institution})</span>` : ''}
-            </span>
-            <span class="koha-item-actions">
-              <button onclick="editLaptop(${l.id})"><i class="fas fa-edit"></i></button>
-              <button onclick="deleteLaptop(${l.id})"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
-            </span>
-          </li>
-        `).join('');
+    // Forgot password
+    forgotPasswordLink.addEventListener('click', function() {
+      authForm.style.display = 'none';
+      forgotForm.style.display = 'block';
+      resetMessage.style.display = 'none';
+    });
+
+    forgotBackLink.addEventListener('click', function() {
+      authForm.style.display = 'block';
+      forgotForm.style.display = 'none';
+      resetMessage.style.display = 'none';
+    });
+
+    forgotSubmitBtn.addEventListener('click', async function() {
+      const email = forgotEmail.value.trim();
+      if (!email) return alert('Enter your email');
+      try {
+        await sendPasswordResetEmail(auth, email);
+        resetMessage.style.display = 'block';
+        resetMessage.innerHTML = `<i class="fas fa-check-circle" style="color:var(--primary-green);"></i> Password reset email sent to ${email}. Check your inbox.`;
+      } catch (error) {
+        alert('Error sending reset email: ' + error.message);
       }
+    });
 
-      function renderStationaryPage(filteredStationary) {
-        const list = document.getElementById('stationaryListPage');
-        list.innerHTML = filteredStationary.map(s => `
-          <li>
-            <span>${s.name} (x${s.quantity}) ${currentUser?.isAdmin ? `<span class="text-muted">(${s.institution})</span>` : ''}</span>
-            <span class="koha-item-actions">
-              <button onclick="editStationary(${s.id})"><i class="fas fa-edit"></i></button>
-              <button onclick="deleteStationary(${s.id})"><i class="fas fa-trash-alt" style="color:#c62828;"></i></button>
-            </span>
-          </li>
-        `).join('');
+    logoutBtn.addEventListener('click', logoutUser);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && modal.classList.contains('show')) {
+        if (authForm.style.display !== 'none') {
+          handleAuthSubmit();
+        } else if (forgotForm.style.display !== 'none') {
+          forgotSubmitBtn.click();
+        }
       }
+      if (e.key === 'Escape') closeModal();
+    });
 
-      function renderBorrowedBooksPage(filteredBooks) {
-        const list = document.getElementById('borrowedBookListPage');
-        const borrowed = filteredBooks.filter(b => b.borrowed);
-        list.innerHTML = borrowed.length ? borrowed.map(b => `
-          <li class="borrowed-item">
-            <span><strong>${b.borrower}</strong> · ${b.title} (${b.acc}) <span class="category-badge ${getCategoryClass(b.category)}">${getCategoryLabel(b.category)}</span> <span class="text-muted">${new Date().toLocaleString()}</span></span>
-            <button class="koha-btn koha-btn-success koha-btn-sm" onclick="returnBookById(${b.id})"><i class="fas fa-undo-alt"></i> Return</button>
-          </li>
-        `).join('') : '<li class="text-muted">No books currently borrowed</li>';
+    // Filter change
+    bookCategoryFilter.addEventListener('change', function() {
+      currentCategoryFilter = this.value;
+      renderBooksPage(books);
+    });
+
+    // Admin school selector
+    adminSchoolSelect.addEventListener('change', function() {
+      adminSelectedSchool = this.value;
+      setupFirestoreListeners();
+      addActivityToCloud(`Admin switched to view: ${adminSelectedSchool === '__all__' ? 'All Schools' : adminSelectedSchool}`);
+    });
+
+    // --- ADD/EDIT/DELETE BUTTONS (Same as before) ---
+    
+    // Add Book
+    document.getElementById('addBookPageBtn').addEventListener('click', async function() {
+      if (!currentUser) return alert('Please login first');
+      const title = document.getElementById('bookTitlePage').value.trim();
+      const author = document.getElementById('bookAuthorPage').value.trim();
+      const acc = document.getElementById('bookAccPage').value.trim();
+      const category = document.getElementById('bookCategoryPage').value;
+      if (!title || !author || !acc) return alert('Fill all fields');
+      
+      let institution = currentUser.institution;
+      if (currentUser.isAdmin) {
+        institution = prompt('Enter institution for this book:', adminSelectedSchool === '__all__' ? 'Springfield University' : adminSelectedSchool) || 'Springfield University';
       }
-
-      function renderBorrowedLaptopsPage(filteredLaptops) {
-        const list = document.getElementById('borrowedLaptopListPage');
-        const borrowed = filteredLaptops.filter(l => l.borrowed);
-        list.innerHTML = borrowed.length ? borrowed.map(l => `
-          <li class="borrowed-item">
-            <span><strong>${l.borrower}</strong> · ${l.owner} (${l.type}) <span class="text-muted">${new Date().toLocaleString()}</span></span>
-            <button class="koha-btn koha-btn-success koha-btn-sm" onclick="returnLaptopById(${l.id})"><i class="fas fa-undo-alt"></i> Return</button>
-          </li>
-        `).join('') : '<li class="text-muted">No laptops currently borrowed</li>';
-      }
-
-      function renderSchoolsPage() {
-        const list = document.getElementById('schoolListPage');
-        list.innerHTML = schools.map(s => `<li><i class="fas fa-school" style="color:var(--primary-green);"></i> ${s}</li>`).join('');
-      }
-
-      function renderUsersPage() {
-        const list = document.getElementById('userListPage');
-        document.getElementById('userCountPage').textContent = users.length;
-        list.innerHTML = users.map(u => `
-          <li>
-            <span><strong>${u.email}</strong> · ${u.school} ${u.isAdmin ? '👑' : ''} <span class="text-muted">${new Date(u.registered).toLocaleDateString()}</span></span>
-          </li>
-        `).join('');
-      }
-
-      function renderDashboard(data) {
-        if (!currentUser) return;
-        document.getElementById('dashBookCount').textContent = data.books.length;
-        document.getElementById('dashLaptopCount').textContent = data.laptops.length;
-        document.getElementById('dashStationaryCount').textContent = data.stationary.reduce((sum, s) => sum + s.quantity, 0);
-        document.getElementById('dashUserCount').textContent = users.length;
-        document.getElementById('dashboardStats').textContent = `Welcome ${currentUser.email}`;
-      }
-
-      function renderAdminPanel() {
-        if (!currentUser || !currentUser.isAdmin) return;
-        document.getElementById('adminBookCount').textContent = books.length;
-        document.getElementById('adminLaptopCount').textContent = laptops.length;
-        document.getElementById('adminStationaryCount').textContent = stationary.reduce((sum, s) => sum + s.quantity, 0);
-        document.getElementById('adminUserCount').textContent = users.length;
-        document.getElementById('adminSchoolCount').textContent = schools.length;
-        const borrowedTotal = books.filter(b => b.borrowed).length + laptops.filter(l => l.borrowed).length;
-        document.getElementById('adminBorrowedCount').textContent = borrowedTotal;
-      }
-
-      function updateCounts(data) {
-        // Book count is updated in renderBooksPage
-        document.getElementById('laptopCountPage').textContent = data.laptops.length;
-        document.getElementById('stationaryCountPage').textContent = data.stationary.reduce((sum, s) => sum + s.quantity, 0);
-      }
-
-      // ---------- CRUD (global) ----------
-      window.deleteBook = function(id) {
-        if (!currentUser) return alert('Please login first');
-        const book = books.find(b => b.id === id);
-        if (!book) return;
-        if (book.borrowed) return alert('Cannot delete a borrowed book');
-        if (!currentUser.isAdmin && book.institution !== currentUser.institution) {
-          return alert('You can only delete items from your institution');
-        }
-        books = books.filter(b => b.id !== id);
-        addActivity(`Book deleted: ${book.title}`);
-        renderAll();
-      };
-      window.editBook = function(id) {
-        if (!currentUser) return alert('Please login first');
-        const b = books.find(x => x.id === id);
-        if (!b) return;
-        if (!currentUser.isAdmin && b.institution !== currentUser.institution) {
-          return alert('You can only edit items from your institution');
-        }
-        if (b.borrowed) return alert('Cannot edit a borrowed book');
-        const newTitle = prompt('Edit title:', b.title);
-        if (newTitle !== null) b.title = newTitle || b.title;
-        const newAuthor = prompt('Edit author:', b.author);
-        if (newAuthor !== null) b.author = newAuthor || b.author;
-        const newAcc = prompt('Edit accession:', b.acc);
-        if (newAcc !== null) b.acc = newAcc || b.acc;
-        const newCategory = prompt('Edit category (textbook/novel/dictionary/atlas):', b.category);
-        if (newCategory !== null && ['textbook','novel','dictionary','atlas'].includes(newCategory)) {
-          b.category = newCategory;
-        }
-        addActivity(`Book edited: ${b.title}`);
-        renderAll();
-      };
-      window.deleteLaptop = function(id) {
-        if (!currentUser) return alert('Please login first');
-        const laptop = laptops.find(l => l.id === id);
-        if (!laptop) return;
-        if (laptop.borrowed) return alert('Cannot delete a borrowed laptop');
-        if (!currentUser.isAdmin && laptop.institution !== currentUser.institution) {
-          return alert('You can only delete items from your institution');
-        }
-        laptops = laptops.filter(l => l.id !== id);
-        addActivity(`Laptop deleted: ${laptop.owner}`);
-        renderAll();
-      };
-      window.editLaptop = function(id) {
-        if (!currentUser) return alert('Please login first');
-        const l = laptops.find(x => x.id === id);
-        if (!l) return;
-        if (!currentUser.isAdmin && l.institution !== currentUser.institution) {
-          return alert('You can only edit items from your institution');
-        }
-        if (l.borrowed) return alert('Cannot edit a borrowed laptop');
-        const owner = prompt('Edit owner:', l.owner);
-        if (owner !== null) l.owner = owner || l.owner;
-        const type = prompt('Edit type:', l.type);
-        if (type !== null) l.type = type || l.type;
-        const date = prompt('Edit date (YYYY-MM-DD):', l.date);
-        if (date !== null) l.date = date || l.date;
-        addActivity(`Laptop edited: ${l.owner}`);
-        renderAll();
-      };
-      window.deleteStationary = function(id) {
-        if (!currentUser) return alert('Please login first');
-        const item = stationary.find(s => s.id === id);
-        if (!item) return;
-        if (!currentUser.isAdmin && item.institution !== currentUser.institution) {
-          return alert('You can only delete items from your institution');
-        }
-        stationary = stationary.filter(s => s.id !== id);
-        addActivity(`Stationary deleted: ${item.name}`);
-        renderAll();
-      };
-      window.editStationary = function(id) {
-        if (!currentUser) return alert('Please login first');
-        const s = stationary.find(x => x.id === id);
-        if (!s) return;
-        if (!currentUser.isAdmin && s.institution !== currentUser.institution) {
-          return alert('You can only edit items from your institution');
-        }
-        const name = prompt('Edit name:', s.name);
-        if (name !== null) s.name = name || s.name;
-        const qty = prompt('Edit quantity:', s.quantity);
-        if (qty !== null) s.quantity = parseInt(qty) || 1;
-        addActivity(`Stationary edited: ${s.name}`);
-        renderAll();
-      };
-
-      // ---------- RETURN FUNCTIONS (global) ----------
-      window.returnBookById = function(id) {
-        if (!currentUser) return alert('Please login first');
-        const book = books.find(b => b.id === id);
-        if (!book || !book.borrowed) return alert('Book is not borrowed');
-        if (!currentUser.isAdmin && book.institution !== currentUser.institution) {
-          return alert('You can only return items from your institution');
-        }
-        book.borrowed = false;
-        book.borrower = '';
-        addActivity(`Book returned: ${book.title} by ${currentUser.email}`);
-        renderAll();
-      };
-
-      window.returnLaptopById = function(id) {
-        if (!currentUser) return alert('Please login first');
-        const laptop = laptops.find(l => l.id === id);
-        if (!laptop || !laptop.borrowed) return alert('Laptop is not borrowed');
-        if (!currentUser.isAdmin && laptop.institution !== currentUser.institution) {
-          return alert('You can only return items from your institution');
-        }
-        laptop.borrowed = false;
-        laptop.borrower = '';
-        addActivity(`Laptop returned: ${laptop.owner} by ${currentUser.email}`);
-        renderAll();
-      };
-
-      // ---------- ADD (page-specific) ----------
-      document.getElementById('addBookPageBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
-        const title = document.getElementById('bookTitlePage').value.trim();
-        const author = document.getElementById('bookAuthorPage').value.trim();
-        const acc = document.getElementById('bookAccPage').value.trim();
-        const category = document.getElementById('bookCategoryPage').value;
-        if (!title || !author || !acc) return alert('Fill all fields');
-        let institution = currentUser.institution;
-        if (currentUser.isAdmin) {
-          institution = prompt('Enter institution for this book:', adminSelectedSchool === '__all__' ? 'Springfield University' : adminSelectedSchool) || 'Springfield University';
-        }
-        books.push({ id: Date.now() + Math.random()*1000, title, author, acc, category, borrowed: false, borrower: '', institution });
+      
+      const newBook = { title, author, acc, category, borrowed: false, borrower: '', institution };
+      
+      showLoading();
+      try {
+        await addBookToCloud(newBook);
         document.getElementById('bookTitlePage').value = '';
         document.getElementById('bookAuthorPage').value = '';
         document.getElementById('bookAccPage').value = '';
-        addActivity(`Book added: ${title} (${getCategoryLabel(category)}) (${institution})`);
-        renderAll();
-      });
+        await addActivityToCloud(`Book added: ${title} (${getCategoryLabel(category)}) (${institution})`);
+      } catch (error) {
+        alert('Error adding book: ' + error.message);
+      }
+      hideLoading();
+    });
 
-      document.getElementById('addLaptopPageBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
-        const owner = document.getElementById('laptopOwnerPage').value.trim();
-        const type = document.getElementById('laptopTypePage').value.trim();
-        const date = document.getElementById('laptopDatePage').value;
-        if (!owner || !type || !date) return alert('Fill all fields');
-        let institution = currentUser.institution;
-        if (currentUser.isAdmin) {
-          institution = prompt('Enter institution for this laptop:', adminSelectedSchool === '__all__' ? 'Springfield University' : adminSelectedSchool) || 'Springfield University';
-        }
-        laptops.push({ id: Date.now() + Math.random()*1000, owner, type, date, borrowed: false, borrower: '', institution });
+    // Add Laptop
+    document.getElementById('addLaptopPageBtn').addEventListener('click', async function() {
+      if (!currentUser) return alert('Please login first');
+      const owner = document.getElementById('laptopOwnerPage').value.trim();
+      const type = document.getElementById('laptopTypePage').value.trim();
+      const date = document.getElementById('laptopDatePage').value;
+      if (!owner || !type || !date) return alert('Fill all fields');
+      
+      let institution = currentUser.institution;
+      if (currentUser.isAdmin) {
+        institution = prompt('Enter institution for this laptop:', adminSelectedSchool === '__all__' ? 'Springfield University' : adminSelectedSchool) || 'Springfield University';
+      }
+      
+      const newLaptop = { owner, type, date, borrowed: false, borrower: '', institution };
+      
+      showLoading();
+      try {
+        await addLaptopToCloud(newLaptop);
         document.getElementById('laptopOwnerPage').value = '';
         document.getElementById('laptopTypePage').value = '';
         document.getElementById('laptopDatePage').value = '';
-        addActivity(`Laptop added: ${owner} (${type}) (${institution})`);
-        renderAll();
-      });
+        await addActivityToCloud(`Laptop added: ${owner} (${type}) (${institution})`);
+      } catch (error) {
+        alert('Error adding laptop: ' + error.message);
+      }
+      hideLoading();
+    });
 
-      document.getElementById('addStationaryPageBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
-        const name = document.getElementById('stationaryNamePage').value.trim();
-        const qty = parseInt(document.getElementById('stationaryQtyPage').value) || 1;
-        if (!name) return alert('Enter item name');
-        let institution = currentUser.institution;
-        if (currentUser.isAdmin) {
-          institution = prompt('Enter institution for this item:', adminSelectedSchool === '__all__' ? 'Springfield University' : adminSelectedSchool) || 'Springfield University';
-        }
-        stationary.push({ id: Date.now() + Math.random()*1000, name, quantity: qty, institution });
+    // Add Stationary
+    document.getElementById('addStationaryPageBtn').addEventListener('click', async function() {
+      if (!currentUser) return alert('Please login first');
+      const name = document.getElementById('stationaryNamePage').value.trim();
+      const qty = parseInt(document.getElementById('stationaryQtyPage').value) || 1;
+      if (!name) return alert('Enter item name');
+      
+      let institution = currentUser.institution;
+      if (currentUser.isAdmin) {
+        institution = prompt('Enter institution for this item:', adminSelectedSchool === '__all__' ? 'Springfield University' : adminSelectedSchool) || 'Springfield University';
+      }
+      
+      const newItem = { name, quantity: qty, institution };
+      
+      showLoading();
+      try {
+        await addStationaryToCloud(newItem);
         document.getElementById('stationaryNamePage').value = '';
         document.getElementById('stationaryQtyPage').value = '1';
-        addActivity(`Stationary added: ${name} (x${qty}) (${institution})`);
-        renderAll();
-      });
+        await addActivityToCloud(`Stationary added: ${name} (x${qty}) (${institution})`);
+      } catch (error) {
+        alert('Error adding stationary: ' + error.message);
+      }
+      hideLoading();
+    });
 
-      // ---------- BORROW / RETURN ----------
-      document.getElementById('borrowBookPageBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
-        const acc = prompt('Enter Accession number of book to borrow:');
-        if (!acc) return;
-        const data = getFilteredData();
-        const book = data.books.find(b => b.acc === acc && !b.borrowed);
-        if (!book) return alert('Book not available or already borrowed');
-        const borrower = prompt('Enter borrower name:');
-        if (!borrower) return;
-        const fullBook = books.find(b => b.id === book.id);
-        if (fullBook) {
-          fullBook.borrowed = true;
-          fullBook.borrower = borrower;
+    // Borrow Book
+    document.getElementById('borrowBookPageBtn').addEventListener('click', async function() {
+      if (!currentUser) return alert('Please login first');
+      const acc = prompt('Enter Accession number of book to borrow:');
+      if (!acc) return;
+      
+      const book = books.find(b => b.acc === acc && !b.borrowed);
+      if (!book) return alert('Book not available or already borrowed');
+      
+      const borrower = prompt('Enter borrower name:');
+      if (!borrower) return;
+      
+      showLoading();
+      try {
+        await borrowBookInCloud(book.id, borrower);
+        await addActivityToCloud(`Book borrowed: ${book.title} by ${borrower}`);
+      } catch (error) {
+        alert('Error borrowing book: ' + error.message);
+      }
+      hideLoading();
+    });
+
+    // Return Book
+    document.getElementById('returnBookPageBtn').addEventListener('click', async function() {
+      if (!currentUser) return alert('Please login first');
+      const acc = prompt('Enter Accession number of book to return:');
+      if (!acc) return;
+      
+      const book = books.find(b => b.acc === acc && b.borrowed);
+      if (!book) return alert('Book not found or not borrowed');
+      
+      showLoading();
+      try {
+        await returnBookInCloud(book.id);
+        await addActivityToCloud(`Book returned: ${book.title}`);
+      } catch (error) {
+        alert('Error returning book: ' + error.message);
+      }
+      hideLoading();
+    });
+
+    // Borrow Laptop
+    document.getElementById('borrowLaptopPageBtn').addEventListener('click', async function() {
+      if (!currentUser) return alert('Please login first');
+      const owner = prompt('Enter Laptop owner (identifier):');
+      if (!owner) return;
+      
+      const laptop = laptops.find(l => l.owner === owner && !l.borrowed);
+      if (!laptop) return alert('Laptop not available or already borrowed');
+      
+      const borrower = prompt('Enter borrower name:');
+      if (!borrower) return;
+      
+      showLoading();
+      try {
+        await borrowLaptopInCloud(laptop.id, borrower);
+        await addActivityToCloud(`Laptop borrowed: ${laptop.owner} by ${borrower}`);
+      } catch (error) {
+        alert('Error borrowing laptop: ' + error.message);
+      }
+      hideLoading();
+    });
+
+    // Return Laptop
+    document.getElementById('returnLaptopPageBtn').addEventListener('click', async function() {
+      if (!currentUser) return alert('Please login first');
+      const owner = prompt('Enter Laptop owner to return:');
+      if (!owner) return;
+      
+      const laptop = laptops.find(l => l.owner === owner && l.borrowed);
+      if (!laptop) return alert('Laptop not found or not borrowed');
+      
+      showLoading();
+      try {
+        await returnLaptopInCloud(laptop.id);
+        await addActivityToCloud(`Laptop returned: ${laptop.owner}`);
+      } catch (error) {
+        alert('Error returning laptop: ' + error.message);
+      }
+      hideLoading();
+    });
+
+    // Clear Returned Books
+    document.getElementById('clearReturnedBooksBtn').addEventListener('click', async function() {
+      if (!currentUser) return alert('Please login first');
+      const borrowed = books.filter(b => b.borrowed);
+      if (borrowed.length === 0) return alert('No borrowed books to clear');
+      
+      showLoading();
+      try {
+        for (const b of borrowed) {
+          await returnBookInCloud(b.id);
         }
-        addActivity(`Book borrowed: ${book.title} by ${borrower}`);
-        renderAll();
-      });
-
-      document.getElementById('returnBookPageBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
-        const acc = prompt('Enter Accession number of book to return:');
-        if (!acc) return;
-        const data = getFilteredData();
-        const book = data.books.find(b => b.acc === acc && b.borrowed);
-        if (!book) return alert('Book not found or not borrowed');
-        const fullBook = books.find(b => b.id === book.id);
-        if (fullBook) {
-          fullBook.borrowed = false;
-          fullBook.borrower = '';
-        }
-        addActivity(`Book returned: ${book.title}`);
-        renderAll();
-      });
-
-      document.getElementById('borrowLaptopPageBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
-        const owner = prompt('Enter Laptop owner (identifier):');
-        if (!owner) return;
-        const data = getFilteredData();
-        const laptop = data.laptops.find(l => l.owner === owner && !l.borrowed);
-        if (!laptop) return alert('Laptop not available or already borrowed');
-        const borrower = prompt('Enter borrower name:');
-        if (!borrower) return;
-        const fullLaptop = laptops.find(l => l.id === laptop.id);
-        if (fullLaptop) {
-          fullLaptop.borrowed = true;
-          fullLaptop.borrower = borrower;
-        }
-        addActivity(`Laptop borrowed: ${laptop.owner} by ${borrower}`);
-        renderAll();
-      });
-
-      document.getElementById('returnLaptopPageBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
-        const owner = prompt('Enter Laptop owner to return:');
-        if (!owner) return;
-        const data = getFilteredData();
-        const laptop = data.laptops.find(l => l.owner === owner && l.borrowed);
-        if (!laptop) return alert('Laptop not found or not borrowed');
-        const fullLaptop = laptops.find(l => l.id === laptop.id);
-        if (fullLaptop) {
-          fullLaptop.borrowed = false;
-          fullLaptop.borrower = '';
-        }
-        addActivity(`Laptop returned: ${laptop.owner}`);
-        renderAll();
-      });
-
-      // ---------- CLEAR RETURNED ----------
-      document.getElementById('clearReturnedBooksBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
-        const data = getFilteredData();
-        const borrowed = data.books.filter(b => b.borrowed);
-        if (borrowed.length === 0) return alert('No borrowed books to clear');
-        borrowed.forEach(b => {
-          const fullBook = books.find(book => book.id === b.id);
-          if (fullBook) {
-            fullBook.borrowed = false;
-            fullBook.borrower = '';
-          }
-        });
-        addActivity(`Cleared all borrowed books (${borrowed.length} items)`);
-        renderAll();
+        await addActivityToCloud(`Cleared all borrowed books (${borrowed.length} items)`);
         alert(`Cleared ${borrowed.length} borrowed books. All returned.`);
-      });
+      } catch (error) {
+        alert('Error clearing books: ' + error.message);
+      }
+      hideLoading();
+    });
 
-      document.getElementById('clearReturnedLaptopsBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
-        const data = getFilteredData();
-        const borrowed = data.laptops.filter(l => l.borrowed);
-        if (borrowed.length === 0) return alert('No borrowed laptops to clear');
-        borrowed.forEach(l => {
-          const fullLaptop = laptops.find(lap => lap.id === l.id);
-          if (fullLaptop) {
-            fullLaptop.borrowed = false;
-            fullLaptop.borrower = '';
-          }
-        });
-        addActivity(`Cleared all borrowed laptops (${borrowed.length} items)`);
-        renderAll();
+    // Clear Returned Laptops
+    document.getElementById('clearReturnedLaptopsBtn').addEventListener('click', async function() {
+      if (!currentUser) return alert('Please login first');
+      const borrowed = laptops.filter(l => l.borrowed);
+      if (borrowed.length === 0) return alert('No borrowed laptops to clear');
+      
+      showLoading();
+      try {
+        for (const l of borrowed) {
+          await returnLaptopInCloud(l.id);
+        }
+        await addActivityToCloud(`Cleared all borrowed laptops (${borrowed.length} items)`);
         alert(`Cleared ${borrowed.length} borrowed laptops. All returned.`);
-      });
+      } catch (error) {
+        alert('Error clearing laptops: ' + error.message);
+      }
+      hideLoading();
+    });
 
-      // ---------- STATIONARY GIVE ----------
-      document.getElementById('giveStationaryPageBtn').addEventListener('click', function() {
-        if (!currentUser) return alert('Please login first');
-        const data = getFilteredData();
-        const name = prompt('Enter stationary item name to give:');
-        if (!name) return;
-        const item = data.stationary.find(s => s.name.toLowerCase() === name.toLowerCase());
-        if (!item) return alert('Item not found');
-        const qty = parseInt(prompt(`How many ${item.name} to give? (available ${item.quantity})`));
-        if (isNaN(qty) || qty <= 0) return alert('Invalid quantity');
-        if (qty > item.quantity) return alert('Not enough quantity');
-        const fullItem = stationary.find(s => s.id === item.id);
-        if (fullItem) {
-          fullItem.quantity -= qty;
-          if (fullItem.quantity === 0) stationary = stationary.filter(s => s.id !== item.id);
-        }
-        addActivity(`Stationary given: ${qty} x ${item.name} to staff`);
-        alert(`Given ${qty} ${item.name} to staff.`);
-        renderAll();
-      });
-
-      // ---------- SCHOOL REGISTER ----------
-      document.getElementById('addSchoolPageBtn').addEventListener('click', function() {
-        if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
-        const name = document.getElementById('schoolNamePage').value.trim();
-        if (!name) return alert('Enter school name');
-        if (!schools.includes(name)) {
-          schools.push(name);
-          populateSchoolSelector();
-        }
-        document.getElementById('schoolNamePage').value = '';
-        addActivity(`School registered: ${name}`);
-        renderAll();
-      });
-
-      // ---------- ADMIN PANEL ACTIONS ----------
-      document.getElementById('adminResetAllBtn').addEventListener('click', function() {
-        if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
-        if (!confirm('Reset ALL borrowed items across ALL institutions? This action cannot be undone.')) return;
-        books.forEach(b => { b.borrowed = false; b.borrower = ''; });
-        laptops.forEach(l => { l.borrowed = false; l.borrower = ''; });
-        addActivity('Admin: Reset all borrowed items');
-        renderAll();
-        alert('All borrowed items have been reset.');
-      });
-
-      document.getElementById('adminExportAllBtn').addEventListener('click', function() {
-        if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
-        const data = {
-          books, laptops, stationary, schools, users,
-          activityLog: activityLog.slice(0, 20),
-          exportedAt: new Date().toISOString()
-        };
-        const json = JSON.stringify(data, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cele_dev_ils_export_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        addActivity('Admin: Exported all data');
-        alert('Data exported successfully!');
-      });
-
-      document.getElementById('adminRefreshBtn').addEventListener('click', function() {
-        if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
-        renderAll();
-        alert('Stats refreshed!');
-      });
-
-      // ---------- AUTH EVENTS ----------
-      document.getElementById('loginBtn').addEventListener('click', () => openModal('login'));
-      document.getElementById('registerBtn').addEventListener('click', () => openModal('register'));
-      document.getElementById('homepageLoginBtn').addEventListener('click', () => openModal('login'));
-      document.getElementById('homepageRegisterBtn').addEventListener('click', () => openModal('register'));
-      adminQuickLoginBtn.addEventListener('click', handleAdminQuickLogin);
-      modalClose.addEventListener('click', closeModal);
-      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-      authSubmitBtn.addEventListener('click', handleAuthSubmit);
-      authSwitchLink.addEventListener('click', function() {
-        if (isLoginMode) {
-          openModal('register');
+    // Give Stationary
+    document.getElementById('giveStationaryPageBtn').addEventListener('click', async function() {
+      if (!currentUser) return alert('Please login first');
+      const name = prompt('Enter stationary item name to give:');
+      if (!name) return;
+      
+      const item = stationary.find(s => s.name.toLowerCase() === name.toLowerCase());
+      if (!item) return alert('Item not found');
+      
+      const qty = parseInt(prompt(`How many ${item.name} to give? (available ${item.quantity})`));
+      if (isNaN(qty) || qty <= 0) return alert('Invalid quantity');
+      if (qty > item.quantity) return alert('Not enough quantity');
+      
+      const newQuantity = item.quantity - qty;
+      
+      showLoading();
+      try {
+        if (newQuantity === 0) {
+          await deleteStationaryFromCloud(item.id);
         } else {
-          openModal('login');
+          await updateStationaryInCloud(item.id, { quantity: newQuantity });
         }
-      });
+        await addActivityToCloud(`Stationary given: ${qty} x ${item.name} to staff`);
+        alert(`Given ${qty} ${item.name} to staff.`);
+      } catch (error) {
+        alert('Error updating stationary: ' + error.message);
+      }
+      hideLoading();
+    });
 
-      forgotPasswordLink.addEventListener('click', function() {
-        authForm.style.display = 'none';
-        forgotForm.style.display = 'block';
-        resetMessage.style.display = 'none';
-      });
+    // Add School
+    document.getElementById('addSchoolPageBtn').addEventListener('click', async function() {
+      if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
+      const name = document.getElementById('schoolNamePage').value.trim();
+      if (!name) return alert('Enter school name');
+      
+      if (!schools.includes(name)) {
+        showLoading();
+        try {
+          await addSchoolToCloud(name);
+          await addActivityToCloud(`School registered: ${name}`);
+        } catch (error) {
+          alert('Error registering school: ' + error.message);
+        }
+        hideLoading();
+      }
+      document.getElementById('schoolNamePage').value = '';
+    });
 
-      forgotBackLink.addEventListener('click', function() {
-        authForm.style.display = 'block';
-        forgotForm.style.display = 'none';
-        resetMessage.style.display = 'none';
-      });
-
-      forgotSubmitBtn.addEventListener('click', handleForgotPassword);
-
-      logoutBtn.addEventListener('click', logout);
-
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && modal.classList.contains('show')) {
-          if (authForm.style.display !== 'none') {
-            handleAuthSubmit();
-          } else if (forgotForm.style.display !== 'none') {
-            handleForgotPassword();
+    // Admin Reset All
+    document.getElementById('adminResetAllBtn').addEventListener('click', async function() {
+      if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
+      if (!confirm('Reset ALL borrowed items across ALL institutions? This action cannot be undone.')) return;
+      
+      showLoading();
+      try {
+        for (const b of books) {
+          if (b.borrowed) {
+            await returnBookInCloud(b.id);
           }
         }
-        if (e.key === 'Escape') closeModal();
-      });
-
-      // ---------- PDF EXPORT ----------
-      function getInstitution() {
-        return document.getElementById('institutionName').value.trim() || 'Institution';
+        for (const l of laptops) {
+          if (l.borrowed) {
+            await returnLaptopInCloud(l.id);
+          }
+        }
+        await addActivityToCloud('Admin: Reset all borrowed items');
+        alert('All borrowed items have been reset.');
+      } catch (error) {
+        alert('Error resetting items: ' + error.message);
       }
-      function generatePDF(title, headers, rows, filename) {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-        const inst = getInstitution();
-        doc.setFontSize(18);
-        doc.text(inst, 14, 20);
-        doc.setFontSize(14);
-        doc.text(title, 14, 30);
-        doc.setFontSize(10);
-        let y = 40;
-        const colWidths = headers.map(() => 45);
-        doc.setFont('helvetica', 'bold');
-        let x = 14;
-        headers.forEach((h, i) => { doc.text(h, x, y); x += colWidths[i] || 45; });
-        doc.setFont('helvetica', 'normal');
-        y += 6;
-        rows.forEach(row => {
-          if (y > 270) { doc.addPage(); y = 20; }
-          let xPos = 14;
-          row.forEach((cell, i) => {
-            doc.text(String(cell), xPos, y);
-            xPos += colWidths[i] || 45;
-          });
-          y += 6;
-        });
-        doc.save(filename);
+      hideLoading();
+    });
+
+    // Admin Export
+    document.getElementById('adminExportAllBtn').addEventListener('click', function() {
+      if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
+      const data = {
+        books, laptops, stationary, schools, users,
+        activityLog: activityLog.slice(0, 20),
+        exportedAt: new Date().toISOString()
+      };
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cele_dev_ils_export_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      addActivityToCloud('Admin: Exported all data');
+      alert('Data exported successfully!');
+    });
+
+    // Admin Refresh
+    document.getElementById('adminRefreshBtn').addEventListener('click', function() {
+      if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
+      alert('Data is already live via Firestore listeners!');
+    });
+
+    // PDF buttons
+    document.getElementById('pdfBooksPageBtn').addEventListener('click', function() {
+      const rows = books.map(b => [b.title || 'Untitled', b.author || 'Unknown', b.acc || 'N/A', getCategoryLabel(b.category), b.borrowed ? 'Borrowed' : 'Available']);
+      generatePDF('Books Catalog', ['Title', 'Author', 'Accession', 'Category', 'Status'], rows, 'books_catalog.pdf');
+    });
+
+    document.getElementById('pdfLaptopsPageBtn').addEventListener('click', function() {
+      const rows = laptops.map(l => [l.owner || 'Unknown', l.type || 'N/A', l.date || 'N/A', l.borrowed ? 'Borrowed' : 'Available']);
+      generatePDF('Laptops Registered', ['Owner', 'Type', 'Date Registered', 'Status'], rows, 'laptops_registered.pdf');
+    });
+
+    document.getElementById('pdfStationaryPageBtn').addEventListener('click', function() {
+      const rows = stationary.map(s => [s.name || 'Unnamed', String(s.quantity || 0)]);
+      generatePDF('Stationary Inventory', ['Item', 'Quantity'], rows, 'stationary_inventory.pdf');
+    });
+
+    document.getElementById('pdfBorrowedBooksPageBtn').addEventListener('click', function() {
+      const borrowed = books.filter(b => b.borrowed);
+      if (borrowed.length === 0) return alert('No borrowed books.');
+      const rows = borrowed.map(b => [b.title || 'Untitled', b.author || 'Unknown', b.acc || 'N/A', getCategoryLabel(b.category), b.borrower || 'Unknown']);
+      generatePDF('Borrowed Books', ['Title', 'Author', 'Accession', 'Category', 'Borrower'], rows, 'borrowed_books.pdf');
+    });
+
+    document.getElementById('pdfBorrowedLaptopsPageBtn').addEventListener('click', function() {
+      const borrowed = laptops.filter(l => l.borrowed);
+      if (borrowed.length === 0) return alert('No borrowed laptops.');
+      const rows = borrowed.map(l => [l.owner || 'Unknown', l.type || 'N/A', l.date || 'N/A', l.borrower || 'Unknown']);
+      generatePDF('Borrowed Laptops', ['Owner', 'Type', 'Date Reg.', 'Borrower'], rows, 'borrowed_laptops.pdf');
+    });
+
+    // ============================================================
+    // AUTH STATE LISTENER (PERSISTENT SESSION)
+    // ============================================================
+    
+    onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // User is logged in
+        try {
+          // Fetch user profile from Firestore using UID
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            currentUser = { 
+              id: firebaseUser.uid, 
+              email: firebaseUser.email, 
+              ...userData 
+            };
+          } else {
+            // Create fallback profile if it doesn't exist
+            const fallbackUser = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              school: 'Unknown',
+              institution: 'Unknown',
+              isAdmin: firebaseUser.email === ADMIN_EMAIL,
+              registered: new Date().toISOString()
+            };
+            await setDoc(doc(db, 'users', firebaseUser.uid), fallbackUser);
+            currentUser = { id: firebaseUser.uid, ...fallbackUser };
+          }
+          
+          // Update UI for logged-in state
+          updateUIForLoggedIn();
+          
+          // Add activity log entry for auto-login
+          await addActivityToCloud(`User ${currentUser.email} auto-logged in`);
+          
+          // Setup Firestore listeners
+          setupFirestoreListeners();
+          
+          hideLoading();
+        } catch (error) {
+          console.error('Error loading user data:', error);
+          // If we can't load user data, treat as logged out
+          currentUser = null;
+          updateUIForLoggedOut();
+          hideLoading();
+        }
+      } else {
+        // User is logged out
+        // Clean up all listeners
+        cleanupListeners();
+        
+        // Clear state
+        currentUser = null;
+        books = [];
+        laptops = [];
+        stationary = [];
+        schools = [];
+        users = [];
+        activityLog = [];
+        
+        // Update UI
+        updateUIForLoggedOut();
+        hideLoading();
       }
+    });
 
-      document.getElementById('pdfBooksPageBtn').addEventListener('click', function() {
-        const data = getFilteredData();
-        const rows = data.books.map(b => [b.title, b.author, b.acc, getCategoryLabel(b.category), b.borrowed ? 'Borrowed' : 'Available']);
-        generatePDF('Books Catalog', ['Title', 'Author', 'Accession', 'Category', 'Status'], rows, 'books_catalog.pdf');
-      });
-      document.getElementById('pdfLaptopsPageBtn').addEventListener('click', function() {
-        const data = getFilteredData();
-        const rows = data.laptops.map(l => [l.owner, l.type, l.date, l.borrowed ? 'Borrowed' : 'Available']);
-        generatePDF('Laptops Registered', ['Owner', 'Type', 'Date Registered', 'Status'], rows, 'laptops_registered.pdf');
-      });
-      document.getElementById('pdfStationaryPageBtn').addEventListener('click', function() {
-        const data = getFilteredData();
-        const rows = data.stationary.map(s => [s.name, String(s.quantity)]);
-        generatePDF('Stationary Inventory', ['Item', 'Quantity'], rows, 'stationary_inventory.pdf');
-      });
-      document.getElementById('pdfBorrowedBooksPageBtn').addEventListener('click', function() {
-        const data = getFilteredData();
-        const borrowed = data.books.filter(b => b.borrowed);
-        if (borrowed.length === 0) return alert('No borrowed books.');
-        const rows = borrowed.map(b => [b.title, b.author, b.acc, getCategoryLabel(b.category), b.borrower, new Date().toLocaleString()]);
-        generatePDF('Borrowed Books', ['Title', 'Author', 'Accession', 'Category', 'Borrower', 'Date/Time'], rows, 'borrowed_books.pdf');
-      });
-      document.getElementById('pdfBorrowedLaptopsPageBtn').addEventListener('click', function() {
-        const data = getFilteredData();
-        const borrowed = data.laptops.filter(l => l.borrowed);
-        if (borrowed.length === 0) return alert('No borrowed laptops.');
-        const rows = borrowed.map(l => [l.owner, l.type, l.date, l.borrower, new Date().toLocaleString()]);
-        generatePDF('Borrowed Laptops', ['Owner', 'Type', 'Date Reg.', 'Borrower', 'Date/Time'], rows, 'borrowed_laptops.pdf');
-      });
-
-      // ---------- INIT ----------
-      ensureAdminExists();
-      updateUIForLoggedIn();
-      renderAll();
-      addActivity('System initialized');
-    })();
+    // ============================================================
+    // INIT
+    // ============================================================
+    
+    // Show loading overlay
+    showLoading();
+    
+    // Initialize with default empty data
+    renderAll();
+    
+    // Note: The onAuthStateChanged listener will handle the rest
+    // If user is already logged in, it will set up the listeners
+    
+    console.log('🚀 Cele.Dev ILS initialized with Firebase Authentication');
+    console.log('📡 Real-time listeners with institution-based filtering');
+    console.log('🔐 Firebase Authentication ready with persistent sessions');
   </script>
 </body>
 </html>
