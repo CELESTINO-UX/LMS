@@ -901,9 +901,7 @@
       const ADMIN_EMAIL = 'onyangocelestino@gmail.com';
       const ADMIN_PASSWORD = 'Cele.Dev2026';
 
-      let users = [
-        { email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', institution: 'Admin', registered: new Date().toISOString(), isAdmin: true }
-      ];
+      let users = [];
       let currentUser = null;
       let resetTokens = {};
 
@@ -937,17 +935,36 @@
 
       // ---------- AUTH FUNCTIONS ----------
       function ensureAdminExists() {
-        const adminExists = users.some(u => u.email === ADMIN_EMAIL);
+        // Check if admin exists in users array
+        const adminExists = users.some(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
         if (!adminExists) {
-          users.push({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', institution: 'Admin', registered: new Date().toISOString(), isAdmin: true });
+          users.push({ 
+            email: ADMIN_EMAIL, 
+            password: ADMIN_PASSWORD, 
+            school: 'Admin', 
+            institution: 'Admin', 
+            registered: new Date().toISOString(), 
+            isAdmin: true 
+          });
           saveUsers();
+          console.log('Admin account created');
+        } else {
+          // Ensure admin has correct password
+          const admin = users.find(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+          if (admin && admin.password !== ADMIN_PASSWORD) {
+            admin.password = ADMIN_PASSWORD;
+            saveUsers();
+            console.log('Admin password reset');
+          }
         }
       }
 
       function saveUsers() {
         try {
           localStorage.setItem('cele_lms_users', JSON.stringify(users));
-        } catch(e) {}
+        } catch(e) {
+          console.warn('Could not save users to localStorage');
+        }
       }
 
       function loadUsers() {
@@ -955,16 +972,23 @@
           const data = localStorage.getItem('cele_lms_users');
           if (data) {
             const parsed = JSON.parse(data);
-            const adminExists = parsed.some(u => u.email === ADMIN_EMAIL);
-            if (!adminExists) {
-              parsed.push({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD, school: 'Admin', institution: 'Admin', registered: new Date().toISOString(), isAdmin: true });
+            // Ensure we have an array
+            if (Array.isArray(parsed)) {
+              users = parsed;
+            } else {
+              users = [];
             }
-            users = parsed;
+          } else {
+            users = [];
           }
-        } catch(e) {}
+        } catch(e) {
+          users = [];
+        }
+        // Always ensure admin exists
         ensureAdminExists();
-        saveUsers();
       }
+      
+      // Initialize users
       loadUsers();
 
       function findUser(email) {
@@ -974,6 +998,7 @@
       function loginUser(email, password) {
         const user = findUser(email);
         if (!user) return { success: false, message: 'User not found' };
+        // Case-sensitive password check
         if (user.password !== password) return { success: false, message: 'Incorrect password' };
         return { success: true, user };
       }
@@ -1041,7 +1066,12 @@
       function performLogin(email, password) {
         const result = loginUser(email, password);
         if (result.success) {
-          currentUser = { email: result.user.email, school: result.user.school, institution: result.user.institution, isAdmin: result.user.isAdmin || false };
+          currentUser = { 
+            email: result.user.email, 
+            school: result.user.school, 
+            institution: result.user.institution, 
+            isAdmin: result.user.isAdmin || false 
+          };
           updateUIForLoggedIn();
           closeModal();
           renderAll();
@@ -1076,7 +1106,15 @@
       }
 
       function handleAdminQuickLogin() {
-        performLogin(ADMIN_EMAIL, ADMIN_PASSWORD);
+        // Ensure admin exists before login
+        ensureAdminExists();
+        // Find the admin user
+        const adminUser = users.find(u => u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+        if (adminUser) {
+          performLogin(ADMIN_EMAIL, ADMIN_PASSWORD);
+        } else {
+          alert('Admin account not found. Please contact support.');
+        }
       }
 
       function handleForgotPassword() {
@@ -1763,6 +1801,7 @@
       });
 
       // ---------- INIT ----------
+      // Ensure admin exists on startup
       ensureAdminExists();
       updateUIForLoggedIn();
       renderAll();
