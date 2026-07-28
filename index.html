@@ -106,6 +106,25 @@
     .koha-btn-sm { padding: 0.2rem 0.9rem; font-size: 0.75rem; }
     .koha-btn-admin { background: #ff6f00; color: white; border: 2px solid var(--yellow-gold); }
     .koha-btn-admin:hover { background: #e65100; transform: scale(1.02); }
+    .koha-btn-google {
+      background: white;
+      color: #444;
+      border: 1px solid #ddd;
+      width: 100%;
+      justify-content: center;
+      padding: 0.6rem;
+      font-weight: 500;
+    }
+    .koha-btn-google:hover {
+      background: #f5f5f5;
+      border-color: #ccc;
+      transform: scale(1.02);
+    }
+    .koha-btn-google i {
+      color: #ea4335;
+      font-size: 1.2rem;
+      margin-right: 8px;
+    }
 
     .institution-title {
       background: var(--yellow-pale);
@@ -561,6 +580,22 @@
       font-size: 0.8rem;
       opacity: 0.6;
     }
+    .google-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 12px 0;
+    }
+    .google-divider hr {
+      flex: 1;
+      border: none;
+      border-top: 1px solid var(--border-color);
+    }
+    .google-divider span {
+      color: var(--text-dark);
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
 
     .koha-footer {
       text-align: center;
@@ -907,6 +942,15 @@
           <a id="forgotPasswordLink">Forgot password?</a>
         </div>
         <button class="koha-btn koha-btn-primary" id="authSubmitBtn"><i class="fas fa-arrow-right"></i> Login</button>
+        
+        <!-- Google Sign-In Button -->
+        <div class="google-divider">
+          <hr><span>or continue with</span><hr>
+        </div>
+        <button class="koha-btn koha-btn-google" id="googleSignInBtn">
+          <i class="fab fa-google"></i> Sign in with Google
+        </button>
+        
         <div class="admin-login-divider">
           <hr><span>OR</span><hr>
         </div>
@@ -927,6 +971,27 @@
         </div>
       </div>
       <div id="resetMessage" style="display:none; text-align:center; padding:10px; background:var(--bg-light); border-radius:30px; margin-top:10px; border:1px solid var(--border-color);"></div>
+    </div>
+  </div>
+
+  <!-- ONBOARDING MODAL FOR GOOGLE USERS -->
+  <div class="modal-overlay" id="onboardingModal">
+    <div class="modal-box">
+      <h2><i class="fas fa-school" style="color:var(--yellow-gold);"></i> Welcome! Set Up Your Profile</h2>
+      <p style="margin-bottom:1rem; color:var(--text-dark); font-family:'Times New Roman', Times, serif;">
+        Please enter your school or institution to complete your profile setup.
+      </p>
+      <div class="koha-input-group">
+        <input type="text" id="onboardingSchool" placeholder="School / Institution Name" style="flex:1;">
+      </div>
+      <button class="koha-btn koha-btn-primary" id="onboardingSubmitBtn" style="width:100%;">
+        <i class="fas fa-check"></i> Complete Setup
+      </button>
+      <div style="margin-top:12px; text-align:center;">
+        <button class="koha-btn koha-btn-danger koha-btn-sm" id="onboardingCancelBtn">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
     </div>
   </div>
 
@@ -955,7 +1020,7 @@
 
   <script type="module">
     // ============================================================
-    // FIREBASE CONFIGURATION - YOUR ACTUAL CONFIG
+    // FIREBASE CONFIGURATION
     // ============================================================
     const firebaseConfig = {
       apiKey: "AIzaSyClEbwwaLodqrvJQofXCw0AThAQAKxUM0U",
@@ -991,13 +1056,16 @@
       signInWithEmailAndPassword, 
       signOut, 
       onAuthStateChanged,
-      sendPasswordResetEmail
+      sendPasswordResetEmail,
+      GoogleAuthProvider,
+      signInWithPopup
     } from "firebase/auth";
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
 
     console.log('✅ Firebase initialized successfully!');
     console.log('📁 Project ID:', firebaseConfig.projectId);
@@ -1017,6 +1085,7 @@
     let currentUser = null;
     let adminSelectedSchool = '__all__';
     let currentCategoryFilter = 'all';
+    let pendingGoogleUser = null; // Store pending Google user for onboarding
 
     // Unsubscribe functions for real-time listeners
     let unsubscribeBooks = null;
@@ -1029,6 +1098,7 @@
     // DOM refs
     const loadingOverlay = document.getElementById('loadingOverlay');
     const modal = document.getElementById('authModal');
+    const onboardingModal = document.getElementById('onboardingModal');
     const modalTitle = document.getElementById('authModalTitle');
     const authForm = document.getElementById('authForm');
     const forgotForm = document.getElementById('forgotForm');
@@ -1052,10 +1122,14 @@
     const homepageContainer = document.getElementById('homepageContainer');
     const sidebarUser = document.getElementById('sidebarUser');
     const adminQuickLoginBtn = document.getElementById('adminQuickLoginBtn');
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
     const institutionTitle = document.getElementById('institutionTitle');
     const adminSchoolSelector = document.getElementById('adminSchoolSelector');
     const adminSchoolSelect = document.getElementById('adminSchoolSelect');
     const bookCategoryFilter = document.getElementById('bookCategoryFilter');
+    const onboardingSchool = document.getElementById('onboardingSchool');
+    const onboardingSubmitBtn = document.getElementById('onboardingSubmitBtn');
+    const onboardingCancelBtn = document.getElementById('onboardingCancelBtn');
 
     let isLoginMode = true;
 
@@ -1138,7 +1212,91 @@
       }
     }
 
-    // Admin quick login - uses Firebase Auth
+    // Google Sign-In
+    async function signInWithGoogle() {
+      try {
+        showLoading();
+        const result = await signInWithPopup(auth, googleProvider);
+        const firebaseUser = result.user;
+        
+        // Check if user profile exists in Firestore
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        
+        if (userDoc.exists()) {
+          // User already has a profile - proceed with login
+          const userData = userDoc.data();
+          currentUser = { 
+            id: firebaseUser.uid, 
+            email: firebaseUser.email, 
+            ...userData 
+          };
+          closeModal();
+          updateUIForLoggedIn();
+          await addActivityToCloud(`User ${currentUser.email} logged in with Google`);
+          alert(`✅ Welcome ${currentUser.email}!`);
+        } else {
+          // New Google user - show onboarding modal
+          pendingGoogleUser = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName || firebaseUser.email
+          };
+          closeModal();
+          showOnboardingModal();
+        }
+        hideLoading();
+      } catch (error) {
+        hideLoading();
+        console.error('Google Sign-In error:', error);
+        if (error.code === 'auth/popup-closed-by-user') {
+          // User closed the popup, nothing to do
+          return;
+        }
+        alert('❌ Google Sign-In failed: ' + error.message);
+      }
+    }
+
+    // Complete Google user onboarding
+    async function completeGoogleOnboarding(school) {
+      if (!pendingGoogleUser) return;
+      
+      showLoading();
+      try {
+        const userProfile = {
+          uid: pendingGoogleUser.uid,
+          email: pendingGoogleUser.email,
+          school: school,
+          institution: school,
+          isAdmin: pendingGoogleUser.email === ADMIN_EMAIL,
+          registered: new Date().toISOString()
+        };
+        
+        // Save user profile to Firestore
+        await setDoc(doc(db, 'users', pendingGoogleUser.uid), userProfile);
+        
+        // Add school to schools collection if it doesn't exist
+        const schoolQuery = query(collection(db, 'schools'), where('name', '==', school));
+        const schoolSnapshot = await getDocs(schoolQuery);
+        if (schoolSnapshot.empty) {
+          await addDoc(collection(db, 'schools'), { name: school });
+        }
+        
+        // Set current user
+        currentUser = { id: pendingGoogleUser.uid, ...userProfile };
+        pendingGoogleUser = null;
+        
+        closeOnboardingModal();
+        updateUIForLoggedIn();
+        await addActivityToCloud(`New Google user registered: ${currentUser.email} (${school})`);
+        alert(`✅ Welcome ${currentUser.email}! Your profile has been set up.`);
+      } catch (error) {
+        console.error('Onboarding error:', error);
+        alert('❌ Error completing setup: ' + error.message);
+      }
+      hideLoading();
+    }
+
+    // Admin quick login
     async function handleAdminQuickLogin() {
       const adminPassword = prompt('Enter admin password:');
       if (!adminPassword) return;
@@ -1148,7 +1306,6 @@
       hideLoading();
       
       if (result.success) {
-        // The onAuthStateChanged listener will handle the rest
         closeModal();
         alert('👑 Welcome Admin! You have full system access.');
       } else {
@@ -1163,6 +1320,7 @@
         // Clean up all listeners
         cleanupListeners();
         currentUser = null;
+        pendingGoogleUser = null;
         books = [];
         laptops = [];
         stationary = [];
@@ -1188,15 +1346,28 @@
     }
 
     // ============================================================
-    // FIRESTORE REAL-TIME LISTENERS WITH FILTERED QUERIES
+    // MODAL CONTROLS
+    // ============================================================
+    
+    function showOnboardingModal() {
+      onboardingModal.classList.add('show');
+      onboardingSchool.value = '';
+      onboardingSchool.focus();
+    }
+
+    function closeOnboardingModal() {
+      onboardingModal.classList.remove('show');
+      pendingGoogleUser = null;
+    }
+
+    // ============================================================
+    // FIRESTORE REAL-TIME LISTENERS
     // ============================================================
     
     function setupFirestoreListeners() {
-      // First, clean up any existing listeners
       cleanupListeners();
 
       if (!currentUser) {
-        // No user - clear data and render empty states
         books = [];
         laptops = [];
         stationary = [];
@@ -1213,14 +1384,9 @@
       let booksQuery;
       if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
         booksQuery = collection(db, "books");
-        console.log('📚 Admin: Viewing all books');
       } else {
         const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
-        booksQuery = query(
-          collection(db, "books"), 
-          where("institution", "==", filterSchool)
-        );
-        console.log('📚 Filtering books by institution:', filterSchool);
+        booksQuery = query(collection(db, "books"), where("institution", "==", filterSchool));
       }
 
       unsubscribeBooks = onSnapshot(booksQuery, (snapshot) => {
@@ -1239,10 +1405,7 @@
         laptopsQuery = collection(db, "laptops");
       } else {
         const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
-        laptopsQuery = query(
-          collection(db, "laptops"), 
-          where("institution", "==", filterSchool)
-        );
+        laptopsQuery = query(collection(db, "laptops"), where("institution", "==", filterSchool));
       }
 
       unsubscribeLaptops = onSnapshot(laptopsQuery, (snapshot) => {
@@ -1261,10 +1424,7 @@
         stationaryQuery = collection(db, "stationary");
       } else {
         const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
-        stationaryQuery = query(
-          collection(db, "stationary"), 
-          where("institution", "==", filterSchool)
-        );
+        stationaryQuery = query(collection(db, "stationary"), where("institution", "==", filterSchool));
       }
 
       unsubscribeStationary = onSnapshot(stationaryQuery, (snapshot) => {
@@ -1335,7 +1495,7 @@
     }
 
     // ============================================================
-    // FIRESTORE OPERATIONS
+    // FIRESTORE OPERATIONS (CRUD)
     // ============================================================
     
     async function addBookToCloud(bookData) {
@@ -1533,7 +1693,6 @@
           }
         }
         
-        // Setup listeners with the new user context
         setupFirestoreListeners();
         hideLoading();
       }
@@ -1549,7 +1708,6 @@
       institutionTitle.classList.remove('hidden');
       adminSchoolSelector.style.display = 'none';
       
-      // Clear data
       books = [];
       laptops = [];
       stationary = [];
@@ -1799,7 +1957,6 @@
     // AUTH HANDLERS
     // ============================================================
     
-    // Handle auth form submission (Login/Register)
     async function handleAuthSubmit() {
       const email = authEmail.value.trim();
       const password = authPassword.value.trim();
@@ -1807,11 +1964,9 @@
 
       showLoading();
       if (isLoginMode) {
-        // Login
         const result = await loginUser(email, password);
         hideLoading();
         if (result.success) {
-          // The onAuthStateChanged listener will handle the rest
           closeModal();
           await addActivityToCloud(`User ${result.user.email} logged in`);
           alert(`✅ Welcome ${result.user.email}!`);
@@ -1819,7 +1974,6 @@
           alert('❌ Login failed: ' + result.message);
         }
       } else {
-        // Register
         const school = authSchool.value.trim();
         if (!school) {
           hideLoading();
@@ -1877,7 +2031,6 @@
     // WINDOW FUNCTIONS FOR UI ACTIONS
     // ============================================================
 
-    // Define wrapper functions for UI actions
     window.deleteBook = async function(id) {
       if (!currentUser) return alert('Please login first');
       const book = books.find(b => b.id === id);
@@ -2078,8 +2231,42 @@
     document.getElementById('homepageLoginBtn').addEventListener('click', () => openModal('login'));
     document.getElementById('homepageRegisterBtn').addEventListener('click', () => openModal('register'));
     adminQuickLoginBtn.addEventListener('click', handleAdminQuickLogin);
+    googleSignInBtn.addEventListener('click', signInWithGoogle);
     modalClose.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    // Onboarding modal
+    onboardingSubmitBtn.addEventListener('click', async () => {
+      const school = onboardingSchool.value.trim();
+      if (!school) {
+        alert('Please enter your school/institution name');
+        return;
+      }
+      await completeGoogleOnboarding(school);
+    });
+
+    onboardingCancelBtn.addEventListener('click', async () => {
+      if (pendingGoogleUser) {
+        try {
+          // Delete the user account if they cancel onboarding
+          const user = auth.currentUser;
+          if (user) {
+            await user.delete();
+          }
+        } catch (error) {
+          console.error('Error deleting user on cancel:', error);
+        }
+      }
+      pendingGoogleUser = null;
+      closeOnboardingModal();
+      alert('You can try signing up again with Google or use email/password.');
+    });
+
+    onboardingSchool.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        onboardingSubmitBtn.click();
+      }
+    });
 
     // Auth form
     authSubmitBtn.addEventListener('click', handleAuthSubmit);
@@ -2127,7 +2314,13 @@
           forgotSubmitBtn.click();
         }
       }
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Enter' && onboardingModal.classList.contains('show')) {
+        onboardingSubmitBtn.click();
+      }
+      if (e.key === 'Escape') {
+        closeModal();
+        closeOnboardingModal();
+      }
     });
 
     // Filter change
@@ -2494,11 +2687,9 @@
     
     onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // User is logged in
         try {
           console.log('👤 User authenticated:', firebaseUser.email);
           
-          // Fetch user profile from Firestore using UID
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           
           if (userDoc.exists()) {
@@ -2508,56 +2699,37 @@
               email: firebaseUser.email, 
               ...userData 
             };
+            console.log('📋 User profile loaded:', currentUser);
+            updateUIForLoggedIn();
+            await addActivityToCloud(`User ${currentUser.email} auto-logged in`);
           } else {
-            // Create fallback profile if it doesn't exist
-            const fallbackUser = {
+            // New user (likely Google) - show onboarding
+            pendingGoogleUser = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
-              school: 'Unknown',
-              institution: 'Unknown',
-              isAdmin: firebaseUser.email === ADMIN_EMAIL,
-              registered: new Date().toISOString()
+              displayName: firebaseUser.displayName || firebaseUser.email
             };
-            await setDoc(doc(db, 'users', firebaseUser.uid), fallbackUser);
-            currentUser = { id: firebaseUser.uid, ...fallbackUser };
+            // Show onboarding modal instead of logging in
+            showOnboardingModal();
+            hideLoading();
           }
-          
-          console.log('📋 User profile loaded:', currentUser);
-          
-          // Update UI for logged-in state
-          updateUIForLoggedIn();
-          
-          // Add activity log entry for auto-login
-          await addActivityToCloud(`User ${currentUser.email} auto-logged in`);
-          
-          // Setup Firestore listeners
-          setupFirestoreListeners();
-          
-          hideLoading();
         } catch (error) {
           console.error('❌ Error loading user data:', error);
-          // If we can't load user data, treat as logged out
           currentUser = null;
           updateUIForLoggedOut();
           hideLoading();
         }
       } else {
-        // User is logged out
         console.log('👤 User logged out');
-        
-        // Clean up all listeners
         cleanupListeners();
-        
-        // Clear state
         currentUser = null;
+        pendingGoogleUser = null;
         books = [];
         laptops = [];
         stationary = [];
         schools = [];
         users = [];
         activityLog = [];
-        
-        // Update UI
         updateUIForLoggedOut();
         hideLoading();
       }
@@ -2567,18 +2739,12 @@
     // INIT
     // ============================================================
     
-    // Show loading overlay
     showLoading();
-    
-    // Initialize with default empty data
     renderAll();
     
-    // Note: The onAuthStateChanged listener will handle the rest
-    // If user is already logged in, it will set up the listeners
-    
     console.log('🚀 Cele.Dev ILS initialized with Firebase Authentication');
+    console.log('🔐 Google Sign-In enabled');
     console.log('📡 Real-time listeners with institution-based filtering');
-    console.log('🔐 Firebase Authentication ready with persistent sessions');
   </script>
 </body>
 </html>
