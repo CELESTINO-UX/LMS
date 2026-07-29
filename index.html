@@ -8,7 +8,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
-    /* All styles remain the same - keeping it concise */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Times New Roman', Times, serif; }
     html, body { height: 100%; }
     body { background: #f0f5f0; display: flex; flex-direction: column; }
@@ -882,34 +881,6 @@
     </div>
   </div>
 
-  <!-- ADMIN SETUP MODAL -->
-  <div class="modal-overlay" id="adminSetupModal">
-    <div class="modal-box">
-      <button class="modal-close" id="adminSetupClose">&times;</button>
-      <h2><i class="fas fa-crown" style="color:var(--yellow-gold);"></i> Admin Account Setup</h2>
-      <p style="margin-bottom:1rem; color:var(--text-dark); font-family:'Times New Roman', Times, serif;">
-        The admin account needs to be set up. Please enter a password to create or reset it.
-      </p>
-      <div class="koha-input-group">
-        <input type="email" id="adminSetupEmail" value="onyangocelestino@gmail.com" readonly style="background:#f5f5f5;">
-      </div>
-      <div class="koha-input-group">
-        <input type="password" id="adminSetupPassword" placeholder="New password (min 6 characters)" required>
-      </div>
-      <div class="koha-input-group">
-        <input type="password" id="adminSetupConfirmPassword" placeholder="Confirm password" required>
-      </div>
-      <button class="koha-btn koha-btn-primary" id="adminSetupSubmitBtn" style="width:100%;">
-        <i class="fas fa-user-plus"></i> Create / Reset Admin Account
-      </button>
-      <div style="margin-top:12px; text-align:center;">
-        <button class="koha-btn koha-btn-outline koha-btn-sm" id="adminSetupCancelBtn" style="background:var(--primary-dark); color:white;">
-          <i class="fas fa-arrow-left"></i> Back to Login
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- FOOTER -->
   <footer class="koha-footer">
     <div>Cele.Dev ILS · Integrated Library Management System</div>
@@ -973,8 +944,7 @@
       sendPasswordResetEmail,
       GoogleAuthProvider,
       signInWithPopup,
-      fetchSignInMethodsForEmail,
-      sendPasswordResetEmail
+      fetchSignInMethodsForEmail
     } from "firebase/auth";
 
     const app = initializeApp(firebaseConfig);
@@ -1011,7 +981,6 @@
     const loadingOverlay = document.getElementById('loadingOverlay');
     const modal = document.getElementById('authModal');
     const onboardingModal = document.getElementById('onboardingModal');
-    const adminSetupModal = document.getElementById('adminSetupModal');
     const modalTitle = document.getElementById('authModalTitle');
     const authForm = document.getElementById('authForm');
     const forgotForm = document.getElementById('forgotForm');
@@ -1043,22 +1012,39 @@
     const onboardingSchool = document.getElementById('onboardingSchool');
     const onboardingSubmitBtn = document.getElementById('onboardingSubmitBtn');
     const onboardingCancelBtn = document.getElementById('onboardingCancelBtn');
-    const adminSetupPassword = document.getElementById('adminSetupPassword');
-    const adminSetupConfirmPassword = document.getElementById('adminSetupConfirmPassword');
-    const adminSetupSubmitBtn = document.getElementById('adminSetupSubmitBtn');
-    const adminSetupCancelBtn = document.getElementById('adminSetupCancelBtn');
-    const adminSetupClose = document.getElementById('adminSetupClose');
 
     let isLoginMode = true;
 
+    // ============================================================
+    // HELPER FUNCTIONS
+    // ============================================================
     function showLoading() { loadingOverlay.classList.add('show'); }
     function hideLoading() { loadingOverlay.classList.remove('show'); }
+
+    function getCategoryLabel(category) {
+      const labels = {
+        'textbook': '📖 Textbook',
+        'novel': '📕 Novel',
+        'dictionary': '📗 Dictionary/Kamusi',
+        'atlas': '🌍 Atlas'
+      };
+      return labels[category] || category;
+    }
+
+    function getCategoryClass(category) {
+      const classes = {
+        'textbook': 'cat-textbook',
+        'novel': 'cat-novel',
+        'dictionary': 'cat-dictionary',
+        'atlas': 'cat-atlas'
+      };
+      return classes[category] || '';
+    }
 
     // ============================================================
     // AUTH FUNCTIONS
     // ============================================================
 
-    // Register or update user profile
     async function createOrUpdateUserProfile(user, school, isAdmin = false) {
       const userProfile = {
         uid: user.uid,
@@ -1071,7 +1057,6 @@
       
       await setDoc(doc(db, 'users', user.uid), userProfile);
       
-      // Add school to schools collection if it doesn't exist
       const schoolQuery = query(collection(db, 'schools'), where('name', '==', school));
       const schoolSnapshot = await getDocs(schoolQuery);
       if (schoolSnapshot.empty) {
@@ -1081,7 +1066,6 @@
       return userProfile;
     }
 
-    // Register new user with Firebase Auth and Firestore
     async function registerUser(email, password, school) {
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -1094,7 +1078,6 @@
       }
     }
 
-    // Login user with Firebase Auth
     async function loginUser(email, password) {
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -1112,7 +1095,6 @@
             } 
           };
         } else {
-          // If user exists in Auth but not in Firestore, create profile
           const school = prompt('Please enter your school/institution:');
           if (!school) {
             await firebaseUser.delete();
@@ -1127,7 +1109,6 @@
       }
     }
 
-    // Check if admin account exists in Firebase Auth
     async function checkAdminExists() {
       try {
         const methods = await fetchSignInMethodsForEmail(auth, ADMIN_EMAIL);
@@ -1138,7 +1119,6 @@
       }
     }
 
-    // Handle admin login with setup flow
     async function handleAdminLogin() {
       const adminPassword = prompt('Enter admin password:');
       if (!adminPassword) return;
@@ -1146,7 +1126,6 @@
       showLoading();
       
       try {
-        // Try to login first
         const result = await loginUser(ADMIN_EMAIL, adminPassword);
         hideLoading();
         
@@ -1156,96 +1135,37 @@
           return;
         }
         
-        // If login fails, check if admin account exists
         const adminExists = await checkAdminExists();
         
         if (!adminExists || result.message.includes('user-not-found')) {
-          // Account doesn't exist - show setup modal
-          adminSetupModal.classList.add('show');
-          adminSetupPassword.value = '';
-          adminSetupConfirmPassword.value = '';
+          // Create admin account
+          const createAdmin = confirm('Admin account not found. Would you like to create one?');
+          if (createAdmin) {
+            const newPassword = prompt('Enter a password for the admin account (min 6 characters):');
+            if (newPassword && newPassword.length >= 6) {
+              const registerResult = await registerUser(ADMIN_EMAIL, newPassword, 'Admin');
+              if (registerResult.success) {
+                alert('✅ Admin account created! Please login.');
+                const loginResult = await loginUser(ADMIN_EMAIL, newPassword);
+                if (loginResult.success) {
+                  closeModal();
+                  alert('👑 Welcome Admin!');
+                }
+              } else {
+                alert('❌ Failed to create admin: ' + registerResult.message);
+              }
+            }
+          }
         } else {
-          // Account exists but password is wrong
           alert('❌ Incorrect password. Please try again.');
         }
       } catch (error) {
         hideLoading();
         console.error('Admin login error:', error);
-        
-        // Check if admin exists
-        const adminExists = await checkAdminExists();
-        if (!adminExists) {
-          adminSetupModal.classList.add('show');
-          adminSetupPassword.value = '';
-          adminSetupConfirmPassword.value = '';
-        } else {
-          alert('❌ Admin login failed: ' + error.message);
-        }
+        alert('❌ Admin login failed: ' + error.message);
       }
     }
 
-    // Create or reset admin account
-    async function createOrResetAdminAccount() {
-      const password = adminSetupPassword.value.trim();
-      const confirmPassword = adminSetupConfirmPassword.value.trim();
-      
-      if (!password || password.length < 6) {
-        alert('Password must be at least 6 characters.');
-        return;
-      }
-      
-      if (password !== confirmPassword) {
-        alert('Passwords do not match.');
-        return;
-      }
-      
-      showLoading();
-      
-      try {
-        // Check if admin exists
-        const adminExists = await checkAdminExists();
-        
-        if (adminExists) {
-          // Admin exists - we need to handle password reset
-          try {
-            // Send password reset email
-            await sendPasswordResetEmail(auth, ADMIN_EMAIL);
-            alert('✅ Password reset email sent to ' + ADMIN_EMAIL + '. Check your inbox and follow the instructions to reset your password.');
-            adminSetupModal.classList.remove('show');
-          } catch (resetError) {
-            // If password reset fails, we might need to delete and recreate
-            alert('❌ Could not reset password. Please contact support or try logging in with Google.');
-          }
-        } else {
-          // Create new admin account
-          const result = await registerUser(ADMIN_EMAIL, password, 'Admin');
-          if (result.success) {
-            adminSetupModal.classList.remove('show');
-            alert('✅ Admin account created successfully! Please login.');
-            
-            // Try to login automatically
-            const loginResult = await loginUser(ADMIN_EMAIL, password);
-            if (loginResult.success) {
-              closeModal();
-              alert('👑 Welcome Admin! You have full system access.');
-            } else {
-              openModal('login');
-              authEmail.value = ADMIN_EMAIL;
-              authPassword.value = password;
-            }
-          } else {
-            alert('❌ Failed to create admin account: ' + result.message);
-          }
-        }
-      } catch (error) {
-        console.error('Admin setup error:', error);
-        alert('❌ Setup failed: ' + error.message);
-      }
-      
-      hideLoading();
-    }
-
-    // Google Sign-In
     async function signInWithGoogle() {
       try {
         showLoading();
@@ -1285,7 +1205,6 @@
       }
     }
 
-    // Complete Google user onboarding
     async function completeGoogleOnboarding(school) {
       if (!pendingGoogleUser) return;
       
@@ -1311,7 +1230,6 @@
       hideLoading();
     }
 
-    // Logout user
     async function logoutUser() {
       try {
         await signOut(auth);
@@ -1332,7 +1250,6 @@
       }
     }
 
-    // Clean up listeners
     function cleanupListeners() {
       if (unsubscribeBooks) { unsubscribeBooks(); unsubscribeBooks = null; }
       if (unsubscribeLaptops) { unsubscribeLaptops(); unsubscribeLaptops = null; }
@@ -1343,133 +1260,7 @@
     }
 
     // ============================================================
-    // MODAL CONTROLS
-    // ============================================================
-    
-    function showOnboardingModal() {
-      onboardingModal.classList.add('show');
-      onboardingSchool.value = '';
-      onboardingSchool.focus();
-    }
-
-    function closeOnboardingModal() {
-      onboardingModal.classList.remove('show');
-      pendingGoogleUser = null;
-    }
-
-    function openModal(mode) {
-      isLoginMode = (mode === 'login');
-      modal.classList.add('show');
-      authForm.style.display = 'block';
-      forgotForm.style.display = 'none';
-      resetMessage.style.display = 'none';
-      if (isLoginMode) {
-        modalTitle.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-        authSubmitBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Login';
-        authSwitchText.textContent = "Don't have an account?";
-        authSwitchLink.textContent = 'Register';
-        schoolField.style.display = 'none';
-        forgotLinkWrap.style.display = 'block';
-      } else {
-        modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Register';
-        authSubmitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
-        authSwitchText.textContent = 'Already have an account?';
-        authSwitchLink.textContent = 'Login';
-        schoolField.style.display = 'flex';
-        forgotLinkWrap.style.display = 'none';
-      }
-      authEmail.value = '';
-      authPassword.value = '';
-      authSchool.value = '';
-    }
-
-    function closeModal() {
-      modal.classList.remove('show');
-    }
-
-    // ============================================================
-    // FIRESTORE LISTENERS (Simplified - same as before)
-    // ============================================================
-    
-    function setupFirestoreListeners() {
-      cleanupListeners();
-      if (!currentUser) {
-        books = []; laptops = []; stationary = []; schools = []; users = []; activityLog = [];
-        renderAll();
-        return;
-      }
-
-      // Books
-      let booksQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
-        ? collection(db, "books") 
-        : query(collection(db, "books"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution));
-      
-      unsubscribeBooks = onSnapshot(booksQuery, (snapshot) => {
-        books = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderBooksPage(books);
-        renderBorrowedBooksPage(books);
-        updateDashboardStats({ books });
-        updateAdminPanel();
-      });
-
-      // Laptops
-      let laptopsQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
-        ? collection(db, "laptops") 
-        : query(collection(db, "laptops"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution));
-      
-      unsubscribeLaptops = onSnapshot(laptopsQuery, (snapshot) => {
-        laptops = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderLaptopsPage(laptops);
-        renderBorrowedLaptopsPage(laptops);
-        updateDashboardStats({ laptops });
-        updateAdminPanel();
-      });
-
-      // Stationary
-      let stationaryQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
-        ? collection(db, "stationary") 
-        : query(collection(db, "stationary"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution));
-      
-      unsubscribeStationary = onSnapshot(stationaryQuery, (snapshot) => {
-        stationary = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderStationaryPage(stationary);
-        updateDashboardStats({ stationary });
-        updateAdminPanel();
-      });
-
-      // Schools
-      unsubscribeSchools = onSnapshot(collection(db, "schools"), (snapshot) => {
-        schools = [];
-        snapshot.forEach(doc => schools.push(doc.data().name));
-        populateSchoolSelector();
-        renderSchoolsPage();
-        updateAdminPanel();
-      });
-
-      // Users (Admin only)
-      if (currentUser.isAdmin) {
-        unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
-          users = [];
-          snapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-          renderUsersPage();
-          updateAdminPanel();
-        });
-      }
-
-      // Activity Log
-      let activityQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
-        ? query(collection(db, "activityLog"), orderBy("timestamp", "desc"), limit(50))
-        : query(collection(db, "activityLog"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution), orderBy("timestamp", "desc"), limit(50));
-      
-      unsubscribeActivity = onSnapshot(activityQuery, (snapshot) => {
-        activityLog = [];
-        snapshot.forEach(doc => activityLog.push({ id: doc.id, ...doc.data() }));
-        renderActivityLog();
-      });
-    }
-
-    // ============================================================
-    // CRUD OPERATIONS (Same as before - keep your existing functions)
+    // FIRESTORE OPERATIONS
     // ============================================================
     
     async function addBookToCloud(bookData) {
@@ -1627,94 +1418,90 @@
     }
 
     // ============================================================
-    // UI UPDATE FUNCTIONS
+    // FIRESTORE LISTENERS
     // ============================================================
     
-    function updateUIForLoggedIn() {
-      if (currentUser) {
-        userDisplay.textContent = `👤 ${currentUser.email}`;
-        userDisplay.style.display = 'inline';
-        logoutBtn.style.display = 'inline-flex';
-        document.getElementById('loginBtn').style.display = 'none';
-        document.getElementById('registerBtn').style.display = 'none';
-        dashboardWrapper.style.display = 'flex';
-        homepageContainer.style.display = 'none';
-        sidebarUser.innerHTML = `<strong>${currentUser.email}</strong><br><span style="font-size:0.8rem; color:#aab8a8;">${currentUser.isAdmin ? '👑 Admin' : currentUser.institution}</span>`;
-        
-        const schoolsItem = document.getElementById('schoolsMenuItem');
-        const usersItem = document.getElementById('usersMenuItem');
-        const adminItem = document.getElementById('adminMenuItem');
-        
-        if (currentUser.isAdmin) {
-          schoolsItem.style.display = 'flex';
-          usersItem.style.display = 'flex';
-          adminItem.style.display = 'flex';
-          institutionTitle.classList.add('hidden');
-          adminSchoolSelector.style.display = 'inline-flex';
-          populateSchoolSelector();
-        } else {
-          schoolsItem.style.display = 'none';
-          usersItem.style.display = 'none';
-          adminItem.style.display = 'none';
-          institutionTitle.classList.remove('hidden');
-          adminSchoolSelector.style.display = 'none';
-        }
-        
-        if (!currentUser.isAdmin) {
-          const activePage = document.querySelector('.page.active-page');
-          if (activePage && (activePage.id === 'pageSchools' || activePage.id === 'pageUsers' || activePage.id === 'pageAdmin')) {
-            switchPage('pageDashboard');
-          }
-        }
-        
-        setupFirestoreListeners();
-        hideLoading();
+    function setupFirestoreListeners() {
+      cleanupListeners();
+      if (!currentUser) {
+        books = []; laptops = []; stationary = []; schools = []; users = []; activityLog = [];
+        renderAll();
+        return;
       }
-    }
 
-    function updateUIForLoggedOut() {
-      userDisplay.style.display = 'none';
-      logoutBtn.style.display = 'none';
-      document.getElementById('loginBtn').style.display = 'inline-flex';
-      document.getElementById('registerBtn').style.display = 'inline-flex';
-      dashboardWrapper.style.display = 'none';
-      homepageContainer.style.display = 'flex';
-      institutionTitle.classList.remove('hidden');
-      adminSchoolSelector.style.display = 'none';
+      // Books
+      let booksQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
+        ? collection(db, "books") 
+        : query(collection(db, "books"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution));
       
-      books = [];
-      laptops = [];
-      stationary = [];
-      schools = [];
-      users = [];
-      activityLog = [];
-      renderAll();
+      unsubscribeBooks = onSnapshot(booksQuery, (snapshot) => {
+        books = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderBooksPage(books);
+        renderBorrowedBooksPage(books);
+        updateDashboardStats();
+        updateAdminPanel();
+      });
+
+      // Laptops
+      let laptopsQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
+        ? collection(db, "laptops") 
+        : query(collection(db, "laptops"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution));
+      
+      unsubscribeLaptops = onSnapshot(laptopsQuery, (snapshot) => {
+        laptops = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderLaptopsPage(laptops);
+        renderBorrowedLaptopsPage(laptops);
+        updateDashboardStats();
+        updateAdminPanel();
+      });
+
+      // Stationary
+      let stationaryQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
+        ? collection(db, "stationary") 
+        : query(collection(db, "stationary"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution));
+      
+      unsubscribeStationary = onSnapshot(stationaryQuery, (snapshot) => {
+        stationary = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderStationaryPage(stationary);
+        updateDashboardStats();
+        updateAdminPanel();
+      });
+
+      // Schools
+      unsubscribeSchools = onSnapshot(collection(db, "schools"), (snapshot) => {
+        schools = [];
+        snapshot.forEach(doc => schools.push(doc.data().name));
+        populateSchoolSelector();
+        renderSchoolsPage();
+        updateAdminPanel();
+      });
+
+      // Users (Admin only)
+      if (currentUser.isAdmin) {
+        unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+          users = [];
+          snapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
+          renderUsersPage();
+          updateAdminPanel();
+        });
+      }
+
+      // Activity Log
+      let activityQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
+        ? query(collection(db, "activityLog"), orderBy("timestamp", "desc"), limit(50))
+        : query(collection(db, "activityLog"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution), orderBy("timestamp", "desc"), limit(50));
+      
+      unsubscribeActivity = onSnapshot(activityQuery, (snapshot) => {
+        activityLog = [];
+        snapshot.forEach(doc => activityLog.push({ id: doc.id, ...doc.data() }));
+        renderActivityLog();
+      });
     }
 
     // ============================================================
     // RENDER FUNCTIONS
     // ============================================================
     
-    function getCategoryLabel(category) {
-      const labels = {
-        'textbook': '📖 Textbook',
-        'novel': '📕 Novel',
-        'dictionary': '📗 Dictionary/Kamusi',
-        'atlas': '🌍 Atlas'
-      };
-      return labels[category] || category;
-    }
-
-    function getCategoryClass(category) {
-      const classes = {
-        'textbook': 'cat-textbook',
-        'novel': 'cat-novel',
-        'dictionary': 'cat-dictionary',
-        'atlas': 'cat-atlas'
-      };
-      return classes[category] || '';
-    }
-
     function renderAll() {
       renderBooksPage(books);
       renderLaptopsPage(laptops);
@@ -1723,7 +1510,7 @@
       renderBorrowedLaptopsPage(laptops);
       renderSchoolsPage();
       renderUsersPage();
-      updateDashboardStats({ books, laptops, stationary });
+      updateDashboardStats();
       renderActivityLog();
       updateAdminPanel();
     }
@@ -1840,27 +1627,23 @@
       `).join('');
     }
 
-    function updateDashboardStats(data) {
+    function updateDashboardStats() {
       if (!currentUser) return;
-      const booksCount = data.books ? data.books.length : 0;
-      const laptopsCount = data.laptops ? data.laptops.length : 0;
-      const stationaryCount = data.stationary ? data.stationary.reduce((sum, s) => sum + (s.quantity || 0), 0) : 0;
-      
-      document.getElementById('dashBookCount').textContent = booksCount;
-      document.getElementById('dashLaptopCount').textContent = laptopsCount;
-      document.getElementById('dashStationaryCount').textContent = stationaryCount;
-      document.getElementById('dashUserCount').textContent = (users || []).length;
+      document.getElementById('dashBookCount').textContent = books.length;
+      document.getElementById('dashLaptopCount').textContent = laptops.length;
+      document.getElementById('dashStationaryCount').textContent = stationary.reduce((sum, s) => sum + (s.quantity || 0), 0);
+      document.getElementById('dashUserCount').textContent = users.length;
       document.getElementById('dashboardStats').textContent = `Welcome ${currentUser.email}`;
     }
 
     function updateAdminPanel() {
       if (!currentUser || !currentUser.isAdmin) return;
-      document.getElementById('adminBookCount').textContent = (books || []).length;
-      document.getElementById('adminLaptopCount').textContent = (laptops || []).length;
-      document.getElementById('adminStationaryCount').textContent = (stationary || []).reduce((sum, s) => sum + (s.quantity || 0), 0);
-      document.getElementById('adminUserCount').textContent = (users || []).length;
-      document.getElementById('adminSchoolCount').textContent = (schools || []).length;
-      const borrowedTotal = (books || []).filter(b => b.borrowed).length + (laptops || []).filter(l => l.borrowed).length;
+      document.getElementById('adminBookCount').textContent = books.length;
+      document.getElementById('adminLaptopCount').textContent = laptops.length;
+      document.getElementById('adminStationaryCount').textContent = stationary.reduce((sum, s) => sum + (s.quantity || 0), 0);
+      document.getElementById('adminUserCount').textContent = users.length;
+      document.getElementById('adminSchoolCount').textContent = schools.length;
+      const borrowedTotal = books.filter(b => b.borrowed).length + laptops.filter(l => l.borrowed).length;
       document.getElementById('adminBorrowedCount').textContent = borrowedTotal;
     }
 
@@ -1894,7 +1677,117 @@
     }
 
     // ============================================================
-    // WINDOW FUNCTIONS FOR UI ACTIONS
+    // MODAL CONTROLS
+    // ============================================================
+    
+    function showOnboardingModal() {
+      onboardingModal.classList.add('show');
+      onboardingSchool.value = '';
+      onboardingSchool.focus();
+    }
+
+    function closeOnboardingModal() {
+      onboardingModal.classList.remove('show');
+      pendingGoogleUser = null;
+    }
+
+    function openModal(mode) {
+      isLoginMode = (mode === 'login');
+      modal.classList.add('show');
+      authForm.style.display = 'block';
+      forgotForm.style.display = 'none';
+      resetMessage.style.display = 'none';
+      if (isLoginMode) {
+        modalTitle.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        authSubmitBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Login';
+        authSwitchText.textContent = "Don't have an account?";
+        authSwitchLink.textContent = 'Register';
+        schoolField.style.display = 'none';
+        forgotLinkWrap.style.display = 'block';
+      } else {
+        modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+        authSubmitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+        authSwitchText.textContent = 'Already have an account?';
+        authSwitchLink.textContent = 'Login';
+        schoolField.style.display = 'flex';
+        forgotLinkWrap.style.display = 'none';
+      }
+      authEmail.value = '';
+      authPassword.value = '';
+      authSchool.value = '';
+    }
+
+    function closeModal() {
+      modal.classList.remove('show');
+    }
+
+    // ============================================================
+    // UI UPDATE FUNCTIONS
+    // ============================================================
+    
+    function updateUIForLoggedIn() {
+      if (currentUser) {
+        userDisplay.textContent = `👤 ${currentUser.email}`;
+        userDisplay.style.display = 'inline';
+        logoutBtn.style.display = 'inline-flex';
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('registerBtn').style.display = 'none';
+        dashboardWrapper.style.display = 'flex';
+        homepageContainer.style.display = 'none';
+        sidebarUser.innerHTML = `<strong>${currentUser.email}</strong><br><span style="font-size:0.8rem; color:#aab8a8;">${currentUser.isAdmin ? '👑 Admin' : currentUser.institution}</span>`;
+        
+        const schoolsItem = document.getElementById('schoolsMenuItem');
+        const usersItem = document.getElementById('usersMenuItem');
+        const adminItem = document.getElementById('adminMenuItem');
+        
+        if (currentUser.isAdmin) {
+          schoolsItem.style.display = 'flex';
+          usersItem.style.display = 'flex';
+          adminItem.style.display = 'flex';
+          institutionTitle.classList.add('hidden');
+          adminSchoolSelector.style.display = 'inline-flex';
+          populateSchoolSelector();
+        } else {
+          schoolsItem.style.display = 'none';
+          usersItem.style.display = 'none';
+          adminItem.style.display = 'none';
+          institutionTitle.classList.remove('hidden');
+          adminSchoolSelector.style.display = 'none';
+        }
+        
+        if (!currentUser.isAdmin) {
+          const activePage = document.querySelector('.page.active-page');
+          if (activePage && (activePage.id === 'pageSchools' || activePage.id === 'pageUsers' || activePage.id === 'pageAdmin')) {
+            switchPage('pageDashboard');
+          }
+        }
+        
+        setupFirestoreListeners();
+        hideLoading();
+      }
+    }
+
+    function updateUIForLoggedOut() {
+      userDisplay.style.display = 'none';
+      logoutBtn.style.display = 'none';
+      document.getElementById('loginBtn').style.display = 'inline-flex';
+      document.getElementById('registerBtn').style.display = 'inline-flex';
+      dashboardWrapper.style.display = 'none';
+      homepageContainer.style.display = 'flex';
+      institutionTitle.classList.remove('hidden');
+      adminSchoolSelector.style.display = 'none';
+      
+      books = [];
+      laptops = [];
+      stationary = [];
+      schools = [];
+      users = [];
+      activityLog = [];
+      renderAll();
+    }
+
+    // ============================================================
+    // WINDOW FUNCTIONS (Exposed for onclick handlers)
     // ============================================================
 
     window.deleteBook = async function(id) {
@@ -1909,8 +1802,9 @@
       try {
         await deleteBookFromCloud(id);
         await addActivityToCloud(`Book deleted: ${book.title}`);
+        alert('✅ Book deleted successfully!');
       } catch (error) {
-        alert('Error deleting book: ' + error.message);
+        alert('❌ Error deleting book: ' + error.message);
       }
       hideLoading();
     };
@@ -1943,8 +1837,9 @@
       try {
         await updateBookInCloud(id, updates);
         await addActivityToCloud(`Book edited: ${b.title}`);
+        alert('✅ Book updated successfully!');
       } catch (error) {
-        alert('Error updating book: ' + error.message);
+        alert('❌ Error updating book: ' + error.message);
       }
       hideLoading();
     };
@@ -1960,8 +1855,9 @@
       try {
         await returnBookInCloud(id);
         await addActivityToCloud(`Book returned: ${book.title} by ${currentUser.email}`);
+        alert('✅ Book returned successfully!');
       } catch (error) {
-        alert('Error returning book: ' + error.message);
+        alert('❌ Error returning book: ' + error.message);
       }
       hideLoading();
     };
@@ -1978,8 +1874,9 @@
       try {
         await deleteLaptopFromCloud(id);
         await addActivityToCloud(`Laptop deleted: ${laptop.owner}`);
+        alert('✅ Laptop deleted successfully!');
       } catch (error) {
-        alert('Error deleting laptop: ' + error.message);
+        alert('❌ Error deleting laptop: ' + error.message);
       }
       hideLoading();
     };
@@ -2008,8 +1905,9 @@
       try {
         await updateLaptopInCloud(id, updates);
         await addActivityToCloud(`Laptop edited: ${l.owner}`);
+        alert('✅ Laptop updated successfully!');
       } catch (error) {
-        alert('Error updating laptop: ' + error.message);
+        alert('❌ Error updating laptop: ' + error.message);
       }
       hideLoading();
     };
@@ -2025,8 +1923,9 @@
       try {
         await returnLaptopInCloud(id);
         await addActivityToCloud(`Laptop returned: ${laptop.owner} by ${currentUser.email}`);
+        alert('✅ Laptop returned successfully!');
       } catch (error) {
-        alert('Error returning laptop: ' + error.message);
+        alert('❌ Error returning laptop: ' + error.message);
       }
       hideLoading();
     };
@@ -2042,8 +1941,9 @@
       try {
         await deleteStationaryFromCloud(id);
         await addActivityToCloud(`Stationary deleted: ${item.name}`);
+        alert('✅ Stationary deleted successfully!');
       } catch (error) {
-        alert('Error deleting stationary: ' + error.message);
+        alert('❌ Error deleting stationary: ' + error.message);
       }
       hideLoading();
     };
@@ -2069,8 +1969,9 @@
       try {
         await updateStationaryInCloud(id, updates);
         await addActivityToCloud(`Stationary edited: ${s.name}`);
+        alert('✅ Stationary updated successfully!');
       } catch (error) {
-        alert('Error updating stationary: ' + error.message);
+        alert('❌ Error updating stationary: ' + error.message);
       }
       hideLoading();
     };
@@ -2079,6 +1980,7 @@
     // EVENT LISTENERS
     // ============================================================
     
+    // Sidebar navigation
     document.querySelectorAll('.sidebar-item').forEach(item => {
       item.addEventListener('click', function() {
         const pageId = this.dataset.page;
@@ -2090,6 +1992,7 @@
       });
     });
 
+    // Auth buttons
     document.getElementById('loginBtn').addEventListener('click', () => openModal('login'));
     document.getElementById('registerBtn').addEventListener('click', () => openModal('register'));
     document.getElementById('homepageLoginBtn').addEventListener('click', () => openModal('login'));
@@ -2098,17 +2001,6 @@
     googleSignInBtn.addEventListener('click', signInWithGoogle);
     modalClose.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-    // Admin Setup Modal
-    adminSetupClose.addEventListener('click', () => adminSetupModal.classList.remove('show'));
-    adminSetupCancelBtn.addEventListener('click', () => adminSetupModal.classList.remove('show'));
-    adminSetupSubmitBtn.addEventListener('click', createOrResetAdminAccount);
-    adminSetupPassword.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') adminSetupConfirmPassword.focus();
-    });
-    adminSetupConfirmPassword.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') adminSetupSubmitBtn.click();
-    });
 
     // Onboarding modal
     onboardingSubmitBtn.addEventListener('click', async () => {
@@ -2215,13 +2107,9 @@
       if (e.key === 'Enter' && onboardingModal.classList.contains('show')) {
         onboardingSubmitBtn.click();
       }
-      if (e.key === 'Enter' && adminSetupModal.classList.contains('show')) {
-        adminSetupSubmitBtn.click();
-      }
       if (e.key === 'Escape') {
         closeModal();
         closeOnboardingModal();
-        adminSetupModal.classList.remove('show');
       }
     });
 
@@ -2236,7 +2124,11 @@
       addActivityToCloud(`Admin switched to view: ${adminSelectedSchool === '__all__' ? 'All Schools' : adminSelectedSchool}`);
     });
 
-    // --- ADD BUTTONS ---
+    // ============================================================
+    // ADD BUTTONS - All functional
+    // ============================================================
+
+    // Add Book
     document.getElementById('addBookPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const title = document.getElementById('bookTitlePage').value.trim();
@@ -2266,6 +2158,7 @@
       hideLoading();
     });
 
+    // Add Laptop
     document.getElementById('addLaptopPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const owner = document.getElementById('laptopOwnerPage').value.trim();
@@ -2294,6 +2187,7 @@
       hideLoading();
     });
 
+    // Add Stationary
     document.getElementById('addStationaryPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const name = document.getElementById('stationaryNamePage').value.trim();
@@ -2320,7 +2214,7 @@
       hideLoading();
     });
 
-    // Borrow/Return Buttons
+    // Borrow Book
     document.getElementById('borrowBookPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const acc = prompt('Enter Accession number of book to borrow:');
@@ -2343,6 +2237,7 @@
       hideLoading();
     });
 
+    // Return Book
     document.getElementById('returnBookPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const acc = prompt('Enter Accession number of book to return:');
@@ -2362,6 +2257,7 @@
       hideLoading();
     });
 
+    // Borrow Laptop
     document.getElementById('borrowLaptopPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const owner = prompt('Enter Laptop owner (identifier):');
@@ -2384,6 +2280,7 @@
       hideLoading();
     });
 
+    // Return Laptop
     document.getElementById('returnLaptopPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const owner = prompt('Enter Laptop owner to return:');
@@ -2403,7 +2300,7 @@
       hideLoading();
     });
 
-    // Clear Returned
+    // Clear Returned Books
     document.getElementById('clearReturnedBooksBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const borrowed = books.filter(b => b.borrowed);
@@ -2420,6 +2317,7 @@
       hideLoading();
     });
 
+    // Clear Returned Laptops
     document.getElementById('clearReturnedLaptopsBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const borrowed = laptops.filter(l => l.borrowed);
@@ -2488,7 +2386,7 @@
       document.getElementById('schoolNamePage').value = '';
     });
 
-    // Admin Actions
+    // Admin Reset All
     document.getElementById('adminResetAllBtn').addEventListener('click', async function() {
       if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
       if (!confirm('⚠️ Reset ALL borrowed items across ALL institutions? This action cannot be undone.')) return;
@@ -2505,6 +2403,7 @@
       hideLoading();
     });
 
+    // Admin Export
     document.getElementById('adminExportAllBtn').addEventListener('click', function() {
       if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
       const data = {
@@ -2524,12 +2423,16 @@
       alert('✅ Data exported successfully!');
     });
 
+    // Admin Refresh
     document.getElementById('adminRefreshBtn').addEventListener('click', function() {
       if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
       alert('🔄 Data is already live via Firestore listeners!');
     });
 
-    // PDF Export
+    // ============================================================
+    // PDF EXPORT
+    // ============================================================
+    
     function getInstitution() {
       return document.getElementById('institutionName').value.trim() || 'Institution';
     }
@@ -2613,7 +2516,6 @@
             updateUIForLoggedIn();
             await addActivityToCloud(`User ${currentUser.email} auto-logged in`);
           } else {
-            // New user - show onboarding
             pendingGoogleUser = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
