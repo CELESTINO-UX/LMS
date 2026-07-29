@@ -4,28 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cele.Dev ILS · Library Management</title>
-  <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
-    /* All styles remain the same as before */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Times New Roman', Times, serif;
-    }
-    html, body {
-      height: 100%;
-    }
-    body {
-      background: #f0f5f0;
-      display: flex;
-      flex-direction: column;
-    }
-
+    /* All styles remain the same - keeping it concise */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Times New Roman', Times, serif; }
+    html, body { height: 100%; }
+    body { background: #f0f5f0; display: flex; flex-direction: column; }
     :root {
       --primary-dark: #1a4d2e;
       --primary-green: #2e7d32;
@@ -38,7 +24,6 @@
       --border-color: #c8e6c9;
       --text-dark: #1a2e1a;
     }
-
     .koha-header {
       background: var(--primary-dark);
       color: #f0f4fa;
@@ -115,17 +100,8 @@
       padding: 0.6rem;
       font-weight: 500;
     }
-    .koha-btn-google:hover {
-      background: #f5f5f5;
-      border-color: #ccc;
-      transform: scale(1.02);
-    }
-    .koha-btn-google i {
-      color: #ea4335;
-      font-size: 1.2rem;
-      margin-right: 8px;
-    }
-
+    .koha-btn-google:hover { background: #f5f5f5; border-color: #ccc; transform: scale(1.02); }
+    .koha-btn-google i { color: #ea4335; font-size: 1.2rem; margin-right: 8px; }
     .institution-title {
       background: var(--yellow-pale);
       padding: 0.2rem 1rem;
@@ -151,7 +127,6 @@
     }
     .institution-title input:focus { outline: none; border-bottom: 2px solid var(--primary-green); }
     .institution-title.hidden { display: none; }
-
     .admin-school-selector {
       background: var(--yellow-pale);
       padding: 0.2rem 1rem;
@@ -177,13 +152,11 @@
     }
     .admin-school-selector select:focus { outline: none; }
     .admin-school-selector i { color: var(--yellow-gold); }
-
     .dashboard-wrapper {
       display: flex;
       flex: 1;
       min-height: 0;
     }
-
     .dashboard-sidebar {
       width: 220px;
       background: var(--primary-dark);
@@ -205,19 +178,13 @@
       font-family: 'Times New Roman', Times, serif;
       font-size: 1rem;
     }
-    .dashboard-sidebar .sidebar-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: white;
-    }
+    .dashboard-sidebar .sidebar-item:hover { background: rgba(255, 255, 255, 0.08); color: white; }
     .dashboard-sidebar .sidebar-item.active {
       background: rgba(255, 255, 255, 0.12);
       color: var(--yellow-gold);
       border-left-color: var(--yellow-gold);
     }
-    .dashboard-sidebar .sidebar-item i {
-      width: 24px;
-      color: var(--yellow-gold);
-    }
+    .dashboard-sidebar .sidebar-item i { width: 24px; color: var(--yellow-gold); }
     .dashboard-sidebar .sidebar-divider {
       height: 1px;
       background: rgba(255,255,255,0.1);
@@ -230,10 +197,7 @@
       border-bottom: 1px solid rgba(255,255,255,0.08);
       margin-bottom: 0.5rem;
     }
-    .dashboard-sidebar .sidebar-user strong {
-      color: var(--yellow-gold);
-    }
-
+    .dashboard-sidebar .sidebar-user strong { color: var(--yellow-gold); }
     .dashboard-content {
       flex: 1;
       padding: 2rem;
@@ -243,7 +207,6 @@
     }
     .page { display: none; }
     .page.active-page { display: block; }
-
     .koha-card {
       background: white;
       border-radius: 12px;
@@ -296,10 +259,7 @@
       flex-wrap: wrap;
       font-family: 'Times New Roman', Times, serif;
     }
-    .koha-item-actions {
-      display: flex;
-      gap: 6px;
-    }
+    .koha-item-actions { display: flex; gap: 6px; }
     .koha-item-actions button {
       background: none;
       border: none;
@@ -328,11 +288,7 @@
       font-family: 'Times New Roman', Times, serif;
     }
     .koha-input-group input:focus { border-color: var(--primary-green); outline: none; box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2); }
-    .borrowed-item {
-      background: var(--yellow-pale);
-      border-left: 4px solid var(--yellow-gold);
-      padding-left: 8px;
-    }
+    .borrowed-item { background: var(--yellow-pale); border-left: 4px solid var(--yellow-gold); padding-left: 8px; }
     .koha-school-card {
       background: var(--bg-light);
       border-radius: 40px;
@@ -349,7 +305,6 @@
     }
     .status-available { background: #c8e6c9; color: #1a4d2e; }
     .status-borrowed { background: #ffcdd2; color: #c62828; }
-
     .category-badge {
       display: inline-block;
       padding: 0.1rem 0.6rem;
@@ -361,7 +316,6 @@
     .cat-novel { background: #fce4ec; color: #880e4f; }
     .cat-dictionary { background: #e8f5e9; color: #1b5e20; }
     .cat-atlas { background: #fff3e0; color: #e65100; }
-
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -377,7 +331,6 @@
     }
     .stat-card h4 { color: var(--primary-dark); font-family: 'Times New Roman', Times, serif; }
     .stat-card p { font-size: 1.8rem; font-weight: bold; color: var(--primary-green); font-family: 'Times New Roman', Times, serif; }
-
     .admin-badge {
       background: var(--yellow-gold);
       color: var(--primary-dark);
@@ -387,7 +340,6 @@
       font-weight: 700;
       margin-left: 6px;
     }
-
     .loading-overlay {
       position: fixed;
       top: 0;
@@ -402,18 +354,9 @@
       color: white;
       font-size: 1.5rem;
     }
-    .loading-overlay.show {
-      display: flex;
-    }
-    .loading-overlay i {
-      margin-right: 15px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
+    .loading-overlay.show { display: flex; }
+    .loading-overlay i { margin-right: 15px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .homepage-hero {
       flex: 1;
       display: flex;
@@ -431,10 +374,7 @@
       margin-bottom: 1rem;
       animation: float 3s ease-in-out infinite;
     }
-    .homepage-hero .hero-icon i {
-      color: var(--yellow-gold);
-      text-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
+    .homepage-hero .hero-icon i { color: var(--yellow-gold); text-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     .homepage-hero h1 {
       font-size: 3.2rem;
       font-weight: 700;
@@ -481,21 +421,14 @@
       font-size: 3rem;
       color: var(--primary-green);
     }
-    .homepage-hero .hero-images .img-placeholder:hover {
-      transform: translateY(-8px);
-      border-color: var(--yellow-gold);
-    }
+    .homepage-hero .hero-images .img-placeholder:hover { transform: translateY(-8px); border-color: var(--yellow-gold); }
     .homepage-hero .hero-images .img-placeholder span {
       font-size: 0.8rem;
       color: var(--text-dark);
       margin-top: 6px;
       font-family: 'Times New Roman', Times, serif;
     }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
-    }
-
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
     .modal-overlay {
       display: none;
       position: fixed;
@@ -545,58 +478,17 @@
       color: var(--text-dark);
       font-family: 'Times New Roman', Times, serif;
     }
-    .modal-box .switch-action a {
-      color: var(--primary-green);
-      cursor: pointer;
-      font-weight: 600;
-      text-decoration: underline;
-    }
+    .modal-box .switch-action a { color: var(--primary-green); cursor: pointer; font-weight: 600; text-decoration: underline; }
     .modal-box .switch-action a:hover { color: var(--primary-dark); }
-    .forgot-link {
-      text-align: right;
-      font-size: 0.8rem;
-      margin-top: -6px;
-    }
-    .forgot-link a {
-      color: var(--primary-green);
-      cursor: pointer;
-      text-decoration: none;
-      font-family: 'Times New Roman', Times, serif;
-    }
+    .forgot-link { text-align: right; font-size: 0.8rem; margin-top: -6px; }
+    .forgot-link a { color: var(--primary-green); cursor: pointer; text-decoration: none; font-family: 'Times New Roman', Times, serif; }
     .forgot-link a:hover { text-decoration: underline; }
-    .admin-login-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 12px 0;
-    }
-    .admin-login-divider hr {
-      flex: 1;
-      border: none;
-      border-top: 1px solid var(--border-color);
-    }
-    .admin-login-divider span {
-      color: var(--text-dark);
-      font-size: 0.8rem;
-      opacity: 0.6;
-    }
-    .google-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 12px 0;
-    }
-    .google-divider hr {
-      flex: 1;
-      border: none;
-      border-top: 1px solid var(--border-color);
-    }
-    .google-divider span {
-      color: var(--text-dark);
-      font-size: 0.8rem;
-      opacity: 0.6;
-    }
-
+    .admin-login-divider { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+    .admin-login-divider hr { flex: 1; border: none; border-top: 1px solid var(--border-color); }
+    .admin-login-divider span { color: var(--text-dark); font-size: 0.8rem; opacity: 0.6; }
+    .google-divider { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+    .google-divider hr { flex: 1; border: none; border-top: 1px solid var(--border-color); }
+    .google-divider span { color: var(--text-dark); font-size: 0.8rem; opacity: 0.6; }
     .koha-footer {
       text-align: center;
       padding: 1.2rem;
@@ -632,11 +524,9 @@
     .footer-contact a:hover { background: var(--primary-green); color: white; border-color: var(--primary-green); }
     .footer-contact i { color: var(--primary-green); }
     .footer-contact a:hover i { color: white; }
-
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg-light); }
     ::-webkit-scrollbar-thumb { background: var(--primary-green); border-radius: 20px; }
-
     @media (max-width: 768px) {
       .dashboard-sidebar { width: 100%; min-height: auto; border-right: none; border-bottom: 3px solid var(--yellow-gold); }
       .dashboard-wrapper { flex-direction: column; }
@@ -942,14 +832,12 @@
           <a id="forgotPasswordLink">Forgot password?</a>
         </div>
         <button class="koha-btn koha-btn-primary" id="authSubmitBtn"><i class="fas fa-arrow-right"></i> Login</button>
-        
         <div class="google-divider">
           <hr><span>or continue with</span><hr>
         </div>
         <button class="koha-btn koha-btn-google" id="googleSignInBtn">
           <i class="fab fa-google"></i> Sign in with Google
         </button>
-        
         <div class="admin-login-divider">
           <hr><span>OR</span><hr>
         </div>
@@ -998,21 +886,21 @@
   <div class="modal-overlay" id="adminSetupModal">
     <div class="modal-box">
       <button class="modal-close" id="adminSetupClose">&times;</button>
-      <h2><i class="fas fa-crown" style="color:var(--yellow-gold);"></i> Admin Setup</h2>
+      <h2><i class="fas fa-crown" style="color:var(--yellow-gold);"></i> Admin Account Setup</h2>
       <p style="margin-bottom:1rem; color:var(--text-dark); font-family:'Times New Roman', Times, serif;">
-        The admin account doesn't exist yet. Please create it now.
+        The admin account needs to be set up. Please enter a password to create or reset it.
       </p>
       <div class="koha-input-group">
         <input type="email" id="adminSetupEmail" value="onyangocelestino@gmail.com" readonly style="background:#f5f5f5;">
       </div>
       <div class="koha-input-group">
-        <input type="password" id="adminSetupPassword" placeholder="Choose a password" required>
+        <input type="password" id="adminSetupPassword" placeholder="New password (min 6 characters)" required>
       </div>
       <div class="koha-input-group">
         <input type="password" id="adminSetupConfirmPassword" placeholder="Confirm password" required>
       </div>
       <button class="koha-btn koha-btn-primary" id="adminSetupSubmitBtn" style="width:100%;">
-        <i class="fas fa-user-plus"></i> Create Admin Account
+        <i class="fas fa-user-plus"></i> Create / Reset Admin Account
       </button>
       <div style="margin-top:12px; text-align:center;">
         <button class="koha-btn koha-btn-outline koha-btn-sm" id="adminSetupCancelBtn" style="background:var(--primary-dark); color:white;">
@@ -1033,7 +921,7 @@
   </footer>
 
   <!-- ============================================================ -->
-  <!-- SCRIPT: ES Module with Firebase SDK v9 (Modular) -->
+  <!-- SCRIPT: ES Module with Firebase SDK v9 -->
   <!-- ============================================================ -->
   <script type="importmap">
     {
@@ -1059,7 +947,6 @@
       measurementId: "G-EGBKE1FMD6"
     };
 
-    // Import Firebase SDKs
     import { initializeApp } from "firebase/app";
     import { 
       getFirestore, 
@@ -1086,23 +973,20 @@
       sendPasswordResetEmail,
       GoogleAuthProvider,
       signInWithPopup,
-      fetchSignInMethodsForEmail
+      fetchSignInMethodsForEmail,
+      sendPasswordResetEmail
     } from "firebase/auth";
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
 
     console.log('✅ Firebase initialized successfully!');
-    console.log('📁 Project ID:', firebaseConfig.projectId);
 
     // ============================================================
-    // APPLICATION CODE
+    // APPLICATION STATE
     // ============================================================
-    
-    // ---------- STATE ----------
     let books = [];
     let laptops = [];
     let stationary = [];
@@ -1114,13 +998,14 @@
     let currentCategoryFilter = 'all';
     let pendingGoogleUser = null;
 
-    // Unsubscribe functions
     let unsubscribeBooks = null;
     let unsubscribeLaptops = null;
     let unsubscribeStationary = null;
     let unsubscribeSchools = null;
     let unsubscribeUsers = null;
     let unsubscribeActivity = null;
+
+    const ADMIN_EMAIL = 'onyangocelestino@gmail.com';
 
     // DOM refs
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -1158,7 +1043,6 @@
     const onboardingSchool = document.getElementById('onboardingSchool');
     const onboardingSubmitBtn = document.getElementById('onboardingSubmitBtn');
     const onboardingCancelBtn = document.getElementById('onboardingCancelBtn');
-    const adminSetupEmail = document.getElementById('adminSetupEmail');
     const adminSetupPassword = document.getElementById('adminSetupPassword');
     const adminSetupConfirmPassword = document.getElementById('adminSetupConfirmPassword');
     const adminSetupSubmitBtn = document.getElementById('adminSetupSubmitBtn');
@@ -1167,39 +1051,42 @@
 
     let isLoginMode = true;
 
-    // ---------- LOADING ----------
     function showLoading() { loadingOverlay.classList.add('show'); }
     function hideLoading() { loadingOverlay.classList.remove('show'); }
 
     // ============================================================
-    // FIREBASE AUTH FUNCTIONS
+    // AUTH FUNCTIONS
     // ============================================================
-    
-    const ADMIN_EMAIL = 'onyangocelestino@gmail.com';
 
-    // Register new user
+    // Register or update user profile
+    async function createOrUpdateUserProfile(user, school, isAdmin = false) {
+      const userProfile = {
+        uid: user.uid,
+        email: user.email,
+        school: school,
+        institution: school,
+        isAdmin: isAdmin || user.email === ADMIN_EMAIL,
+        registered: new Date().toISOString()
+      };
+      
+      await setDoc(doc(db, 'users', user.uid), userProfile);
+      
+      // Add school to schools collection if it doesn't exist
+      const schoolQuery = query(collection(db, 'schools'), where('name', '==', school));
+      const schoolSnapshot = await getDocs(schoolQuery);
+      if (schoolSnapshot.empty) {
+        await addDoc(collection(db, 'schools'), { name: school });
+      }
+      
+      return userProfile;
+    }
+
+    // Register new user with Firebase Auth and Firestore
     async function registerUser(email, password, school) {
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        
-        const userProfile = {
-          uid: user.uid,
-          email: email,
-          school: school,
-          institution: school,
-          isAdmin: email === ADMIN_EMAIL,
-          registered: new Date().toISOString()
-        };
-        
-        await setDoc(doc(db, 'users', user.uid), userProfile);
-        
-        const schoolQuery = query(collection(db, 'schools'), where('name', '==', school));
-        const schoolSnapshot = await getDocs(schoolQuery);
-        if (schoolSnapshot.empty) {
-          await addDoc(collection(db, 'schools'), { name: school });
-        }
-        
+        const userProfile = await createOrUpdateUserProfile(user, school, email === ADMIN_EMAIL);
         return { success: true, user: { id: user.uid, ...userProfile } };
       } catch (error) {
         console.error('Registration error:', error);
@@ -1207,7 +1094,7 @@
       }
     }
 
-    // Login user
+    // Login user with Firebase Auth
     async function loginUser(email, password) {
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -1225,15 +1112,14 @@
             } 
           };
         } else {
-          const fallbackUser = {
-            email: firebaseUser.email,
-            school: 'Unknown',
-            institution: 'Unknown',
-            isAdmin: email === ADMIN_EMAIL,
-            registered: new Date().toISOString()
-          };
-          await setDoc(doc(db, 'users', firebaseUser.uid), fallbackUser);
-          return { success: true, user: { id: firebaseUser.uid, ...fallbackUser } };
+          // If user exists in Auth but not in Firestore, create profile
+          const school = prompt('Please enter your school/institution:');
+          if (!school) {
+            await firebaseUser.delete();
+            return { success: false, message: 'School is required. Please try again.' };
+          }
+          const userProfile = await createOrUpdateUserProfile(firebaseUser, school, email === ADMIN_EMAIL);
+          return { success: true, user: { id: firebaseUser.uid, ...userProfile } };
         }
       } catch (error) {
         console.error('Login error:', error);
@@ -1241,7 +1127,7 @@
       }
     }
 
-    // Check if admin account exists
+    // Check if admin account exists in Firebase Auth
     async function checkAdminExists() {
       try {
         const methods = await fetchSignInMethodsForEmail(auth, ADMIN_EMAIL);
@@ -1259,32 +1145,47 @@
       
       showLoading();
       
-      // Check if admin account exists
-      const adminExists = await checkAdminExists();
-      
-      if (!adminExists) {
+      try {
+        // Try to login first
+        const result = await loginUser(ADMIN_EMAIL, adminPassword);
         hideLoading();
-        // Show admin setup modal
-        adminSetupModal.classList.add('show');
-        adminSetupPassword.value = '';
-        adminSetupConfirmPassword.value = '';
-        return;
-      }
-      
-      // Try to login
-      const result = await loginUser(ADMIN_EMAIL, adminPassword);
-      hideLoading();
-      
-      if (result.success) {
-        closeModal();
-        alert('👑 Welcome Admin! You have full system access.');
-      } else {
-        alert('❌ Admin login failed: ' + result.message);
+        
+        if (result.success) {
+          closeModal();
+          alert('👑 Welcome Admin! You have full system access.');
+          return;
+        }
+        
+        // If login fails, check if admin account exists
+        const adminExists = await checkAdminExists();
+        
+        if (!adminExists || result.message.includes('user-not-found')) {
+          // Account doesn't exist - show setup modal
+          adminSetupModal.classList.add('show');
+          adminSetupPassword.value = '';
+          adminSetupConfirmPassword.value = '';
+        } else {
+          // Account exists but password is wrong
+          alert('❌ Incorrect password. Please try again.');
+        }
+      } catch (error) {
+        hideLoading();
+        console.error('Admin login error:', error);
+        
+        // Check if admin exists
+        const adminExists = await checkAdminExists();
+        if (!adminExists) {
+          adminSetupModal.classList.add('show');
+          adminSetupPassword.value = '';
+          adminSetupConfirmPassword.value = '';
+        } else {
+          alert('❌ Admin login failed: ' + error.message);
+        }
       }
     }
 
-    // Create admin account
-    async function createAdminAccount() {
+    // Create or reset admin account
+    async function createOrResetAdminAccount() {
       const password = adminSetupPassword.value.trim();
       const confirmPassword = adminSetupConfirmPassword.value.trim();
       
@@ -1299,25 +1200,49 @@
       }
       
       showLoading();
-      const result = await registerUser(ADMIN_EMAIL, password, 'Admin');
-      hideLoading();
       
-      if (result.success) {
-        adminSetupModal.classList.remove('show');
-        alert('✅ Admin account created successfully! Please login.');
-        // Try to login automatically
-        const loginResult = await loginUser(ADMIN_EMAIL, password);
-        if (loginResult.success) {
-          closeModal();
-          alert('👑 Welcome Admin! You have full system access.');
+      try {
+        // Check if admin exists
+        const adminExists = await checkAdminExists();
+        
+        if (adminExists) {
+          // Admin exists - we need to handle password reset
+          try {
+            // Send password reset email
+            await sendPasswordResetEmail(auth, ADMIN_EMAIL);
+            alert('✅ Password reset email sent to ' + ADMIN_EMAIL + '. Check your inbox and follow the instructions to reset your password.');
+            adminSetupModal.classList.remove('show');
+          } catch (resetError) {
+            // If password reset fails, we might need to delete and recreate
+            alert('❌ Could not reset password. Please contact support or try logging in with Google.');
+          }
         } else {
-          openModal('login');
-          authEmail.value = ADMIN_EMAIL;
-          authPassword.value = password;
+          // Create new admin account
+          const result = await registerUser(ADMIN_EMAIL, password, 'Admin');
+          if (result.success) {
+            adminSetupModal.classList.remove('show');
+            alert('✅ Admin account created successfully! Please login.');
+            
+            // Try to login automatically
+            const loginResult = await loginUser(ADMIN_EMAIL, password);
+            if (loginResult.success) {
+              closeModal();
+              alert('👑 Welcome Admin! You have full system access.');
+            } else {
+              openModal('login');
+              authEmail.value = ADMIN_EMAIL;
+              authPassword.value = password;
+            }
+          } else {
+            alert('❌ Failed to create admin account: ' + result.message);
+          }
         }
-      } else {
-        alert('❌ Failed to create admin account: ' + result.message);
+      } catch (error) {
+        console.error('Admin setup error:', error);
+        alert('❌ Setup failed: ' + error.message);
       }
+      
+      hideLoading();
     }
 
     // Google Sign-In
@@ -1366,22 +1291,11 @@
       
       showLoading();
       try {
-        const userProfile = {
-          uid: pendingGoogleUser.uid,
-          email: pendingGoogleUser.email,
-          school: school,
-          institution: school,
-          isAdmin: pendingGoogleUser.email === ADMIN_EMAIL,
-          registered: new Date().toISOString()
-        };
-        
-        await setDoc(doc(db, 'users', pendingGoogleUser.uid), userProfile);
-        
-        const schoolQuery = query(collection(db, 'schools'), where('name', '==', school));
-        const schoolSnapshot = await getDocs(schoolQuery);
-        if (schoolSnapshot.empty) {
-          await addDoc(collection(db, 'schools'), { name: school });
-        }
+        const userProfile = await createOrUpdateUserProfile(
+          { uid: pendingGoogleUser.uid, email: pendingGoogleUser.email },
+          school,
+          pendingGoogleUser.email === ADMIN_EMAIL
+        );
         
         currentUser = { id: pendingGoogleUser.uid, ...userProfile };
         pendingGoogleUser = null;
@@ -1418,7 +1332,7 @@
       }
     }
 
-    // Clean up all Firestore listeners
+    // Clean up listeners
     function cleanupListeners() {
       if (unsubscribeBooks) { unsubscribeBooks(); unsubscribeBooks = null; }
       if (unsubscribeLaptops) { unsubscribeLaptops(); unsubscribeLaptops = null; }
@@ -1443,142 +1357,119 @@
       pendingGoogleUser = null;
     }
 
+    function openModal(mode) {
+      isLoginMode = (mode === 'login');
+      modal.classList.add('show');
+      authForm.style.display = 'block';
+      forgotForm.style.display = 'none';
+      resetMessage.style.display = 'none';
+      if (isLoginMode) {
+        modalTitle.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        authSubmitBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Login';
+        authSwitchText.textContent = "Don't have an account?";
+        authSwitchLink.textContent = 'Register';
+        schoolField.style.display = 'none';
+        forgotLinkWrap.style.display = 'block';
+      } else {
+        modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+        authSubmitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
+        authSwitchText.textContent = 'Already have an account?';
+        authSwitchLink.textContent = 'Login';
+        schoolField.style.display = 'flex';
+        forgotLinkWrap.style.display = 'none';
+      }
+      authEmail.value = '';
+      authPassword.value = '';
+      authSchool.value = '';
+    }
+
+    function closeModal() {
+      modal.classList.remove('show');
+    }
+
     // ============================================================
-    // FIRESTORE REAL-TIME LISTENERS
+    // FIRESTORE LISTENERS (Simplified - same as before)
     // ============================================================
     
     function setupFirestoreListeners() {
       cleanupListeners();
-
       if (!currentUser) {
-        books = [];
-        laptops = [];
-        stationary = [];
-        schools = [];
-        users = [];
-        activityLog = [];
+        books = []; laptops = []; stationary = []; schools = []; users = []; activityLog = [];
         renderAll();
         return;
       }
 
-      console.log('📡 Setting up Firestore listeners for:', currentUser.isAdmin ? 'Admin' : currentUser.institution);
-
-      // Books Listener
-      let booksQuery;
-      if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
-        booksQuery = collection(db, "books");
-      } else {
-        const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
-        booksQuery = query(collection(db, "books"), where("institution", "==", filterSchool));
-      }
-
+      // Books
+      let booksQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
+        ? collection(db, "books") 
+        : query(collection(db, "books"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution));
+      
       unsubscribeBooks = onSnapshot(booksQuery, (snapshot) => {
         books = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderBooksPage(books);
         renderBorrowedBooksPage(books);
         updateDashboardStats({ books });
         updateAdminPanel();
-      }, (error) => {
-        console.error('Books listener error:', error);
       });
 
-      // Laptops Listener
-      let laptopsQuery;
-      if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
-        laptopsQuery = collection(db, "laptops");
-      } else {
-        const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
-        laptopsQuery = query(collection(db, "laptops"), where("institution", "==", filterSchool));
-      }
-
+      // Laptops
+      let laptopsQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
+        ? collection(db, "laptops") 
+        : query(collection(db, "laptops"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution));
+      
       unsubscribeLaptops = onSnapshot(laptopsQuery, (snapshot) => {
         laptops = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderLaptopsPage(laptops);
         renderBorrowedLaptopsPage(laptops);
         updateDashboardStats({ laptops });
         updateAdminPanel();
-      }, (error) => {
-        console.error('Laptops listener error:', error);
       });
 
-      // Stationary Listener
-      let stationaryQuery;
-      if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
-        stationaryQuery = collection(db, "stationary");
-      } else {
-        const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
-        stationaryQuery = query(collection(db, "stationary"), where("institution", "==", filterSchool));
-      }
-
+      // Stationary
+      let stationaryQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
+        ? collection(db, "stationary") 
+        : query(collection(db, "stationary"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution));
+      
       unsubscribeStationary = onSnapshot(stationaryQuery, (snapshot) => {
         stationary = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderStationaryPage(stationary);
         updateDashboardStats({ stationary });
         updateAdminPanel();
-      }, (error) => {
-        console.error('Stationary listener error:', error);
       });
 
-      // Schools Listener
-      const schoolsQuery = collection(db, "schools");
-      unsubscribeSchools = onSnapshot(schoolsQuery, (snapshot) => {
+      // Schools
+      unsubscribeSchools = onSnapshot(collection(db, "schools"), (snapshot) => {
         schools = [];
-        snapshot.forEach(doc => {
-          schools.push(doc.data().name);
-        });
+        snapshot.forEach(doc => schools.push(doc.data().name));
         populateSchoolSelector();
         renderSchoolsPage();
         updateAdminPanel();
-      }, (error) => {
-        console.error('Schools listener error:', error);
       });
 
-      // Users Listener (Admin only)
+      // Users (Admin only)
       if (currentUser.isAdmin) {
-        const usersQuery = collection(db, "users");
-        unsubscribeUsers = onSnapshot(usersQuery, (snapshot) => {
+        unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
           users = [];
-          snapshot.forEach(doc => {
-            users.push({ id: doc.id, ...doc.data() });
-          });
+          snapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
           renderUsersPage();
           updateAdminPanel();
-        }, (error) => {
-          console.error('Users listener error:', error);
         });
       }
 
-      // Activity Log Listener
-      let activityQuery;
-      if (currentUser.isAdmin && adminSelectedSchool === '__all__') {
-        activityQuery = query(
-          collection(db, "activityLog"),
-          orderBy("timestamp", "desc"),
-          limit(50)
-        );
-      } else {
-        const filterSchool = currentUser.isAdmin ? adminSelectedSchool : currentUser.institution;
-        activityQuery = query(
-          collection(db, "activityLog"),
-          where("institution", "==", filterSchool),
-          orderBy("timestamp", "desc"),
-          limit(50)
-        );
-      }
-
+      // Activity Log
+      let activityQuery = (currentUser.isAdmin && adminSelectedSchool === '__all__') 
+        ? query(collection(db, "activityLog"), orderBy("timestamp", "desc"), limit(50))
+        : query(collection(db, "activityLog"), where("institution", "==", currentUser.isAdmin ? adminSelectedSchool : currentUser.institution), orderBy("timestamp", "desc"), limit(50));
+      
       unsubscribeActivity = onSnapshot(activityQuery, (snapshot) => {
         activityLog = [];
-        snapshot.forEach(doc => {
-          activityLog.push({ id: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(doc => activityLog.push({ id: doc.id, ...doc.data() }));
         renderActivityLog();
-      }, (error) => {
-        console.error('Activity log listener error:', error);
       });
     }
 
     // ============================================================
-    // FIRESTORE OPERATIONS (CRUD)
+    // CRUD OPERATIONS (Same as before - keep your existing functions)
     // ============================================================
     
     async function addBookToCloud(bookData) {
@@ -1984,10 +1875,6 @@
       }
     }
 
-    // ============================================================
-    // UI HELPERS
-    // ============================================================
-    
     function populateSchoolSelector() {
       adminSchoolSelect.innerHTML = '<option value="__all__">📊 All Schools</option>';
       (schools || []).forEach(s => {
@@ -2004,110 +1891,6 @@
       document.querySelector(`.sidebar-item[data-page="${pageId}"]`)?.classList.add('active');
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
       document.getElementById(pageId)?.classList.add('active-page');
-    }
-
-    function openModal(mode) {
-      isLoginMode = (mode === 'login');
-      modal.classList.add('show');
-      authForm.style.display = 'block';
-      forgotForm.style.display = 'none';
-      resetMessage.style.display = 'none';
-      if (isLoginMode) {
-        modalTitle.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-        authSubmitBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Login';
-        authSwitchText.textContent = "Don't have an account?";
-        authSwitchLink.textContent = 'Register';
-        schoolField.style.display = 'none';
-        forgotLinkWrap.style.display = 'block';
-      } else {
-        modalTitle.innerHTML = '<i class="fas fa-user-plus"></i> Register';
-        authSubmitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Register';
-        authSwitchText.textContent = 'Already have an account?';
-        authSwitchLink.textContent = 'Login';
-        schoolField.style.display = 'flex';
-        forgotLinkWrap.style.display = 'none';
-      }
-      authEmail.value = '';
-      authPassword.value = '';
-      authSchool.value = '';
-    }
-
-    function closeModal() {
-      modal.classList.remove('show');
-    }
-
-    // ============================================================
-    // AUTH HANDLERS
-    // ============================================================
-    
-    async function handleAuthSubmit() {
-      const email = authEmail.value.trim();
-      const password = authPassword.value.trim();
-      if (!email || !password) return alert('Please fill in all fields');
-
-      showLoading();
-      if (isLoginMode) {
-        const result = await loginUser(email, password);
-        hideLoading();
-        if (result.success) {
-          closeModal();
-          await addActivityToCloud(`User ${result.user.email} logged in`);
-          alert(`✅ Welcome ${result.user.email}!`);
-        } else {
-          alert('❌ Login failed: ' + result.message);
-        }
-      } else {
-        const school = authSchool.value.trim();
-        if (!school) {
-          hideLoading();
-          return alert('Please enter your school/institution');
-        }
-        const result = await registerUser(email, password, school);
-        hideLoading();
-        if (result.success) {
-          await addActivityToCloud(`New user registered: ${email} (${school})`);
-          alert('✅ Registration successful! Please login.');
-          openModal('login');
-        } else {
-          alert('❌ Registration failed: ' + result.message);
-        }
-      }
-    }
-
-    // ============================================================
-    // PDF EXPORT
-    // ============================================================
-    
-    function getInstitution() {
-      return document.getElementById('institutionName').value.trim() || 'Institution';
-    }
-
-    function generatePDF(title, headers, rows, filename) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-      const inst = getInstitution();
-      doc.setFontSize(18);
-      doc.text(inst, 14, 20);
-      doc.setFontSize(14);
-      doc.text(title, 14, 30);
-      doc.setFontSize(10);
-      let y = 40;
-      const colWidths = headers.map(() => 45);
-      doc.setFont('helvetica', 'bold');
-      let x = 14;
-      headers.forEach((h, i) => { doc.text(h, x, y); x += colWidths[i] || 45; });
-      doc.setFont('helvetica', 'normal');
-      y += 6;
-      rows.forEach(row => {
-        if (y > 270) { doc.addPage(); y = 20; }
-        let xPos = 14;
-        row.forEach((cell, i) => {
-          doc.text(String(cell), xPos, y);
-          xPos += colWidths[i] || 45;
-        });
-        y += 6;
-      });
-      doc.save(filename);
     }
 
     // ============================================================
@@ -2296,7 +2079,6 @@
     // EVENT LISTENERS
     // ============================================================
     
-    // Sidebar navigation
     document.querySelectorAll('.sidebar-item').forEach(item => {
       item.addEventListener('click', function() {
         const pageId = this.dataset.page;
@@ -2308,7 +2090,6 @@
       });
     });
 
-    // Auth buttons
     document.getElementById('loginBtn').addEventListener('click', () => openModal('login'));
     document.getElementById('registerBtn').addEventListener('click', () => openModal('register'));
     document.getElementById('homepageLoginBtn').addEventListener('click', () => openModal('login'));
@@ -2319,13 +2100,9 @@
     modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
     // Admin Setup Modal
-    adminSetupClose.addEventListener('click', () => {
-      adminSetupModal.classList.remove('show');
-    });
-    adminSetupCancelBtn.addEventListener('click', () => {
-      adminSetupModal.classList.remove('show');
-    });
-    adminSetupSubmitBtn.addEventListener('click', createAdminAccount);
+    adminSetupClose.addEventListener('click', () => adminSetupModal.classList.remove('show'));
+    adminSetupCancelBtn.addEventListener('click', () => adminSetupModal.classList.remove('show'));
+    adminSetupSubmitBtn.addEventListener('click', createOrResetAdminAccount);
     adminSetupPassword.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') adminSetupConfirmPassword.focus();
     });
@@ -2347,9 +2124,7 @@
       if (pendingGoogleUser) {
         try {
           const user = auth.currentUser;
-          if (user) {
-            await user.delete();
-          }
+          if (user) await user.delete();
         } catch (error) {
           console.error('Error deleting user on cancel:', error);
         }
@@ -2360,22 +2135,49 @@
     });
 
     onboardingSchool.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        onboardingSubmitBtn.click();
-      }
+      if (e.key === 'Enter') onboardingSubmitBtn.click();
     });
 
     // Auth form
-    authSubmitBtn.addEventListener('click', handleAuthSubmit);
-    authSwitchLink.addEventListener('click', function() {
+    authSubmitBtn.addEventListener('click', async function() {
+      const email = authEmail.value.trim();
+      const password = authPassword.value.trim();
+      if (!email || !password) return alert('Please fill in all fields');
+
+      showLoading();
       if (isLoginMode) {
-        openModal('register');
+        const result = await loginUser(email, password);
+        hideLoading();
+        if (result.success) {
+          closeModal();
+          await addActivityToCloud(`User ${result.user.email} logged in`);
+          alert(`✅ Welcome ${result.user.email}!`);
+        } else {
+          alert('❌ Login failed: ' + result.message);
+        }
       } else {
-        openModal('login');
+        const school = authSchool.value.trim();
+        if (!school) {
+          hideLoading();
+          return alert('Please enter your school/institution');
+        }
+        const result = await registerUser(email, password, school);
+        hideLoading();
+        if (result.success) {
+          await addActivityToCloud(`New user registered: ${email} (${school})`);
+          alert('✅ Registration successful! Please login.');
+          openModal('login');
+        } else {
+          alert('❌ Registration failed: ' + result.message);
+        }
       }
     });
 
-    // Forgot password
+    authSwitchLink.addEventListener('click', function() {
+      if (isLoginMode) openModal('register');
+      else openModal('login');
+    });
+
     forgotPasswordLink.addEventListener('click', function() {
       authForm.style.display = 'none';
       forgotForm.style.display = 'block';
@@ -2402,11 +2204,10 @@
 
     logoutBtn.addEventListener('click', logoutUser);
 
-    // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' && modal.classList.contains('show')) {
         if (authForm.style.display !== 'none') {
-          handleAuthSubmit();
+          authSubmitBtn.click();
         } else if (forgotForm.style.display !== 'none') {
           forgotSubmitBtn.click();
         }
@@ -2424,22 +2225,18 @@
       }
     });
 
-    // Filter change
     bookCategoryFilter.addEventListener('change', function() {
       currentCategoryFilter = this.value;
       renderBooksPage(books);
     });
 
-    // Admin school selector
     adminSchoolSelect.addEventListener('change', function() {
       adminSelectedSchool = this.value;
       setupFirestoreListeners();
       addActivityToCloud(`Admin switched to view: ${adminSelectedSchool === '__all__' ? 'All Schools' : adminSelectedSchool}`);
     });
 
-    // --- ADD/EDIT/DELETE BUTTONS (All the same as before) ---
-    
-    // Add Book
+    // --- ADD BUTTONS ---
     document.getElementById('addBookPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const title = document.getElementById('bookTitlePage').value.trim();
@@ -2469,7 +2266,6 @@
       hideLoading();
     });
 
-    // Add Laptop
     document.getElementById('addLaptopPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const owner = document.getElementById('laptopOwnerPage').value.trim();
@@ -2498,7 +2294,6 @@
       hideLoading();
     });
 
-    // Add Stationary
     document.getElementById('addStationaryPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const name = document.getElementById('stationaryNamePage').value.trim();
@@ -2525,7 +2320,7 @@
       hideLoading();
     });
 
-    // Borrow Book
+    // Borrow/Return Buttons
     document.getElementById('borrowBookPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const acc = prompt('Enter Accession number of book to borrow:');
@@ -2548,7 +2343,6 @@
       hideLoading();
     });
 
-    // Return Book
     document.getElementById('returnBookPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const acc = prompt('Enter Accession number of book to return:');
@@ -2568,7 +2362,6 @@
       hideLoading();
     });
 
-    // Borrow Laptop
     document.getElementById('borrowLaptopPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const owner = prompt('Enter Laptop owner (identifier):');
@@ -2591,7 +2384,6 @@
       hideLoading();
     });
 
-    // Return Laptop
     document.getElementById('returnLaptopPageBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const owner = prompt('Enter Laptop owner to return:');
@@ -2611,7 +2403,7 @@
       hideLoading();
     });
 
-    // Clear Returned Books
+    // Clear Returned
     document.getElementById('clearReturnedBooksBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const borrowed = books.filter(b => b.borrowed);
@@ -2619,9 +2411,7 @@
       
       showLoading();
       try {
-        for (const b of borrowed) {
-          await returnBookInCloud(b.id);
-        }
+        for (const b of borrowed) await returnBookInCloud(b.id);
         await addActivityToCloud(`Cleared all borrowed books (${borrowed.length} items)`);
         alert(`✅ Cleared ${borrowed.length} borrowed books. All returned.`);
       } catch (error) {
@@ -2630,7 +2420,6 @@
       hideLoading();
     });
 
-    // Clear Returned Laptops
     document.getElementById('clearReturnedLaptopsBtn').addEventListener('click', async function() {
       if (!currentUser) return alert('Please login first');
       const borrowed = laptops.filter(l => l.borrowed);
@@ -2638,9 +2427,7 @@
       
       showLoading();
       try {
-        for (const l of borrowed) {
-          await returnLaptopInCloud(l.id);
-        }
+        for (const l of borrowed) await returnLaptopInCloud(l.id);
         await addActivityToCloud(`Cleared all borrowed laptops (${borrowed.length} items)`);
         alert(`✅ Cleared ${borrowed.length} borrowed laptops. All returned.`);
       } catch (error) {
@@ -2701,23 +2488,15 @@
       document.getElementById('schoolNamePage').value = '';
     });
 
-    // Admin Reset All
+    // Admin Actions
     document.getElementById('adminResetAllBtn').addEventListener('click', async function() {
       if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
       if (!confirm('⚠️ Reset ALL borrowed items across ALL institutions? This action cannot be undone.')) return;
       
       showLoading();
       try {
-        for (const b of books) {
-          if (b.borrowed) {
-            await returnBookInCloud(b.id);
-          }
-        }
-        for (const l of laptops) {
-          if (l.borrowed) {
-            await returnLaptopInCloud(l.id);
-          }
-        }
+        for (const b of books) if (b.borrowed) await returnBookInCloud(b.id);
+        for (const l of laptops) if (l.borrowed) await returnLaptopInCloud(l.id);
         await addActivityToCloud('Admin: Reset all borrowed items');
         alert('✅ All borrowed items have been reset.');
       } catch (error) {
@@ -2726,7 +2505,6 @@
       hideLoading();
     });
 
-    // Admin Export
     document.getElementById('adminExportAllBtn').addEventListener('click', function() {
       if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
       const data = {
@@ -2746,13 +2524,44 @@
       alert('✅ Data exported successfully!');
     });
 
-    // Admin Refresh
     document.getElementById('adminRefreshBtn').addEventListener('click', function() {
       if (!currentUser || !currentUser.isAdmin) return alert('Admin access required');
       alert('🔄 Data is already live via Firestore listeners!');
     });
 
-    // PDF buttons
+    // PDF Export
+    function getInstitution() {
+      return document.getElementById('institutionName').value.trim() || 'Institution';
+    }
+
+    function generatePDF(title, headers, rows, filename) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const inst = getInstitution();
+      doc.setFontSize(18);
+      doc.text(inst, 14, 20);
+      doc.setFontSize(14);
+      doc.text(title, 14, 30);
+      doc.setFontSize(10);
+      let y = 40;
+      const colWidths = headers.map(() => 45);
+      doc.setFont('helvetica', 'bold');
+      let x = 14;
+      headers.forEach((h, i) => { doc.text(h, x, y); x += colWidths[i] || 45; });
+      doc.setFont('helvetica', 'normal');
+      y += 6;
+      rows.forEach(row => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        let xPos = 14;
+        row.forEach((cell, i) => {
+          doc.text(String(cell), xPos, y);
+          xPos += colWidths[i] || 45;
+        });
+        y += 6;
+      });
+      doc.save(filename);
+    }
+
     document.getElementById('pdfBooksPageBtn').addEventListener('click', function() {
       const rows = books.map(b => [b.title || 'Untitled', b.author || 'Unknown', b.acc || 'N/A', getCategoryLabel(b.category), b.borrowed ? 'Borrowed' : 'Available']);
       generatePDF('Books Catalog', ['Title', 'Author', 'Accession', 'Category', 'Status'], rows, 'books_catalog.pdf');
@@ -2783,7 +2592,7 @@
     });
 
     // ============================================================
-    // AUTH STATE LISTENER (PERSISTENT SESSION)
+    // AUTH STATE LISTENER
     // ============================================================
     
     onAuthStateChanged(auth, async (firebaseUser) => {
@@ -2804,7 +2613,7 @@
             updateUIForLoggedIn();
             await addActivityToCloud(`User ${currentUser.email} auto-logged in`);
           } else {
-            // New user (likely Google) - show onboarding
+            // New user - show onboarding
             pendingGoogleUser = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
@@ -2842,7 +2651,7 @@
     showLoading();
     renderAll();
     
-    console.log('🚀 Cele.Dev ILS initialized with Firebase Authentication');
+    console.log('🚀 Cele.Dev ILS initialized');
     console.log('🔐 Google Sign-In enabled');
     console.log('👑 Admin auto-setup enabled');
   </script>
