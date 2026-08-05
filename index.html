@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Chart.js 3 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -78,18 +81,6 @@
             gap: 0.6rem;
         }
         .logo i { color: var(--primary); }
-        .school-badge {
-            background: var(--primary);
-            color: white;
-            padding: 0.25rem 1rem;
-            border-radius: 40px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
         .topbar-actions {
             display: flex;
             align-items: center;
@@ -137,6 +128,19 @@
             gap: 0.5rem;
         }
         .btn-primary:hover { opacity: 0.9; }
+        .btn-pdf {
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 40px;
+            padding: 0.4rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-pdf:hover { opacity: 0.9; }
         /* stats */
         .dashboard-grid {
             display: grid;
@@ -205,11 +209,9 @@
             font-size: 0.72rem;
             font-weight: 600;
         }
-        .badge-warning { background: #fef3c7; color: #b45309; }
         .badge-success { background: #dcfce7; color: #0d7a3e; }
-        .badge-danger { background: #fee2e2; color: #b91c1c; }
+        .badge-warning { background: #fef3c7; color: #b45309; }
         .badge-school { background: var(--primary); color: white; }
-        /* search */
         .search-bar {
             display: flex;
             flex-wrap: wrap;
@@ -228,8 +230,7 @@
         }
         .flex { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
         .mt-2 { margin-top: 1rem; }
-        /* countdown */
-        .countdown { font-weight: 600; color: var(--danger); }
+        .mb-2 { margin-bottom: 1rem; }
         /* toast */
         .toast-container {
             position: fixed;
@@ -268,22 +269,13 @@
             border-bottom: 3px solid transparent;
             cursor: pointer;
             font-size: 0.9rem;
+            transition: 0.2s;
         }
+        .tab-bar button:hover { color: var(--primary); }
         .tab-bar button.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
         }
-        .laptop-status {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-        .laptop-available { background: var(--success); }
-        .laptop-issued { background: var(--warning); }
-        .laptop-maintenance { background: var(--danger); }
-        /* school registration modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -314,7 +306,7 @@
             cursor: pointer;
             color: var(--text-secondary);
         }
-        .modal input, .modal select {
+        .modal input, .modal select, .modal textarea {
             width: 100%;
             padding: 0.7rem 1rem;
             margin-bottom: 0.8rem;
@@ -323,6 +315,7 @@
             background: var(--bg-body);
             color: var(--text-primary);
         }
+        .modal textarea { border-radius: var(--radius-sm); min-height: 60px; }
         .modal .btn-primary { width: 100%; justify-content: center; }
         @media (max-width: 640px) {
             .topbar { flex-direction: column; align-items: stretch; gap: 0.5rem; }
@@ -349,28 +342,39 @@
             font-weight: 500;
             cursor: pointer;
         }
-        .school-filter-badge {
-            display: inline-block;
-            padding: 0.2rem 0.8rem;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            background: var(--primary);
-            color: white;
-        }
-        .hidden-row { display: none !important; }
         .no-data-msg {
             text-align: center;
             padding: 2rem;
             color: var(--text-secondary);
             font-style: italic;
         }
+        .action-buttons {
+            display: flex;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+        .action-buttons button {
+            padding: 0.2rem 0.6rem;
+            font-size: 0.7rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            cursor: pointer;
+        }
+        .action-buttons button:hover { background: var(--primary-light); }
+        .tab-content {
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 <div class="app-container" id="app">
 
-    <!-- TOPBAR with School Selector & Register -->
+    <!-- TOPBAR -->
     <header class="topbar">
         <div class="logo"><i class="fas fa-graduation-cap"></i> SchoolLib</div>
         <div class="topbar-actions">
@@ -381,7 +385,6 @@
                     <option value="1">Greenwood High</option>
                     <option value="2">Riverside Academy</option>
                     <option value="3">Hilltop School</option>
-                    <option value="4">St. Mary's College</option>
                 </select>
                 <button class="btn-outline" id="registerSchoolBtn"><i class="fas fa-plus-circle"></i> Register</button>
             </div>
@@ -391,84 +394,105 @@
         </div>
     </header>
 
-    <!-- stats - will be dynamically updated -->
-    <div class="dashboard-grid" id="statsGrid">
-        <div class="stat-card"><div class="stat-info"><h4>Total Books</h4><h2 id="statBooks">0</h2></div><div class="stat-icon"><i class="fas fa-book"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Students</h4><h2 id="statStudents">0</h2></div><div class="stat-icon"><i class="fas fa-user-graduate"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Overdue</h4><h2 id="statOverdue">0</h2></div><div class="stat-icon"><i class="fas fa-clock"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Laptops Issued</h4><h2 id="statLaptops">0</h2></div><div class="stat-icon"><i class="fas fa-laptop"></i></div></div>
-    </div>
-
     <!-- Main Tabs -->
     <div class="card">
         <div class="tab-bar" id="mainTabs">
-            <button class="active" data-tab="catalog"><i class="fas fa-list-ul"></i> Book Catalog</button>
+            <button class="active" data-tab="catalog"><i class="fas fa-book"></i> Book Catalog</button>
+            <button data-tab="stationary"><i class="fas fa-pencil-alt"></i> Stationary</button>
+            <button data-tab="laptops"><i class="fas fa-laptop"></i> Registered Laptops</button>
             <button data-tab="borrow"><i class="fas fa-hand-holding-heart"></i> Borrowings</button>
-            <button data-tab="fines"><i class="fas fa-coins"></i> Fine Management</button>
-            <button data-tab="analytics"><i class="fas fa-chart-pie"></i> Analytics</button>
+            <button data-tab="fines"><i class="fas fa-coins"></i> Fines</button>
             <button data-tab="students"><i class="fas fa-user-graduate"></i> Students</button>
-            <button data-tab="schools"><i class="fas fa-school"></i> Schools</button>
         </div>
 
-        <!-- TAB: CATALOG -->
+        <!-- TAB: BOOK CATALOG -->
         <div id="tab-catalog" class="tab-content">
+            <div class="card-header">
+                <h3><i class="fas fa-book"></i> Book Catalog</h3>
+                <div class="flex">
+                    <button class="btn-primary" id="addBookBtn"><i class="fas fa-plus"></i> Add Book</button>
+                    <button class="btn-pdf" id="downloadBookPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                </div>
+            </div>
             <div class="search-bar">
-                <input type="text" placeholder="Search by title, author, ISBN..." id="bookSearch">
-                <select id="genreFilter"><option value="">All Genres</option><option>Fiction</option><option>Non-fiction</option><option>Science</option><option>History</option><option>Mathematics</option></select>
+                <input type="text" placeholder="Search by title, author, accession..." id="bookSearch">
+                <select id="genreFilter"><option value="">All Genres</option><option>Fiction</option><option>Non-fiction</option><option>Science</option><option>History</option></select>
                 <button class="btn-primary" id="searchBookBtn"><i class="fas fa-search"></i> Search</button>
-                <button class="btn-outline" id="addBookBtn"><i class="fas fa-plus"></i> Add Book</button>
-                <button class="btn-outline"><i class="fas fa-file-import"></i> Import</button>
             </div>
             <div class="table-responsive">
                 <table>
-                    <thead><tr><th>#</th><th>Title</th><th>Author</th><th>Genre</th><th>School</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="catalogTableBody">
-                        <!-- Data will be populated dynamically -->
-                    </tbody>
+                    <thead><tr><th>#</th><th>Title</th><th>Author</th><th>Accession No.</th><th>Genre</th><th>School</th><th>Date Added</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="catalogTableBody"></tbody>
                 </table>
             </div>
-            <div class="flex mt-2"><span id="catalogCount">Showing 0 items</span> <button class="btn-outline">Next</button></div>
+            <div class="flex mt-2"><span id="catalogCount">Showing 0 items</span></div>
+        </div>
+
+        <!-- TAB: STATIONARY -->
+        <div id="tab-stationary" class="tab-content" style="display:none;">
+            <div class="card-header">
+                <h3><i class="fas fa-pencil-alt"></i> Library Stationary</h3>
+                <div class="flex">
+                    <button class="btn-primary" id="addStationaryBtn"><i class="fas fa-plus"></i> Add Item</button>
+                    <button class="btn-pdf" id="downloadStationaryPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                </div>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search stationary items..." id="stationarySearch">
+                <button class="btn-primary" id="searchStationaryBtn"><i class="fas fa-search"></i> Search</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>#</th><th>Item Name</th><th>Quantity</th><th>School</th><th>Date Added</th><th>Actions</th></tr></thead>
+                    <tbody id="stationaryTableBody"></tbody>
+                </table>
+            </div>
+            <div class="flex mt-2"><span id="stationaryCount">Showing 0 items</span></div>
+        </div>
+
+        <!-- TAB: REGISTERED LAPTOPS -->
+        <div id="tab-laptops" class="tab-content" style="display:none;">
+            <div class="card-header">
+                <h3><i class="fas fa-laptop"></i> Registered Laptops</h3>
+                <div class="flex">
+                    <button class="btn-primary" id="addLaptopBtn"><i class="fas fa-plus"></i> Register Laptop</button>
+                    <button class="btn-pdf" id="downloadLaptopPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                </div>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search by owner, type, serial..." id="laptopSearch">
+                <button class="btn-primary" id="searchLaptopBtn"><i class="fas fa-search"></i> Search</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>#</th><th>Owner</th><th>Laptop Type</th><th>Serial No.</th><th>School</th><th>Date Added</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="laptopTableBody"></tbody>
+                </table>
+            </div>
+            <div class="flex mt-2"><span id="laptopCount">Showing 0 items</span></div>
         </div>
 
         <!-- TAB: BORROWINGS -->
         <div id="tab-borrow" class="tab-content" style="display:none;">
             <div class="card-header"><h3><i class="fas fa-clock"></i> Currently Borrowed</h3><span class="badge" id="borrowCount">0 items</span></div>
             <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Book</th><th>Student</th><th>School</th><th>Due Date</th><th>Countdown</th><th>Action</th></tr></thead>
-                    <tbody id="borrowTableBody">
-                        <!-- Data will be populated dynamically -->
-                    </tbody>
-                </table>
+                <table><thead><tr><th>Book</th><th>Student</th><th>School</th><th>Due Date</th><th>Action</th></tr></thead>
+                <tbody id="borrowTableBody"></tbody></table>
             </div>
             <div class="card-header mt-2"><h3><i class="fas fa-history"></i> Borrowing History</h3></div>
             <div class="table-responsive">
                 <table><thead><tr><th>Book</th><th>Student</th><th>School</th><th>Borrowed</th><th>Returned</th><th>Status</th></tr></thead>
-                <tbody id="historyTableBody">
-                    <!-- Data will be populated dynamically -->
-                </tbody>
-                </table>
+                <tbody id="historyTableBody"></tbody></table>
             </div>
         </div>
 
-        <!-- TAB: FINE MANAGEMENT -->
+        <!-- TAB: FINES -->
         <div id="tab-fines" class="tab-content" style="display:none;">
-            <div class="card-header"><h3><i class="fas fa-coins"></i> Outstanding Fines</h3><span class="badge badge-danger" id="fineTotal">$0.00</span></div>
+            <div class="card-header"><h3><i class="fas fa-coins"></i> Outstanding Fines</h3><span class="badge badge-warning" id="fineTotal">$0.00</span></div>
             <div class="table-responsive">
                 <table><thead><tr><th>Student</th><th>School</th><th>Book</th><th>Fine ($)</th><th>Status</th><th>Action</th></tr></thead>
-                <tbody id="fineTableBody">
-                    <!-- Data will be populated dynamically -->
-                </tbody>
-                </table>
+                <tbody id="fineTableBody"></tbody></table>
             </div>
-            <div class="flex mt-2"><button class="btn-outline"><i class="fas fa-file-pdf"></i> Export PDF</button><button class="btn-outline"><i class="fas fa-file-csv"></i> Export CSV</button></div>
-        </div>
-
-        <!-- TAB: ANALYTICS -->
-        <div id="tab-analytics" class="tab-content" style="display:none;">
-            <div class="card-header"><h3><i class="fas fa-chart-line"></i> Monthly Circulation <span id="analyticsSchoolLabel">(All Schools)</span></h3></div>
-            <div class="chart-container"><canvas id="circulationChart" width="400" height="200"></canvas></div>
-            <div class="flex mt-2"><button class="btn-outline"><i class="fas fa-print"></i> Print Report</button></div>
         </div>
 
         <!-- TAB: STUDENTS -->
@@ -477,42 +501,15 @@
                 <h3><i class="fas fa-user-graduate"></i> Student Management</h3>
                 <button class="btn-primary" id="addStudentBtn"><i class="fas fa-user-plus"></i> Add Student</button>
             </div>
-            <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); margin:0 0 1rem 0;">
-                <div class="stat-card"><div class="stat-info"><h4>Total Students</h4><h2 id="studentTotal">0</h2></div><div class="stat-icon"><i class="fas fa-users"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><h4>Books Issued</h4><h2 id="studentBooksIssued">0</h2></div><div class="stat-icon"><i class="fas fa-book"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><h4>Laptops Issued</h4><h2 id="studentLaptopsIssued">0</h2></div><div class="stat-icon"><i class="fas fa-laptop"></i></div></div>
-            </div>
             <div class="search-bar">
-                <input type="text" placeholder="Search student name or ID..." id="studentSearch">
+                <input type="text" placeholder="Search student..." id="studentSearch">
                 <button class="btn-primary" id="studentSearchBtn"><i class="fas fa-search"></i> Search</button>
-                <button class="btn-outline" id="exportStudentCSV"><i class="fas fa-file-csv"></i> Export CSV</button>
             </div>
             <div class="table-responsive">
-                <table>
-                    <thead><tr><th>ID</th><th>Student</th><th>School</th><th>Book</th><th>Book Status</th><th>Laptop</th><th>Laptop Status</th><th>Actions</th></tr></thead>
-                    <tbody id="studentTableBody">
-                        <!-- Data will be populated dynamically -->
-                    </tbody>
-                </table>
+                <table><thead><tr><th>ID</th><th>Student</th><th>School</th><th>Book</th><th>Book Status</th><th>Laptop</th><th>Laptop Status</th><th>Actions</th></tr></thead>
+                <tbody id="studentTableBody"></tbody></table>
             </div>
-            <div class="flex mt-2"><span id="studentCount">Showing 0 students</span> <button class="btn-outline">Next</button></div>
-        </div>
-
-        <!-- TAB: SCHOOLS -->
-        <div id="tab-schools" class="tab-content" style="display:none;">
-            <div class="card-header">
-                <h3><i class="fas fa-school"></i> Registered Schools</h3>
-                <button class="btn-primary" id="registerSchoolFromTab"><i class="fas fa-plus"></i> Register School</button>
-            </div>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>School ID</th><th>School Name</th><th>Address</th><th>Students</th><th>Books</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="schoolTableBody">
-                        <!-- Data will be populated dynamically -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="flex mt-2"><button class="btn-outline"><i class="fas fa-file-csv"></i> Export Schools</button></div>
+            <div class="flex mt-2"><span id="studentCount">Showing 0 students</span></div>
         </div>
     </div>
 
@@ -531,6 +528,63 @@
         </div>
     </div>
 
+    <!-- Add Book Modal -->
+    <div class="modal-overlay" id="bookModal">
+        <div class="modal">
+            <button class="close-modal" id="closeBookModal">&times;</button>
+            <h3><i class="fas fa-book" style="color:var(--primary);"></i> Add New Book</h3>
+            <form id="bookForm">
+                <input type="text" placeholder="Title *" id="bookTitle" required>
+                <input type="text" placeholder="Author *" id="bookAuthor" required>
+                <input type="text" placeholder="Accession Number *" id="bookAccession" required>
+                <select id="bookGenre"><option>Fiction</option><option>Non-fiction</option><option>Science</option><option>History</option><option>Mathematics</option></select>
+                <select id="bookSchool">
+                    <option value="1">Greenwood High</option>
+                    <option value="2">Riverside Academy</option>
+                    <option value="3">Hilltop School</option>
+                </select>
+                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Add Book</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Stationary Modal -->
+    <div class="modal-overlay" id="stationaryModal">
+        <div class="modal">
+            <button class="close-modal" id="closeStationaryModal">&times;</button>
+            <h3><i class="fas fa-pencil-alt" style="color:var(--primary);"></i> Add Stationary Item</h3>
+            <form id="stationaryForm">
+                <input type="text" placeholder="Item Name *" id="stationaryName" required>
+                <input type="number" placeholder="Quantity *" id="stationaryQty" required min="1">
+                <select id="stationarySchool">
+                    <option value="1">Greenwood High</option>
+                    <option value="2">Riverside Academy</option>
+                    <option value="3">Hilltop School</option>
+                </select>
+                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Add Item</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Laptop Modal -->
+    <div class="modal-overlay" id="laptopModal">
+        <div class="modal">
+            <button class="close-modal" id="closeLaptopModal">&times;</button>
+            <h3><i class="fas fa-laptop" style="color:var(--primary);"></i> Register Laptop</h3>
+            <form id="laptopForm">
+                <input type="text" placeholder="Owner Name *" id="laptopOwner" required>
+                <input type="text" placeholder="Laptop Type/Model *" id="laptopType" required>
+                <input type="text" placeholder="Serial Number *" id="laptopSerial" required>
+                <select id="laptopSchool">
+                    <option value="1">Greenwood High</option>
+                    <option value="2">Riverside Academy</option>
+                    <option value="3">Hilltop School</option>
+                </select>
+                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Register Laptop</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast container -->
     <div class="toast-container" id="toastContainer"></div>
 </div>
@@ -544,51 +598,48 @@
             schools: [
                 { id: 1, name: 'Greenwood High', address: '123 Main St, NY', email: 'greenwood@school.edu', status: 'Active' },
                 { id: 2, name: 'Riverside Academy', address: '456 River Rd, CA', email: 'riverside@school.edu', status: 'Active' },
-                { id: 3, name: 'Hilltop School', address: '789 Hill Ave, TX', email: 'hilltop@school.edu', status: 'Active' },
-                { id: 4, name: "St. Mary's College", address: '321 College Blvd, MA', email: 'stmary@school.edu', status: 'Active' }
+                { id: 3, name: 'Hilltop School', address: '789 Hill Ave, TX', email: 'hilltop@school.edu', status: 'Active' }
             ],
             books: [
-                { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', genre: 'Fiction', schoolId: 1, status: 'Available' },
-                { id: 2, title: 'Sapiens', author: 'Yuval N. Harari', genre: 'Non-fiction', schoolId: 2, status: 'Borrowed' },
-                { id: 3, title: 'Dune', author: 'Frank Herbert', genre: 'Science', schoolId: 3, status: 'Available' },
-                { id: 4, title: 'To Kill a Mockingbird', author: 'Harper Lee', genre: 'Fiction', schoolId: 1, status: 'Borrowed' },
-                { id: 5, title: '1984', author: 'George Orwell', genre: 'Fiction', schoolId: 2, status: 'Available' },
-                { id: 6, title: 'A Brief History of Time', author: 'Stephen Hawking', genre: 'Science', schoolId: 3, status: 'Borrowed' },
-                { id: 7, title: 'The Art of War', author: 'Sun Tzu', genre: 'History', schoolId: 4, status: 'Available' },
-                { id: 8, title: 'Pride and Prejudice', author: 'Jane Austen', genre: 'Fiction', schoolId: 4, status: 'Available' },
-                { id: 9, title: 'The Selfish Gene', author: 'Richard Dawkins', genre: 'Science', schoolId: 1, status: 'Borrowed' },
-                { id: 10, title: 'The Diary of a Young Girl', author: 'Anne Frank', genre: 'History', schoolId: 2, status: 'Available' }
+                { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', accession: 'ACC-001', genre: 'Fiction', schoolId: 1, dateAdded: '2026-01-15', status: 'Available' },
+                { id: 2, title: 'Sapiens', author: 'Yuval N. Harari', accession: 'ACC-002', genre: 'Non-fiction', schoolId: 2, dateAdded: '2026-02-20', status: 'Borrowed' },
+                { id: 3, title: 'Dune', author: 'Frank Herbert', accession: 'ACC-003', genre: 'Science', schoolId: 3, dateAdded: '2026-03-10', status: 'Available' },
+                { id: 4, title: 'To Kill a Mockingbird', author: 'Harper Lee', accession: 'ACC-004', genre: 'Fiction', schoolId: 1, dateAdded: '2026-04-05', status: 'Borrowed' },
+                { id: 5, title: '1984', author: 'George Orwell', accession: 'ACC-005', genre: 'Fiction', schoolId: 2, dateAdded: '2026-05-12', status: 'Available' }
+            ],
+            stationary: [
+                { id: 1, name: 'A4 Paper (ream)', quantity: 50, schoolId: 1, dateAdded: '2026-01-10' },
+                { id: 2, name: 'Pens (box)', quantity: 30, schoolId: 2, dateAdded: '2026-02-15' },
+                { id: 3, name: 'Whiteboard Markers', quantity: 20, schoolId: 1, dateAdded: '2026-03-20' },
+                { id: 4, name: 'Stapler', quantity: 10, schoolId: 3, dateAdded: '2026-04-25' },
+                { id: 5, name: 'Notebooks', quantity: 100, schoolId: 2, dateAdded: '2026-05-30' }
+            ],
+            laptops: [
+                { id: 1, owner: 'Alice Johnson', type: 'Dell XPS 13', serial: 'SN-001', schoolId: 1, dateAdded: '2026-01-20', status: 'Issued' },
+                { id: 2, owner: 'Bob Smith', type: 'MacBook Air', serial: 'SN-002', schoolId: 2, dateAdded: '2026-02-25', status: 'Available' },
+                { id: 3, owner: 'Carol White', type: 'HP Spectre', serial: 'SN-003', schoolId: 1, dateAdded: '2026-03-15', status: 'Issued' },
+                { id: 4, owner: 'David Brown', type: 'Lenovo ThinkPad', serial: 'SN-004', schoolId: 3, dateAdded: '2026-04-10', status: 'Available' },
+                { id: 5, owner: 'Emma Wilson', type: 'Acer Swift', serial: 'SN-005', schoolId: 2, dateAdded: '2026-05-05', status: 'Available' }
             ],
             students: [
                 { id: 1, name: 'Alice Johnson', schoolId: 1, bookId: 2, laptop: 'Dell XPS 13', laptopStatus: 'Issued' },
                 { id: 2, name: 'Bob Smith', schoolId: 2, bookId: null, laptop: null, laptopStatus: 'Available' },
-                { id: 3, name: 'Carol White', schoolId: 3, bookId: 3, laptop: 'MacBook Air', laptopStatus: 'Issued' },
-                { id: 4, name: 'David Brown', schoolId: 1, bookId: 4, laptop: null, laptopStatus: 'Available' },
-                { id: 5, name: 'Emma Wilson', schoolId: 4, bookId: null, laptop: 'HP Spectre', laptopStatus: 'Issued' },
-                { id: 6, name: 'Frank Miller', schoolId: 2, bookId: 9, laptop: null, laptopStatus: 'Available' },
-                { id: 7, name: 'Grace Lee', schoolId: 3, bookId: null, laptop: null, laptopStatus: 'Available' },
-                { id: 8, name: 'Henry Davis', schoolId: 4, bookId: 7, laptop: 'Lenovo ThinkPad', laptopStatus: 'Issued' }
+                { id: 3, name: 'Carol White', schoolId: 1, bookId: 4, laptop: 'HP Spectre', laptopStatus: 'Issued' },
+                { id: 4, name: 'David Brown', schoolId: 3, bookId: null, laptop: null, laptopStatus: 'Available' }
             ],
             borrowings: [
                 { id: 1, studentId: 1, bookId: 2, borrowDate: '2026-07-20', dueDate: '2026-08-10', returned: false },
-                { id: 2, studentId: 3, bookId: 3, borrowDate: '2026-07-25', dueDate: '2026-08-15', returned: false },
-                { id: 3, studentId: 4, bookId: 4, borrowDate: '2026-07-28', dueDate: '2026-08-18', returned: false },
-                { id: 4, studentId: 6, bookId: 9, borrowDate: '2026-07-22', dueDate: '2026-08-12', returned: false },
-                { id: 5, studentId: 8, bookId: 7, borrowDate: '2026-07-30', dueDate: '2026-08-20', returned: false },
-                { id: 6, studentId: 2, bookId: 5, borrowDate: '2026-06-01', dueDate: '2026-06-15', returned: true },
-                { id: 7, studentId: 5, bookId: 8, borrowDate: '2026-06-10', dueDate: '2026-06-24', returned: true }
+                { id: 2, studentId: 3, bookId: 4, borrowDate: '2026-07-25', dueDate: '2026-08-15', returned: false },
+                { id: 3, studentId: 2, bookId: 5, borrowDate: '2026-06-01', dueDate: '2026-06-15', returned: true }
             ],
             fines: [
                 { id: 1, studentId: 1, bookId: 2, amount: 5.00, status: 'Unpaid' },
-                { id: 2, studentId: 3, bookId: 3, amount: 8.50, status: 'Unpaid' },
-                { id: 3, studentId: 4, bookId: 4, amount: 3.00, status: 'Unpaid' }
+                { id: 2, studentId: 3, bookId: 4, amount: 8.50, status: 'Unpaid' }
             ]
         };
 
         let currentSchoolId = 'all';
-        let nextStudentId = 9;
-        let nextBookId = 11;
-        let nextSchoolId = 5;
+        let nextId = { book: 6, stationary: 6, laptop: 6, student: 5, borrowing: 4, fine: 3 };
 
         // ========== HELPER FUNCTIONS ==========
         function getSchoolName(id) {
@@ -606,136 +657,152 @@
             return student ? student.name : 'Unknown';
         }
 
-        function getStudentBook(id) {
-            const student = schoolData.students.find(s => s.id === id);
-            if (student && student.bookId) {
-                return getBookTitle(student.bookId);
+        function formatDate(date) {
+            if (!date) return '—';
+            return date;
+        }
+
+        function getFilteredItems(items, schoolId, searchTerm = '') {
+            let filtered = items;
+            if (schoolId !== 'all') {
+                filtered = filtered.filter(item => item.schoolId === parseInt(schoolId));
             }
-            return '—';
-        }
-
-        function getStudentBookStatus(id) {
-            const student = schoolData.students.find(s => s.id === id);
-            if (student && student.bookId) {
-                return '<span class="badge badge-warning">Borrowed</span>';
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filtered = filtered.filter(item => 
+                    JSON.stringify(item).toLowerCase().includes(term)
+                );
             }
-            return '<span class="badge badge-success">None</span>';
-        }
-
-        function getStudentLaptop(id) {
-            const student = schoolData.students.find(s => s.id === id);
-            return student && student.laptop ? student.laptop : '—';
-        }
-
-        function getStudentLaptopStatus(id) {
-            const student = schoolData.students.find(s => s.id === id);
-            if (student && student.laptopStatus === 'Issued') {
-                return '<span class="laptop-status laptop-issued"></span> Issued';
-            }
-            return '<span class="laptop-status laptop-available"></span> Available';
-        }
-
-        function getSchoolStudents(schoolId) {
-            return schoolData.students.filter(s => schoolId === 'all' || s.schoolId === parseInt(schoolId));
-        }
-
-        function getSchoolBooks(schoolId) {
-            return schoolData.books.filter(b => schoolId === 'all' || b.schoolId === parseInt(schoolId));
-        }
-
-        function getSchoolBorrowings(schoolId) {
-            const students = getSchoolStudents(schoolId);
-            const studentIds = students.map(s => s.id);
-            return schoolData.borrowings.filter(b => studentIds.includes(b.studentId));
-        }
-
-        function getSchoolFines(schoolId) {
-            const students = getSchoolStudents(schoolId);
-            const studentIds = students.map(s => s.id);
-            return schoolData.fines.filter(f => studentIds.includes(f.studentId));
+            return filtered;
         }
 
         // ========== RENDER FUNCTIONS ==========
-        function renderStats() {
-            const students = getSchoolStudents(currentSchoolId);
-            const books = getSchoolBooks(currentSchoolId);
-            const borrowings = getSchoolBorrowings(currentSchoolId);
-            const fines = getSchoolFines(currentSchoolId);
-
-            document.getElementById('statBooks').textContent = books.length;
-            document.getElementById('statStudents').textContent = students.length;
-            document.getElementById('statOverdue').textContent = borrowings.filter(b => !b.returned).length;
-            document.getElementById('statLaptops').textContent = students.filter(s => s.laptopStatus === 'Issued').length;
-
-            // Update student tab stats
-            document.getElementById('studentTotal').textContent = students.length;
-            document.getElementById('studentBooksIssued').textContent = students.filter(s => s.bookId !== null).length;
-            document.getElementById('studentLaptopsIssued').textContent = students.filter(s => s.laptopStatus === 'Issued').length;
-        }
-
-        function renderCatalog() {
+        function renderBooks() {
             const tbody = document.getElementById('catalogTableBody');
-            const books = getSchoolBooks(currentSchoolId);
-            const searchTerm = document.getElementById('bookSearch').value.toLowerCase();
+            const searchTerm = document.getElementById('bookSearch').value;
             const genreFilter = document.getElementById('genreFilter').value;
+            
+            let books = getFilteredItems(schoolData.books, currentSchoolId, searchTerm);
+            if (genreFilter) {
+                books = books.filter(b => b.genre === genreFilter);
+            }
 
-            let filtered = books.filter(b => {
-                const matchSearch = b.title.toLowerCase().includes(searchTerm) || 
-                                  b.author.toLowerCase().includes(searchTerm);
-                const matchGenre = !genreFilter || b.genre === genreFilter;
-                return matchSearch && matchGenre;
-            });
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="no-data-msg">No books found for this school</td></tr>`;
+            if (books.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="no-data-msg">No books found</td></tr>`;
                 document.getElementById('catalogCount').textContent = 'Showing 0 items';
                 return;
             }
 
-            tbody.innerHTML = filtered.map((b, index) => `
-                <tr data-book-id="${b.id}">
+            tbody.innerHTML = books.map((b, index) => `
+                <tr>
                     <td>${index + 1}</td>
                     <td><i class="fas fa-book" style="margin-right:8px;color:var(--primary);"></i> ${b.title}</td>
                     <td>${b.author}</td>
+                    <td><code>${b.accession}</code></td>
                     <td>${b.genre}</td>
                     <td><span class="badge badge-school">${getSchoolName(b.schoolId)}</span></td>
+                    <td>${formatDate(b.dateAdded)}</td>
                     <td><span class="badge ${b.status === 'Available' ? 'badge-success' : 'badge-warning'}">${b.status}</span></td>
                     <td>
-                        <i class="fas fa-edit" style="color:var(--primary);cursor:pointer;" onclick="editBook(${b.id})"></i>
-                        <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;" onclick="deleteBook(${b.id})"></i>
+                        <div class="action-buttons">
+                            <button onclick="editBook(${b.id})"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteBook(${b.id})"><i class="fas fa-trash"></i></button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
-            document.getElementById('catalogCount').textContent = `Showing ${filtered.length} of ${books.length} items`;
+            document.getElementById('catalogCount').textContent = `Showing ${books.length} of ${getFilteredItems(schoolData.books, currentSchoolId).length} items`;
+        }
+
+        function renderStationary() {
+            const tbody = document.getElementById('stationaryTableBody');
+            const searchTerm = document.getElementById('stationarySearch').value;
+            const items = getFilteredItems(schoolData.stationary, currentSchoolId, searchTerm);
+
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No stationary items found</td></tr>`;
+                document.getElementById('stationaryCount').textContent = 'Showing 0 items';
+                return;
+            }
+
+            tbody.innerHTML = items.map((item, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.name}</td>
+                    <td><strong>${item.quantity}</strong></td>
+                    <td><span class="badge badge-school">${getSchoolName(item.schoolId)}</span></td>
+                    <td>${formatDate(item.dateAdded)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button onclick="editStationary(${item.id})"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteStationary(${item.id})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('stationaryCount').textContent = `Showing ${items.length} of ${getFilteredItems(schoolData.stationary, currentSchoolId).length} items`;
+        }
+
+        function renderLaptops() {
+            const tbody = document.getElementById('laptopTableBody');
+            const searchTerm = document.getElementById('laptopSearch').value;
+            const items = getFilteredItems(schoolData.laptops, currentSchoolId, searchTerm);
+
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="no-data-msg">No laptops found</td></tr>`;
+                document.getElementById('laptopCount').textContent = 'Showing 0 items';
+                return;
+            }
+
+            tbody.innerHTML = items.map((item, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><i class="fas fa-user"></i> ${item.owner}</td>
+                    <td>${item.type}</td>
+                    <td><code>${item.serial}</code></td>
+                    <td><span class="badge badge-school">${getSchoolName(item.schoolId)}</span></td>
+                    <td>${formatDate(item.dateAdded)}</td>
+                    <td><span class="badge ${item.status === 'Available' ? 'badge-success' : 'badge-warning'}">${item.status}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button onclick="editLaptop(${item.id})"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteLaptop(${item.id})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('laptopCount').textContent = `Showing ${items.length} of ${getFilteredItems(schoolData.laptops, currentSchoolId).length} items`;
         }
 
         function renderBorrowings() {
             const tbody = document.getElementById('borrowTableBody');
             const historyBody = document.getElementById('historyTableBody');
-            const borrowings = getSchoolBorrowings(currentSchoolId);
-            
+            const borrowings = schoolData.borrowings.filter(b => {
+                const student = schoolData.students.find(s => s.id === b.studentId);
+                if (!student) return false;
+                return currentSchoolId === 'all' || student.schoolId === parseInt(currentSchoolId);
+            });
+
             const active = borrowings.filter(b => !b.returned);
             const history = borrowings.filter(b => b.returned);
 
             document.getElementById('borrowCount').textContent = `${active.length} items`;
 
             if (active.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No active borrowings</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="no-data-msg">No active borrowings</td></tr>`;
             } else {
                 tbody.innerHTML = active.map(b => {
                     const student = schoolData.students.find(s => s.id === b.studentId);
                     return `
-                        <tr data-borrow-id="${b.id}">
+                        <tr>
                             <td>${getBookTitle(b.bookId)}</td>
                             <td>${student ? student.name : 'Unknown'}</td>
                             <td><span class="badge badge-school">${student ? getSchoolName(student.schoolId) : 'Unknown'}</span></td>
                             <td>${b.dueDate}</td>
-                            <td><span class="countdown" data-due="${b.dueDate}">Calculating...</span></td>
                             <td><button class="btn-outline" style="padding:0.2rem 1rem;" onclick="returnBook(${b.id})">Return</button></td>
                         </tr>
                     `;
                 }).join('');
-                updateCountdowns();
             }
 
             if (history.length === 0) {
@@ -759,11 +826,15 @@
 
         function renderFines() {
             const tbody = document.getElementById('fineTableBody');
-            const fines = getSchoolFines(currentSchoolId);
-            let total = 0;
+            const fines = schoolData.fines.filter(f => {
+                const student = schoolData.students.find(s => s.id === f.studentId);
+                if (!student) return false;
+                return currentSchoolId === 'all' || student.schoolId === parseInt(currentSchoolId);
+            });
 
+            let total = 0;
             if (fines.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No fines for this school</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No fines</td></tr>`;
                 document.getElementById('fineTotal').textContent = '$0.00';
                 return;
             }
@@ -772,7 +843,7 @@
                 const student = schoolData.students.find(s => s.id === f.studentId);
                 total += f.amount;
                 return `
-                    <tr data-fine-id="${f.id}">
+                    <tr>
                         <td>${student ? student.name : 'Unknown'}</td>
                         <td><span class="badge badge-school">${student ? getSchoolName(student.schoolId) : 'Unknown'}</span></td>
                         <td>${getBookTitle(f.bookId)}</td>
@@ -790,133 +861,80 @@
 
         function renderStudents() {
             const tbody = document.getElementById('studentTableBody');
-            const students = getSchoolStudents(currentSchoolId);
-            const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+            const searchTerm = document.getElementById('studentSearch').value;
+            let students = getFilteredItems(schoolData.students, currentSchoolId, searchTerm);
 
-            let filtered = students.filter(s => 
-                s.name.toLowerCase().includes(searchTerm) || 
-                `S${String(s.id).padStart(3, '0')}`.includes(searchTerm)
-            );
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="no-data-msg">No students found for this school</td></tr>`;
+            if (students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="no-data-msg">No students found</td></tr>`;
                 document.getElementById('studentCount').textContent = 'Showing 0 students';
                 return;
             }
 
-            tbody.innerHTML = filtered.map(s => `
-                <tr data-student-id="${s.id}">
+            tbody.innerHTML = students.map(s => `
+                <tr>
                     <td>S${String(s.id).padStart(3, '0')}</td>
                     <td>${s.name}</td>
                     <td><span class="badge badge-school">${getSchoolName(s.schoolId)}</span></td>
-                    <td>${getStudentBook(s.id)}</td>
-                    <td>${getStudentBookStatus(s.id)}</td>
-                    <td>${getStudentLaptop(s.id)}</td>
-                    <td>${getStudentLaptopStatus(s.id)}</td>
+                    <td>${s.bookId ? getBookTitle(s.bookId) : '—'}</td>
+                    <td>${s.bookId ? '<span class="badge badge-warning">Borrowed</span>' : '<span class="badge badge-success">None</span>'}</td>
+                    <td>${s.laptop || '—'}</td>
+                    <td>${s.laptopStatus === 'Issued' ? '<span class="badge badge-warning">Issued</span>' : '<span class="badge badge-success">Available</span>'}</td>
                     <td>
-                        ${!s.bookId ? `<button class="btn-outline" style="padding:0.2rem 0.8rem;font-size:0.7rem;" onclick="issueBook(${s.id})"><i class="fas fa-book"></i> Issue Book</button>` : 
-                        `<button class="btn-outline" style="padding:0.2rem 0.8rem;font-size:0.7rem;" onclick="returnStudentBook(${s.id})"><i class="fas fa-undo"></i> Ret Book</button>`}
-                        ${s.laptopStatus === 'Available' ? 
-                        `<button class="btn-outline" style="padding:0.2rem 0.8rem;font-size:0.7rem;" onclick="issueLaptop(${s.id})"><i class="fas fa-laptop"></i> Issue Laptop</button>` :
-                        `<button class="btn-outline" style="padding:0.2rem 0.8rem;font-size:0.7rem;" onclick="returnLaptop(${s.id})"><i class="fas fa-laptop"></i> Ret Laptop</button>`}
+                        <div class="action-buttons">
+                            ${!s.bookId ? `<button onclick="issueBook(${s.id})"><i class="fas fa-book"></i></button>` : 
+                            `<button onclick="returnStudentBook(${s.id})"><i class="fas fa-undo"></i></button>`}
+                            ${s.laptopStatus === 'Available' ? 
+                            `<button onclick="issueLaptop(${s.id})"><i class="fas fa-laptop"></i></button>` :
+                            `<button onclick="returnLaptop(${s.id})"><i class="fas fa-laptop"></i></button>`}
+                        </div>
                     </td>
                 </tr>
             `).join('');
-            document.getElementById('studentCount').textContent = `Showing ${filtered.length} of ${students.length} students`;
+            document.getElementById('studentCount').textContent = `Showing ${students.length} of ${getFilteredItems(schoolData.students, currentSchoolId).length} students`;
         }
 
-        function renderSchools() {
-            const tbody = document.getElementById('schoolTableBody');
-            if (schoolData.schools.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="no-data-msg">No schools registered</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = schoolData.schools.map(s => {
-                const studentCount = schoolData.students.filter(st => st.schoolId === s.id).length;
-                const bookCount = schoolData.books.filter(b => b.schoolId === s.id).length;
-                return `
-                    <tr>
-                        <td>SCH-${String(s.id).padStart(3, '0')}</td>
-                        <td>${s.name}</td>
-                        <td>${s.address || '—'}</td>
-                        <td>${studentCount}</td>
-                        <td>${bookCount}</td>
-                        <td><span class="badge ${s.status === 'Active' ? 'badge-success' : 'badge-warning'}">${s.status}</span></td>
-                        <td>
-                            <i class="fas fa-edit" style="color:var(--primary);cursor:pointer;"></i>
-                            <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;" onclick="deleteSchool(${s.id})"></i>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function updateChart() {
-            const chart = window.circulationChart;
-            if (!chart) return;
-
-            const schoolId = currentSchoolId;
-            let datasets = [];
-            
-            if (schoolId === 'all') {
-                // Show all schools
-                const schoolColors = ['#1e4a6f', '#2d7a9b', '#4a8c6f', '#8b6f4a'];
-                schoolData.schools.forEach((school, idx) => {
-                    const students = schoolData.students.filter(s => s.schoolId === school.id);
-                    const borrowings = schoolData.borrowings.filter(b => 
-                        students.some(s => s.id === b.studentId)
-                    );
-                    // Simulate monthly data
-                    const monthlyData = [30, 35, 42, 50, 55, 48].map(v => 
-                        Math.round(v * (borrowings.length / 10 + 0.5))
-                    );
-                    datasets.push({
-                        label: school.name,
-                        data: monthlyData,
-                        backgroundColor: schoolColors[idx % schoolColors.length]
-                    });
-                });
-            } else {
-                // Show selected school
-                const school = schoolData.schools.find(s => s.id === parseInt(schoolId));
-                if (school) {
-                    const students = schoolData.students.filter(s => s.schoolId === school.id);
-                    const borrowings = schoolData.borrowings.filter(b => 
-                        students.some(s => s.id === b.studentId)
-                    );
-                    const monthlyData = [30, 35, 42, 50, 55, 48].map(v => 
-                        Math.round(v * (borrowings.length / 10 + 0.5))
-                    );
-                    datasets = [{
-                        label: school.name,
-                        data: monthlyData,
-                        backgroundColor: '#1e4a6f'
-                    }];
-                }
-            }
-
-            chart.data.datasets = datasets;
-            chart.update();
-
-            document.getElementById('analyticsSchoolLabel').textContent = 
-                schoolId === 'all' ? '(All Schools)' : `(${getSchoolName(parseInt(schoolId))})`;
+        function refreshAll() {
+            renderBooks();
+            renderStationary();
+            renderLaptops();
+            renderBorrowings();
+            renderFines();
+            renderStudents();
         }
 
         // ========== ACTIONS ==========
         window.editBook = function(id) {
-            showToast(`Editing book ID ${id}`, 'info');
+            showToast('Edit book feature (simulated)', 'info');
         };
 
         window.deleteBook = function(id) {
             if (confirm('Delete this book?')) {
-                const book = schoolData.books.find(b => b.id === id);
                 schoolData.books = schoolData.books.filter(b => b.id !== id);
-                // Remove from students
-                schoolData.students.forEach(s => {
-                    if (s.bookId === id) s.bookId = null;
-                });
-                showToast('Book deleted successfully', 'success');
+                showToast('Book deleted', 'success');
+                refreshAll();
+            }
+        };
+
+        window.editStationary = function(id) {
+            showToast('Edit stationary feature (simulated)', 'info');
+        };
+
+        window.deleteStationary = function(id) {
+            if (confirm('Delete this stationary item?')) {
+                schoolData.stationary = schoolData.stationary.filter(s => s.id !== id);
+                showToast('Stationary item deleted', 'success');
+                refreshAll();
+            }
+        };
+
+        window.editLaptop = function(id) {
+            showToast('Edit laptop feature (simulated)', 'info');
+        };
+
+        window.deleteLaptop = function(id) {
+            if (confirm('Delete this laptop?')) {
+                schoolData.laptops = schoolData.laptops.filter(l => l.id !== id);
+                showToast('Laptop deleted', 'success');
                 refreshAll();
             }
         };
@@ -925,10 +943,11 @@
             const borrowing = schoolData.borrowings.find(b => b.id === id);
             if (borrowing) {
                 borrowing.returned = true;
-                // Update student
                 const student = schoolData.students.find(s => s.id === borrowing.studentId);
                 if (student) student.bookId = null;
-                showToast('Book returned successfully', 'success');
+                const book = schoolData.books.find(b => b.id === borrowing.bookId);
+                if (book) book.status = 'Available';
+                showToast('Book returned', 'success');
                 refreshAll();
             }
         };
@@ -937,7 +956,7 @@
             const fine = schoolData.fines.find(f => f.id === id);
             if (fine) {
                 fine.status = 'Paid';
-                showToast('Payment simulated! Fine cleared.', 'success');
+                showToast('Fine paid', 'success');
                 refreshAll();
             }
         };
@@ -946,7 +965,7 @@
             const fine = schoolData.fines.find(f => f.id === id);
             if (fine) {
                 fine.status = 'Waived';
-                showToast('Fine waived by admin.', 'info');
+                showToast('Fine waived', 'info');
                 refreshAll();
             }
         };
@@ -968,11 +987,10 @@
             student.bookId = book.id;
             book.status = 'Borrowed';
             
-            // Add borrowing record
             const dueDate = new Date();
             dueDate.setDate(dueDate.getDate() + 14);
             schoolData.borrowings.push({
-                id: schoolData.borrowings.length + 1,
+                id: nextId.borrowing++,
                 studentId: studentId,
                 bookId: book.id,
                 borrowDate: new Date().toISOString().split('T')[0],
@@ -980,7 +998,7 @@
                 returned: false
             });
             
-            showToast(`Book "${book.title}" issued to ${student.name}`, 'success');
+            showToast(`Book "${book.title}" issued`, 'success');
             refreshAll();
         };
 
@@ -997,22 +1015,32 @@
             if (borrowing) borrowing.returned = true;
             
             student.bookId = null;
-            showToast('Book returned successfully', 'success');
+            showToast('Book returned', 'success');
             refreshAll();
         };
 
         window.issueLaptop = function(studentId) {
             const student = schoolData.students.find(s => s.id === studentId);
             if (!student) return;
-            
             if (student.laptopStatus === 'Issued') {
                 showToast('Student already has a laptop', 'warning');
                 return;
             }
             
-            student.laptop = 'Dell Latitude 5420';
+            const availableLaptops = schoolData.laptops.filter(l => 
+                l.schoolId === student.schoolId && l.status === 'Available'
+            );
+            
+            if (availableLaptops.length === 0) {
+                showToast('No available laptops for this school', 'warning');
+                return;
+            }
+            
+            const laptop = availableLaptops[0];
+            student.laptop = laptop.type;
             student.laptopStatus = 'Issued';
-            showToast('Laptop issued successfully', 'success');
+            laptop.status = 'Issued';
+            showToast('Laptop issued', 'success');
             refreshAll();
         };
 
@@ -1020,63 +1048,72 @@
             const student = schoolData.students.find(s => s.id === studentId);
             if (!student || student.laptopStatus !== 'Issued') return;
             
+            const laptop = schoolData.laptops.find(l => l.type === student.laptop && l.schoolId === student.schoolId);
+            if (laptop) laptop.status = 'Available';
+            
             student.laptop = null;
             student.laptopStatus = 'Available';
-            showToast('Laptop returned successfully', 'success');
+            showToast('Laptop returned', 'success');
             refreshAll();
         };
 
-        window.deleteSchool = function(id) {
-            if (confirm('Delete this school? This will remove all associated data.')) {
-                schoolData.schools = schoolData.schools.filter(s => s.id !== id);
-                schoolData.books = schoolData.books.filter(b => b.schoolId !== id);
-                schoolData.students = schoolData.students.filter(s => s.schoolId !== id);
-                schoolData.borrowings = schoolData.borrowings.filter(b => 
-                    schoolData.students.some(s => s.id === b.studentId)
-                );
-                schoolData.fines = schoolData.fines.filter(f => 
-                    schoolData.students.some(s => s.id === f.studentId)
-                );
-                showToast('School deleted successfully', 'success');
-                // Update select
-                const select = document.getElementById('schoolSelect');
-                const option = select.querySelector(`option[value="${id}"]`);
-                if (option) option.remove();
-                if (currentSchoolId === String(id)) {
-                    currentSchoolId = 'all';
-                    select.value = 'all';
-                }
-                refreshAll();
-            }
-        };
-
-        // ========== COUNTDOWN TIMER ==========
-        function updateCountdowns() {
-            const now = new Date();
-            document.querySelectorAll('.countdown[data-due]').forEach(el => {
-                const due = new Date(el.dataset.due + 'T23:59:59');
-                const diff = due - now;
-                if (diff <= 0) {
-                    el.textContent = 'Overdue!';
-                    el.style.color = '#b91c1c';
-                    return;
-                }
-                const days = Math.floor(diff / (1000*60*60*24));
-                const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-                el.textContent = `${days}d ${hours}h`;
+        // ========== PDF GENERATION ==========
+        function generatePDF(title, headers, data, filename) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape', 'mm', 'a4');
+            
+            // Add title
+            doc.setFontSize(18);
+            doc.setTextColor(30, 74, 111);
+            doc.text(title, 14, 20);
+            
+            // Add school info
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            const schoolName = currentSchoolId === 'all' ? 'All Schools' : getSchoolName(parseInt(currentSchoolId));
+            doc.text(`School: ${schoolName}`, 14, 28);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 33);
+            
+            // Add table
+            doc.autoTable({
+                head: [headers],
+                body: data,
+                startY: 40,
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [30, 74, 111], textColor: [255, 255, 255] },
+                alternateRowStyles: { fillColor: [240, 244, 249] }
             });
+            
+            doc.save(filename);
+            showToast('PDF downloaded successfully!', 'success');
         }
 
-        // ========== REFRESH ALL ==========
-        function refreshAll() {
-            renderStats();
-            renderCatalog();
-            renderBorrowings();
-            renderFines();
-            renderStudents();
-            renderSchools();
-            updateChart();
-            updateCountdowns();
+        function downloadBookPDF() {
+            const books = getFilteredItems(schoolData.books, currentSchoolId);
+            const headers = ['#', 'Title', 'Author', 'Accession No.', 'Genre', 'School', 'Date Added', 'Status'];
+            const data = books.map((b, i) => [
+                i + 1, b.title, b.author, b.accession, b.genre, 
+                getSchoolName(b.schoolId), b.dateAdded, b.status
+            ]);
+            generatePDF('Book Catalog', headers, data, `book_catalog_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        function downloadStationaryPDF() {
+            const items = getFilteredItems(schoolData.stationary, currentSchoolId);
+            const headers = ['#', 'Item Name', 'Quantity', 'School', 'Date Added'];
+            const data = items.map((item, i) => [
+                i + 1, item.name, item.quantity, getSchoolName(item.schoolId), item.dateAdded
+            ]);
+            generatePDF('Library Stationary', headers, data, `stationary_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        function downloadLaptopPDF() {
+            const items = getFilteredItems(schoolData.laptops, currentSchoolId);
+            const headers = ['#', 'Owner', 'Laptop Type', 'Serial No.', 'School', 'Date Added', 'Status'];
+            const data = items.map((item, i) => [
+                i + 1, item.owner, item.type, item.serial, getSchoolName(item.schoolId), item.dateAdded, item.status
+            ]);
+            generatePDF('Registered Laptops', headers, data, `laptops_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
         // ========== TOAST ==========
@@ -1084,14 +1121,16 @@
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = 'toast';
-            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}" style="color:var(--primary);margin-right:8px;"></i> ${message}`;
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+            const color = type === 'success' ? 'var(--success)' : 'var(--primary)';
+            toast.innerHTML = `<i class="fas ${icon}" style="color:${color};margin-right:8px;"></i> ${message}`;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 3500);
         }
 
         // ========== EVENT LISTENERS ==========
 
-        // School selection change
+        // School selection
         document.getElementById('schoolSelect').addEventListener('change', function() {
             currentSchoolId = this.value;
             refreshAll();
@@ -1107,129 +1146,185 @@
 
         // Tab switching
         const tabs = document.querySelectorAll('#mainTabs button');
-        const contents = {
+        const tabContents = {
             catalog: document.getElementById('tab-catalog'),
+            stationary: document.getElementById('tab-stationary'),
+            laptops: document.getElementById('tab-laptops'),
             borrow: document.getElementById('tab-borrow'),
             fines: document.getElementById('tab-fines'),
-            analytics: document.getElementById('tab-analytics'),
-            students: document.getElementById('tab-students'),
-            schools: document.getElementById('tab-schools')
+            students: document.getElementById('tab-students')
         };
         tabs.forEach(btn => {
             btn.addEventListener('click', function() {
                 tabs.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
-                Object.keys(contents).forEach(key => {
-                    contents[key].style.display = (key === this.dataset.tab) ? 'block' : 'none';
+                Object.keys(tabContents).forEach(key => {
+                    tabContents[key].style.display = (key === this.dataset.tab) ? 'block' : 'none';
                 });
-                if (this.dataset.tab === 'analytics') {
-                    updateChart();
-                }
             });
         });
 
-        // Search book
-        document.getElementById('searchBookBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            renderCatalog();
-        });
-        document.getElementById('bookSearch').addEventListener('input', renderCatalog);
-        document.getElementById('genreFilter').addEventListener('change', renderCatalog);
-
-        // Search student
-        document.getElementById('studentSearchBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            renderStudents();
-        });
+        // Search handlers
+        document.getElementById('searchBookBtn').addEventListener('click', renderBooks);
+        document.getElementById('bookSearch').addEventListener('input', renderBooks);
+        document.getElementById('genreFilter').addEventListener('change', renderBooks);
+        
+        document.getElementById('searchStationaryBtn').addEventListener('click', renderStationary);
+        document.getElementById('stationarySearch').addEventListener('input', renderStationary);
+        
+        document.getElementById('searchLaptopBtn').addEventListener('click', renderLaptops);
+        document.getElementById('laptopSearch').addEventListener('input', renderLaptops);
+        
+        document.getElementById('studentSearchBtn').addEventListener('click', renderStudents);
         document.getElementById('studentSearch').addEventListener('input', renderStudents);
 
-        // Add Book
-        document.getElementById('addBookBtn').addEventListener('click', function() {
-            const schoolId = currentSchoolId === 'all' ? 1 : parseInt(currentSchoolId);
-            const newBook = {
-                id: nextBookId++,
-                title: `New Book ${nextBookId - 1}`,
-                author: 'Author Name',
-                genre: 'Fiction',
-                schoolId: schoolId,
+        // PDF Download buttons
+        document.getElementById('downloadBookPDF').addEventListener('click', downloadBookPDF);
+        document.getElementById('downloadStationaryPDF').addEventListener('click', downloadStationaryPDF);
+        document.getElementById('downloadLaptopPDF').addEventListener('click', downloadLaptopPDF);
+
+        // Add Book Modal
+        const bookModal = document.getElementById('bookModal');
+        document.getElementById('addBookBtn').addEventListener('click', () => bookModal.classList.add('active'));
+        document.getElementById('closeBookModal').addEventListener('click', () => bookModal.classList.remove('active'));
+        bookModal.addEventListener('click', (e) => { if (e.target === bookModal) bookModal.classList.remove('active'); });
+
+        document.getElementById('bookForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = document.getElementById('bookTitle').value.trim();
+            const author = document.getElementById('bookAuthor').value.trim();
+            const accession = document.getElementById('bookAccession').value.trim();
+            if (!title || !author || !accession) {
+                showToast('Please fill all required fields', 'warning');
+                return;
+            }
+            const book = {
+                id: nextId.book++,
+                title, author, accession,
+                genre: document.getElementById('bookGenre').value,
+                schoolId: parseInt(document.getElementById('bookSchool').value),
+                dateAdded: new Date().toISOString().split('T')[0],
                 status: 'Available'
             };
-            schoolData.books.push(newBook);
-            showToast(`Book "${newBook.title}" added to ${getSchoolName(schoolId)}`, 'success');
+            schoolData.books.push(book);
+            bookModal.classList.remove('active');
+            this.reset();
+            showToast(`Book "${title}" added successfully!`, 'success');
+            refreshAll();
+        });
+
+        // Add Stationary Modal
+        const stationaryModal = document.getElementById('stationaryModal');
+        document.getElementById('addStationaryBtn').addEventListener('click', () => stationaryModal.classList.add('active'));
+        document.getElementById('closeStationaryModal').addEventListener('click', () => stationaryModal.classList.remove('active'));
+        stationaryModal.addEventListener('click', (e) => { if (e.target === stationaryModal) stationaryModal.classList.remove('active'); });
+
+        document.getElementById('stationaryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('stationaryName').value.trim();
+            const qty = parseInt(document.getElementById('stationaryQty').value);
+            if (!name || !qty) {
+                showToast('Please fill all required fields', 'warning');
+                return;
+            }
+            const item = {
+                id: nextId.stationary++,
+                name, quantity: qty,
+                schoolId: parseInt(document.getElementById('stationarySchool').value),
+                dateAdded: new Date().toISOString().split('T')[0]
+            };
+            schoolData.stationary.push(item);
+            stationaryModal.classList.remove('active');
+            this.reset();
+            showToast(`Stationary item "${name}" added!`, 'success');
+            refreshAll();
+        });
+
+        // Add Laptop Modal
+        const laptopModal = document.getElementById('laptopModal');
+        document.getElementById('addLaptopBtn').addEventListener('click', () => laptopModal.classList.add('active'));
+        document.getElementById('closeLaptopModal').addEventListener('click', () => laptopModal.classList.remove('active'));
+        laptopModal.addEventListener('click', (e) => { if (e.target === laptopModal) laptopModal.classList.remove('active'); });
+
+        document.getElementById('laptopForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const owner = document.getElementById('laptopOwner').value.trim();
+            const type = document.getElementById('laptopType').value.trim();
+            const serial = document.getElementById('laptopSerial').value.trim();
+            if (!owner || !type || !serial) {
+                showToast('Please fill all required fields', 'warning');
+                return;
+            }
+            const laptop = {
+                id: nextId.laptop++,
+                owner, type, serial,
+                schoolId: parseInt(document.getElementById('laptopSchool').value),
+                dateAdded: new Date().toISOString().split('T')[0],
+                status: 'Available'
+            };
+            schoolData.laptops.push(laptop);
+            laptopModal.classList.remove('active');
+            this.reset();
+            showToast(`Laptop for "${owner}" registered!`, 'success');
             refreshAll();
         });
 
         // Add Student
         document.getElementById('addStudentBtn').addEventListener('click', function() {
             const schoolId = currentSchoolId === 'all' ? 1 : parseInt(currentSchoolId);
-            const newStudent = {
-                id: nextStudentId++,
-                name: `New Student ${nextStudentId - 1}`,
+            const student = {
+                id: nextId.student++,
+                name: `New Student ${nextId.student - 1}`,
                 schoolId: schoolId,
                 bookId: null,
                 laptop: null,
                 laptopStatus: 'Available'
             };
-            schoolData.students.push(newStudent);
-            showToast(`Student "${newStudent.name}" added to ${getSchoolName(schoolId)}`, 'success');
+            schoolData.students.push(student);
+            showToast(`Student added to ${getSchoolName(schoolId)}`, 'success');
             refreshAll();
         });
 
         // School Registration Modal
-        const modal = document.getElementById('schoolModal');
-        document.getElementById('registerSchoolBtn').addEventListener('click', () => modal.classList.add('active'));
-        document.getElementById('registerSchoolFromTab').addEventListener('click', () => modal.classList.add('active'));
-        document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.remove('active'));
-        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+        const schoolModal = document.getElementById('schoolModal');
+        document.getElementById('registerSchoolBtn').addEventListener('click', () => schoolModal.classList.add('active'));
+        document.getElementById('closeModalBtn').addEventListener('click', () => schoolModal.classList.remove('active'));
+        schoolModal.addEventListener('click', (e) => { if (e.target === schoolModal) schoolModal.classList.remove('active'); });
 
         document.getElementById('schoolForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('schoolName').value.trim();
             if (!name) { showToast('School name is required', 'warning'); return; }
-            
-            const newSchool = {
-                id: nextSchoolId++,
+            const school = {
+                id: schoolData.schools.length + 1,
                 name: name,
                 address: document.getElementById('schoolAddress').value || '—',
                 email: document.getElementById('schoolEmail').value || '—',
                 status: document.getElementById('schoolStatus').value
             };
-            schoolData.schools.push(newSchool);
-            
-            // Add to select
+            schoolData.schools.push(school);
             const select = document.getElementById('schoolSelect');
             const opt = document.createElement('option');
-            opt.value = newSchool.id;
-            opt.textContent = newSchool.name;
+            opt.value = school.id;
+            opt.textContent = school.name;
             select.appendChild(opt);
-            
-            modal.classList.remove('active');
-            showToast(`School "${name}" registered successfully!`, 'success');
+            schoolModal.classList.remove('active');
             this.reset();
+            showToast(`School "${name}" registered!`, 'success');
             refreshAll();
         });
 
-        // Export buttons
-        document.getElementById('exportStudentCSV').addEventListener('click', function() {
-            showToast('Student data exported (CSV)', 'success');
-        });
-
         // ========== INITIALIZATION ==========
-        // Setup initial data
         refreshAll();
+        setTimeout(() => showToast('Welcome to SchoolLib!', 'success'), 600);
 
-        // Update countdowns every minute
-        setInterval(updateCountdowns, 60000);
-
-        // Set initial school filter badge
-        console.log('SchoolLib initialized!');
-
-        // Welcome toast
-        setTimeout(() => showToast('Welcome to SchoolLib! Select a school to filter data.', 'success'), 600);
-
-        // Make functions globally accessible for onclick handlers
+        // Make functions globally accessible
         window.editBook = editBook;
         window.deleteBook = deleteBook;
+        window.editStationary = editStationary;
+        window.deleteStationary = deleteStationary;
+        window.editLaptop = editLaptop;
+        window.deleteLaptop = deleteLaptop;
         window.returnBook = returnBook;
         window.payFine = payFine;
         window.waiveFine = waiveFine;
@@ -1237,7 +1332,6 @@
         window.returnStudentBook = returnStudentBook;
         window.issueLaptop = issueLaptop;
         window.returnLaptop = returnLaptop;
-        window.deleteSchool = deleteSchool;
 
     })();
 </script>
