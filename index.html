@@ -3,14 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
-    <title>SchoolLib · Integrated School Library System</title>
+    <title>School Integrated Library System</title>
     <!-- Font Awesome 6 (free) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Chart.js 3 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <!-- jsPDF for PDF generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -21,275 +16,236 @@
         body {
             background: var(--bg-body);
             color: var(--text-primary);
-            transition: background 0.2s, color 0.2s;
-            line-height: 1.5;
-            padding: 1rem;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         :root {
             --bg-body: #f0f4f9;
             --bg-card: #ffffff;
+            --bg-nav: #1e4a6f;
             --text-primary: #0b1a2e;
             --text-secondary: #2c3e5a;
+            --text-light: #f1f5f9;
             --border: #cbd5e1;
             --primary: #1e4a6f;
             --primary-light: #dbeafe;
+            --primary-dark: #0b2a44;
             --danger: #b91c1c;
             --success: #0d7a3e;
             --warning: #b45309;
-            --shadow: 0 8px 24px rgba(0,0,0,0.06);
-            --radius: 16px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.1);
+            --radius: 20px;
+            --radius-sm: 12px;
         }
         .dark {
             --bg-body: #0a1420;
             --bg-card: #162433;
+            --bg-nav: #08121c;
             --text-primary: #e8edf3;
             --text-secondary: #b0c4db;
             --border: #2a3f57;
             --primary-light: #1a3450;
-            --shadow: 0 8px 24px rgba(0,0,0,0.6);
+            --shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
-        .app-container { max-width: 1440px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
-        
-        /* Topbar */
-        .topbar {
+
+        /* ========== TOP NAV ========== */
+        .top-nav {
+            background: var(--bg-nav);
+            padding: 0.8rem 2rem;
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            background: var(--bg-card);
-            padding: 0.75rem 1.8rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
-        .logo { font-weight: 700; font-size: 1.6rem; display: flex; align-items: center; gap: 0.6rem; }
-        .logo i { color: var(--primary); }
-        .topbar-actions { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-        .theme-toggle, .role-badge {
-            background: var(--bg-body);
-            border: 1px solid var(--border);
-            border-radius: 40px;
-            padding: 0.4rem 1.2rem;
+        .top-nav .logo {
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .top-nav .logo i {
+            color: #60a5fa;
+            font-size: 1.4rem;
+        }
+        .top-nav .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .top-nav .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            transition: 0.3s;
             font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .top-nav .nav-links a:hover,
+        .top-nav .nav-links a.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        .top-nav .nav-links .theme-toggle {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
         }
-        .role-badge {
-            background: var(--primary-light);
-            border-color: var(--primary);
+        .top-nav .nav-links .theme-toggle:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            flex: 1;
+            padding: 80px 1rem 80px 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* ========== HOMEPAGE ========== */
+        .homepage {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            animation: fadeInUp 0.8s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .homepage .hero-icon {
+            font-size: 4.5rem;
             color: var(--primary);
-            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
         }
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 40px;
-            padding: 0.4rem 1.2rem;
-            cursor: pointer;
+        .homepage h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
             color: var(--text-primary);
-            font-weight: 500;
-            transition: 0.2s;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
         }
-        .btn-outline:hover { background: var(--primary-light); }
-        .btn-primary {
+        .homepage h1 span {
+            color: var(--primary);
+        }
+        .homepage .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        .homepage .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .homepage .btn-group .btn {
+            padding: 0.9rem 2.8rem;
+            border-radius: 50px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+        }
+        .homepage .btn-group .btn-primary {
             background: var(--primary);
             color: white;
-            border: none;
-            border-radius: 40px;
-            padding: 0.5rem 1.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(30, 74, 111, 0.3);
         }
-        .btn-primary:hover { opacity: 0.9; }
-        .btn-pdf {
-            background: #dc2626;
+        .homepage .btn-group .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(30, 74, 111, 0.4);
+        }
+        .homepage .btn-group .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+        .homepage .btn-group .btn-outline:hover {
+            background: var(--primary);
             color: white;
-            border: none;
-            border-radius: 40px;
-            padding: 0.4rem 1.2rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
+            border-color: var(--primary);
+            transform: translateY(-3px);
         }
-        .btn-pdf:hover { opacity: 0.9; }
-        .btn-success {
-            background: var(--success);
-            color: white;
-            border: none;
-            border-radius: 40px;
-            padding: 0.3rem 1rem;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        .btn-success:hover { opacity: 0.9; }
 
-        /* Stats */
-        .dashboard-grid {
+        /* ========== DASHBOARD (hidden by default) ========== */
+        .dashboard-container {
+            display: none;
+            width: 100%;
+            max-width: 1400px;
+        }
+        .dashboard-container.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1.5rem;
-            margin: 0.5rem 0;
+            margin-bottom: 2rem;
         }
         .stat-card {
             background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: 1.25rem 1.5rem;
+            border-radius: var(--radius-sm);
+            padding: 1.5rem;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            transition: transform 0.2s;
         }
-        .stat-info h4 { font-weight: 400; font-size: 0.85rem; color: var(--text-secondary); }
-        .stat-info h2 { font-size: 1.8rem; font-weight: 700; }
-        .stat-icon { font-size: 2rem; opacity: 0.4; color: var(--primary); }
-
-        /* Cards */
-        .card {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: 1.25rem 1.5rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-        }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .card-header h3 { font-weight: 600; }
-
-        /* Tables */
-        .table-responsive { overflow-x: auto; margin: 0.5rem 0; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        th {
-            text-align: left;
-            padding: 0.75rem 0.5rem;
-            border-bottom: 2px solid var(--border);
-            color: var(--text-secondary);
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        td { padding: 0.7rem 0.5rem; border-bottom: 1px solid var(--border); }
-        .badge {
-            background: var(--primary-light);
-            color: var(--primary);
-            padding: 0.2rem 0.9rem;
-            border-radius: 30px;
-            font-size: 0.72rem;
-            font-weight: 600;
-        }
-        .badge-success { background: #dcfce7; color: #0d7a3e; }
-        .badge-warning { background: #fef3c7; color: #b45309; }
-        .badge-danger { background: #fee2e2; color: #b91c1c; }
-        .badge-school { background: var(--primary); color: white; }
-        .badge-staff { background: #8b5cf6; color: white; }
-        .badge-student { background: #3b82f6; color: white; }
-
-        /* Search */
-        .search-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        .search-bar input, .search-bar select {
-            padding: 0.5rem 1.2rem;
-            border-radius: 40px;
-            border: 1px solid var(--border);
-            background: var(--bg-body);
-            color: var(--text-primary);
-            flex: 1 1 180px;
-            min-width: 140px;
-        }
-        .flex { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
-        .mt-2 { margin-top: 1rem; }
-        .mb-2 { margin-bottom: 1rem; }
-
-        /* Modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: 2rem 2.5rem;
-            max-width: 550px;
-            width: 90%;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            position: relative;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal h3 { margin-bottom: 1.2rem; }
-        .modal .close-modal {
-            position: absolute;
-            top: 1rem; right: 1.5rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-secondary);
-        }
-        .modal input, .modal select, .modal textarea {
-            width: 100%;
-            padding: 0.7rem 1rem;
-            margin-bottom: 0.8rem;
-            border-radius: 40px;
-            border: 1px solid var(--border);
-            background: var(--bg-body);
-            color: var(--text-primary);
-        }
-        .modal .btn-primary { width: 100%; justify-content: center; }
-
-        /* Toast */
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            z-index: 999;
-        }
-        .toast {
-            background: var(--bg-card);
-            padding: 0.75rem 1.8rem;
-            border-radius: 50px;
-            border-left: 5px solid var(--primary);
-            box-shadow: var(--shadow);
-            font-weight: 500;
-            animation: slideUp 0.3s ease;
-            border: 1px solid var(--border);
-        }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card .stat-info h4 { font-weight: 400; font-size: 0.85rem; color: var(--text-secondary); }
+        .stat-card .stat-info h2 { font-size: 1.8rem; font-weight: 700; }
+        .stat-card .stat-icon { font-size: 2rem; opacity: 0.4; color: var(--primary); }
 
         /* Tabs */
         .tab-bar {
             display: flex;
             gap: 0.25rem;
             border-bottom: 2px solid var(--border);
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.5rem;
             flex-wrap: wrap;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
         }
         .tab-bar button {
             background: transparent;
@@ -299,8 +255,9 @@
             color: var(--text-secondary);
             border-bottom: 3px solid transparent;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: 0.2s;
+            white-space: nowrap;
         }
         .tab-bar button:hover { color: var(--primary); }
         .tab-bar button.active {
@@ -308,67 +265,410 @@
             border-bottom-color: var(--primary);
         }
 
-        .school-selector {
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            padding: 1.25rem 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+        .card-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
             gap: 0.5rem;
         }
-        .school-selector select {
-            padding: 0.3rem 1rem;
-            border-radius: 40px;
-            border: 1px solid var(--border);
-            background: var(--bg-body);
-            color: var(--text-primary);
-            font-weight: 500;
-            cursor: pointer;
-        }
-        .no-data-msg {
-            text-align: center;
-            padding: 2rem;
+        .card-header h3 { font-weight: 600; font-size: 1.1rem; }
+
+        /* Tables */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th {
+            text-align: left;
+            padding: 0.6rem 0.5rem;
+            border-bottom: 2px solid var(--border);
             color: var(--text-secondary);
-            font-style: italic;
+            font-weight: 600;
+            white-space: nowrap;
         }
-        .action-buttons {
-            display: flex;
-            gap: 0.3rem;
-            flex-wrap: wrap;
+        td { padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--border); }
+        .badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 0.15rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
         }
-        .action-buttons button {
-            padding: 0.2rem 0.6rem;
+        .badge-success { background: #dcfce7; color: #0d7a3e; }
+        .badge-warning { background: #fef3c7; color: #b45309; }
+        .badge-school { background: var(--primary); color: white; }
+        .badge-student { background: #3b82f6; color: white; }
+        .badge-staff { background: #8b5cf6; color: white; }
+
+        .btn-sm {
+            padding: 0.2rem 0.8rem;
             font-size: 0.7rem;
             border-radius: 20px;
             border: 1px solid var(--border);
             background: transparent;
             cursor: pointer;
         }
-        .action-buttons button:hover { background: var(--primary-light); }
-        .tab-content { animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .btn-sm:hover { background: var(--primary-light); }
+        .btn-success-sm {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.7rem;
+            border-radius: 20px;
+            cursor: pointer;
         }
-        .fa-sun, .fa-moon { transition: 0.2s; }
-        .dark .fa-moon { display: none; }
-        .dark .fa-sun { display: inline; }
-        .fa-sun { display: none; }
-        .dark .fa-sun { display: inline; }
-        .dark .fa-moon { display: none; }
-        @media (max-width: 640px) {
-            .topbar { flex-direction: column; align-items: stretch; gap: 0.5rem; }
-            .topbar-actions { justify-content: space-between; }
-            .modal { padding: 1.5rem; }
+        .btn-success-sm:hover { opacity: 0.9; }
+
+        .btn-primary-sm {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.3rem 1.2rem;
+            font-size: 0.8rem;
+            border-radius: 30px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
         }
+        .btn-primary-sm:hover { opacity: 0.9; }
+
+        .search-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .search-bar input, .search-bar select {
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            background: var(--bg-body);
+            color: var(--text-primary);
+            flex: 1 1 160px;
+            min-width: 120px;
+            font-size: 0.85rem;
+        }
+
+        .no-data-msg {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        .flex { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+
+        /* ========== BOTTOM NAV ========== */
+        .bottom-nav {
+            background: var(--bg-nav);
+            padding: 0.6rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .bottom-nav .copyright {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+        }
+        .bottom-nav .bottom-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .bottom-nav .bottom-links a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: 0.3s;
+        }
+        .bottom-nav .bottom-links a:hover {
+            color: white;
+        }
+        .bottom-nav .bottom-links .school-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .bottom-nav .bottom-links .school-selector select {
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            border: none;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .bottom-nav .bottom-links .school-selector select option {
+            background: var(--bg-nav);
+            color: white;
+        }
+
+        /* ========== TOAST ========== */
+        .toast-container {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 9999;
+        }
+        .toast {
+            background: var(--bg-card);
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            border-left: 5px solid var(--primary);
+            box-shadow: var(--shadow);
+            font-weight: 500;
+            animation: slideUp 0.3s ease;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .top-nav { padding: 0.6rem 1rem; }
+            .top-nav .logo { font-size: 1rem; }
+            .top-nav .nav-links a { font-size: 0.75rem; padding: 0.3rem 0.7rem; }
+            .bottom-nav { padding: 0.5rem 1rem; flex-direction: column; gap: 0.3rem; text-align: center; }
+            .homepage h1 { font-size: 2rem; }
+            .homepage .btn-group .btn { padding: 0.7rem 1.8rem; font-size: 0.9rem; }
+            .main-content { padding: 70px 0.5rem 90px 0.5rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+            .stat-card { padding: 1rem; }
+            .stat-card .stat-info h2 { font-size: 1.4rem; }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .homepage h1 { font-size: 1.6rem; }
+            .tab-bar button { font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+            .card { padding: 1rem; }
+        }
+
+        .hidden { display: none !important; }
+        .mt-2 { margin-top: 1rem; }
+        .mb-2 { margin-bottom: 1rem; }
     </style>
 </head>
 <body>
-<div class="app-container" id="app">
+    <!-- ===== TOP NAV ===== -->
+    <nav class="top-nav">
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <span>SchoolLib</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active" id="navHome"><i class="fas fa-home"></i> Home</a>
+            <a href="#" id="navDashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i><i class="fas fa-sun"></i> Theme</button>
+        </div>
+    </nav>
 
-    <!-- TOPBAR -->
-    <header class="topbar">
-        <div class="logo"><i class="fas fa-graduation-cap"></i> SchoolLib</div>
-        <div class="topbar-actions">
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="main-content">
+
+        <!-- ===== HOMEPAGE ===== -->
+        <div class="homepage" id="homepage">
+            <span class="hero-icon"><i class="fas fa-university"></i></span>
+            <h1>SCHOOL INTEGRATED<br><span>LIBRARY SYSTEM</span></h1>
+            <p class="subtitle">
+                Complete library management solution for schools. Manage books, stationary, laptops, students, staff, and track all borrowings efficiently.
+            </p>
+            <div class="btn-group">
+                <button class="btn btn-primary" id="registerBtn"><i class="fas fa-user-plus"></i> Register</button>
+                <button class="btn btn-outline" id="dashboardBtn"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+            </div>
+        </div>
+
+        <!-- ===== DASHBOARD ===== -->
+        <div class="dashboard-container" id="dashboardContainer">
+            <!-- Stats -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card"><div class="stat-info"><h4>Total Books</h4><h2 id="statBooks">0</h2></div><div class="stat-icon"><i class="fas fa-book"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><h4>Students</h4><h2 id="statStudents">0</h2></div><div class="stat-icon"><i class="fas fa-user-graduate"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><h4>Staff</h4><h2 id="statStaff">0</h2></div><div class="stat-icon"><i class="fas fa-user-tie"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><h4>Active Borrowings</h4><h2 id="statBorrowings">0</h2></div><div class="stat-icon"><i class="fas fa-hand-holding"></i></div></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-bar" id="mainTabs">
+                <button class="active" data-tab="books"><i class="fas fa-book"></i> Book Catalog</button>
+                <button data-tab="stationary"><i class="fas fa-box"></i> Stationary</button>
+                <button data-tab="laptops"><i class="fas fa-laptop"></i> Laptops</button>
+                <button data-tab="students"><i class="fas fa-user-graduate"></i> Students</button>
+                <button data-tab="staff"><i class="fas fa-user-tie"></i> Staff</button>
+                <button data-tab="borrowings"><i class="fas fa-hand-holding-heart"></i> Borrowings</button>
+            </div>
+
+            <!-- TAB: BOOKS -->
+            <div id="tab-books" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-book"></i> Book Catalog</h3>
+                        <div class="flex">
+                            <button class="btn-primary-sm" id="addBookBtn"><i class="fas fa-plus"></i> Add Book</button>
+                            <button class="btn-primary-sm" style="background:#dc2626;" id="downloadBookPDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                        </div>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search books..." id="bookSearch">
+                        <button class="btn-primary-sm" id="searchBookBtn"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>#</th><th>Title</th><th>Author</th><th>Accession</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody id="catalogTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: STATIONARY -->
+            <div id="tab-stationary" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-box"></i> Stationary Catalog</h3>
+                        <div class="flex">
+                            <button class="btn-primary-sm" id="addStationaryBtn"><i class="fas fa-plus"></i> Add Item</button>
+                            <button class="btn-primary-sm" style="background:#dc2626;" id="downloadStationaryPDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                        </div>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search stationary..." id="stationarySearch">
+                        <button class="btn-primary-sm" id="searchStationaryBtn"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>#</th><th>Item</th><th>Category</th><th>Qty</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody id="stationaryTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: LAPTOPS -->
+            <div id="tab-laptops" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-laptop"></i> Laptop Catalog</h3>
+                        <div class="flex">
+                            <button class="btn-primary-sm" id="addLaptopBtn"><i class="fas fa-plus"></i> Register</button>
+                            <button class="btn-primary-sm" style="background:#dc2626;" id="downloadLaptopPDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                        </div>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search laptops..." id="laptopSearch">
+                        <button class="btn-primary-sm" id="searchLaptopBtn"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>#</th><th>Type</th><th>Serial</th><th>Owner</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody id="laptopTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: STUDENTS -->
+            <div id="tab-students" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user-graduate"></i> Students</h3>
+                        <div class="flex">
+                            <button class="btn-primary-sm" id="addStudentBtn"><i class="fas fa-plus"></i> Add Student</button>
+                            <button class="btn-primary-sm" style="background:#dc2626;" id="downloadStudentPDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                        </div>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search students..." id="studentSearch">
+                        <button class="btn-primary-sm" id="studentSearchBtn"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>ID</th><th>Name</th><th>Book</th><th>Laptop</th><th>Actions</th></tr></thead>
+                            <tbody id="studentTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: STAFF -->
+            <div id="tab-staff" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user-tie"></i> Staff</h3>
+                        <div class="flex">
+                            <button class="btn-primary-sm" id="addStaffBtn"><i class="fas fa-plus"></i> Add Staff</button>
+                            <button class="btn-primary-sm" style="background:#dc2626;" id="downloadStaffPDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                        </div>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search staff..." id="staffSearch">
+                        <button class="btn-primary-sm" id="staffSearchBtn"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Staff No.</th><th>Name</th><th>Dept</th><th>Book</th><th>Laptop</th><th>Actions</th></tr></thead>
+                            <tbody id="staffTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: BORROWINGS -->
+            <div id="tab-borrowings" class="tab-content" style="display:none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-hand-holding-heart"></i> Borrowing Records</h3>
+                        <div class="flex">
+                            <button class="btn-primary-sm" id="newBorrowBtn"><i class="fas fa-plus"></i> New Borrowing</button>
+                            <button class="btn-primary-sm" style="background:#dc2626;" id="downloadBorrowPDF"><i class="fas fa-file-pdf"></i> PDF</button>
+                        </div>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search borrowings..." id="borrowSearch">
+                        <button class="btn-primary-sm" id="searchBorrowBtn"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>#</th><th>Borrower</th><th>Type</th><th>Item</th><th>Date</th><th>Due</th><th>Status</th><th>Actions</th></tr></thead>
+                            <tbody id="borrowTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BOTTOM NAV ===== -->
+    <nav class="bottom-nav">
+        <div class="copyright">
+            &copy; 2026 School Integrated Library System. All rights reserved.
+        </div>
+        <div class="bottom-links">
             <div class="school-selector">
-                <i class="fas fa-school"></i>
+                <i class="fas fa-school" style="color:rgba(255,255,255,0.6);"></i>
                 <select id="schoolSelect">
                     <option value="all">All Schools</option>
                     <option value="1">Greenwood High</option>
@@ -376,366 +676,21 @@
                     <option value="3">Hilltop School</option>
                 </select>
             </div>
-            <span class="role-badge"><i class="fas fa-user-shield"></i> Admin</span>
-            <div class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i><i class="fas fa-sun"></i> Theme</div>
-            <button class="btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            <a href="#" id="bottomHome"><i class="fas fa-home"></i> Home</a>
+            <a href="#" id="bottomDashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+            <a href="#"><i class="fas fa-envelope"></i> Contact</a>
         </div>
-    </header>
+    </nav>
 
-    <!-- Stats -->
-    <div class="dashboard-grid" id="statsGrid">
-        <div class="stat-card"><div class="stat-info"><h4>Total Books</h4><h2 id="statBooks">0</h2></div><div class="stat-icon"><i class="fas fa-book"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Students</h4><h2 id="statStudents">0</h2></div><div class="stat-icon"><i class="fas fa-user-graduate"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Staff</h4><h2 id="statStaff">0</h2></div><div class="stat-icon"><i class="fas fa-user-tie"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Active Borrowings</h4><h2 id="statBorrowings">0</h2></div><div class="stat-icon"><i class="fas fa-hand-holding"></i></div></div>
-    </div>
-
-    <!-- Main Tabs -->
-    <div class="card">
-        <div class="tab-bar" id="mainTabs">
-            <button class="active" data-tab="books"><i class="fas fa-book"></i> Book Catalog</button>
-            <button data-tab="stationaryCatalog"><i class="fas fa-box"></i> Stationary Catalog</button>
-            <button data-tab="laptopCatalog"><i class="fas fa-laptop"></i> Laptop Catalog</button>
-            <button data-tab="students"><i class="fas fa-user-graduate"></i> Students</button>
-            <button data-tab="staff"><i class="fas fa-user-tie"></i> Staff</button>
-            <button data-tab="bookBorrow"><i class="fas fa-hand-holding-heart"></i> Book Borrowing</button>
-            <button data-tab="laptopBorrow"><i class="fas fa-laptop"></i> Laptop Issuance</button>
-            <button data-tab="stationaryBorrow"><i class="fas fa-box"></i> Stationary Issuance</button>
-        </div>
-
-        <!-- TAB: BOOK CATALOG -->
-        <div id="tab-books" class="tab-content">
-            <div class="card-header">
-                <h3><i class="fas fa-book"></i> Book Catalog</h3>
-                <div class="flex">
-                    <button class="btn-primary" id="addBookBtn"><i class="fas fa-plus"></i> Add Book</button>
-                    <button class="btn-pdf" id="downloadBookPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                </div>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search by title, author, accession..." id="bookSearch">
-                <select id="genreFilter"><option value="">All Genres</option><option>Fiction</option><option>Non-fiction</option><option>Science</option><option>History</option></select>
-                <button class="btn-primary" id="searchBookBtn"><i class="fas fa-search"></i> Search</button>
-            </div>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>#</th><th>Title</th><th>Author</th><th>Accession No.</th><th>Genre</th><th>School</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="catalogTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB: STATIONARY CATALOG -->
-        <div id="tab-stationaryCatalog" class="tab-content" style="display:none;">
-            <div class="card-header">
-                <h3><i class="fas fa-box"></i> Stationary Catalog</h3>
-                <div class="flex">
-                    <button class="btn-primary" id="addStationaryItemBtn"><i class="fas fa-plus"></i> Add Item</button>
-                    <button class="btn-pdf" id="downloadStationaryPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                </div>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search stationary items..." id="stationaryCatalogSearch">
-                <button class="btn-primary" id="searchStationaryCatalogBtn"><i class="fas fa-search"></i> Search</button>
-            </div>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>#</th><th>Item Name</th><th>Category</th><th>Quantity</th><th>School</th><th>Date Added</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="stationaryCatalogTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB: LAPTOP CATALOG -->
-        <div id="tab-laptopCatalog" class="tab-content" style="display:none;">
-            <div class="card-header">
-                <h3><i class="fas fa-laptop"></i> Laptop Catalog</h3>
-                <div class="flex">
-                    <button class="btn-primary" id="addLaptopBtn"><i class="fas fa-plus"></i> Register Laptop</button>
-                    <button class="btn-pdf" id="downloadLaptopPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                </div>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search by type, serial, owner..." id="laptopCatalogSearch">
-                <button class="btn-primary" id="searchLaptopCatalogBtn"><i class="fas fa-search"></i> Search</button>
-            </div>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>#</th><th>Type/Model</th><th>Serial Number</th><th>Owner</th><th>School</th><th>Date Added</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="laptopCatalogTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB: STUDENTS -->
-        <div id="tab-students" class="tab-content" style="display:none;">
-            <div class="card-header">
-                <h3><i class="fas fa-user-graduate"></i> Student Management</h3>
-                <div class="flex">
-                    <button class="btn-primary" id="addStudentBtn"><i class="fas fa-user-plus"></i> Add Student</button>
-                    <button class="btn-pdf" id="downloadStudentPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                </div>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search student by name or ID..." id="studentSearch">
-                <button class="btn-primary" id="studentSearchBtn"><i class="fas fa-search"></i> Search</button>
-            </div>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Student ID</th><th>Student Name</th><th>School</th><th>Book</th><th>Laptop</th><th>Actions</th></tr></thead>
-                    <tbody id="studentTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB: STAFF -->
-        <div id="tab-staff" class="tab-content" style="display:none;">
-            <div class="card-header">
-                <h3><i class="fas fa-user-tie"></i> Staff Management</h3>
-                <div class="flex">
-                    <button class="btn-primary" id="addStaffBtn"><i class="fas fa-user-plus"></i> Add Staff</button>
-                    <button class="btn-pdf" id="downloadStaffPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                </div>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search staff by name or number..." id="staffSearch">
-                <button class="btn-primary" id="staffSearchBtn"><i class="fas fa-search"></i> Search</button>
-            </div>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>Staff No.</th><th>Staff Name</th><th>School</th><th>Department</th><th>Book</th><th>Laptop</th><th>Actions</th></tr></thead>
-                    <tbody id="staffTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB: BOOK BORROWING -->
-        <div id="tab-bookBorrow" class="tab-content" style="display:none;">
-            <div class="card-header">
-                <h3><i class="fas fa-hand-holding-heart"></i> Book Borrowing Records</h3>
-                <div class="flex">
-                    <button class="btn-primary" id="newBookBorrowBtn"><i class="fas fa-plus"></i> New Borrowing</button>
-                    <button class="btn-pdf" id="downloadBookBorrowPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                </div>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search by borrower name, book title..." id="bookBorrowSearch">
-                <button class="btn-primary" id="searchBookBorrowBtn"><i class="fas fa-search"></i> Search</button>
-            </div>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>#</th><th>Borrower Name</th><th>Borrower Type</th><th>Book Title</th><th>Accession No.</th><th>Date Borrowed</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="bookBorrowTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB: LAPTOP ISSUANCE -->
-        <div id="tab-laptopBorrow" class="tab-content" style="display:none;">
-            <div class="card-header">
-                <h3><i class="fas fa-laptop"></i> Laptop Issuance Records</h3>
-                <div class="flex">
-                    <button class="btn-primary" id="newLaptopBorrowBtn"><i class="fas fa-plus"></i> Issue Laptop</button>
-                    <button class="btn-pdf" id="downloadLaptopBorrowPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                </div>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search by owner, laptop type..." id="laptopBorrowSearch">
-                <button class="btn-primary" id="searchLaptopBorrowBtn"><i class="fas fa-search"></i> Search</button>
-            </div>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>#</th><th>Owner Name</th><th>Owner Type</th><th>Laptop Type</th><th>Serial No.</th><th>Issued Time</th><th>Returned Time</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="laptopBorrowTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- TAB: STATIONARY ISSUANCE -->
-        <div id="tab-stationaryBorrow" class="tab-content" style="display:none;">
-            <div class="card-header">
-                <h3><i class="fas fa-box"></i> Stationary Issuance Records</h3>
-                <div class="flex">
-                    <button class="btn-primary" id="newStationaryBorrowBtn"><i class="fas fa-plus"></i> Issue Stationary</button>
-                    <button class="btn-pdf" id="downloadStationaryBorrowPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                </div>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search by staff name, item..." id="stationaryBorrowSearch">
-                <button class="btn-primary" id="searchStationaryBorrowBtn"><i class="fas fa-search"></i> Search</button>
-            </div>
-            <div class="table-responsive">
-                <table>
-                    <thead><tr><th>#</th><th>Staff Name</th><th>Item Issued</th><th>Quantity</th><th>Date Issued</th><th>Status</th><th>Actions</th></tr></thead>
-                    <tbody id="stationaryBorrowTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALS -->
-    <!-- Add Book Modal -->
-    <div class="modal-overlay" id="bookModal">
-        <div class="modal">
-            <button class="close-modal" id="closeBookModal">&times;</button>
-            <h3><i class="fas fa-book" style="color:var(--primary);"></i> Add New Book</h3>
-            <form id="bookForm">
-                <input type="text" placeholder="Title *" id="bookTitle" required>
-                <input type="text" placeholder="Author *" id="bookAuthor" required>
-                <input type="text" placeholder="Accession Number *" id="bookAccession" required>
-                <select id="bookGenre"><option>Fiction</option><option>Non-fiction</option><option>Science</option><option>History</option><option>Mathematics</option></select>
-                <select id="bookSchool">
-                    <option value="1">Greenwood High</option>
-                    <option value="2">Riverside Academy</option>
-                    <option value="3">Hilltop School</option>
-                </select>
-                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Add Book</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Stationary Item Modal -->
-    <div class="modal-overlay" id="stationaryItemModal">
-        <div class="modal">
-            <button class="close-modal" id="closeStationaryItemModal">&times;</button>
-            <h3><i class="fas fa-box" style="color:var(--primary);"></i> Add Stationary Item</h3>
-            <form id="stationaryItemForm">
-                <input type="text" placeholder="Item Name *" id="stationaryItemName" required>
-                <input type="text" placeholder="Category *" id="stationaryCategory" required>
-                <input type="number" placeholder="Quantity *" id="stationaryItemQty" required min="0">
-                <select id="stationaryItemSchool">
-                    <option value="1">Greenwood High</option>
-                    <option value="2">Riverside Academy</option>
-                    <option value="3">Hilltop School</option>
-                </select>
-                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Add Item</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Laptop Modal -->
-    <div class="modal-overlay" id="laptopModal">
-        <div class="modal">
-            <button class="close-modal" id="closeLaptopModal">&times;</button>
-            <h3><i class="fas fa-laptop" style="color:var(--primary);"></i> Register Laptop</h3>
-            <form id="laptopForm">
-                <input type="text" placeholder="Type/Model *" id="laptopType" required>
-                <input type="text" placeholder="Serial Number *" id="laptopSerial" required>
-                <input type="text" placeholder="Owner (optional)" id="laptopOwner">
-                <select id="laptopSchool">
-                    <option value="1">Greenwood High</option>
-                    <option value="2">Riverside Academy</option>
-                    <option value="3">Hilltop School</option>
-                </select>
-                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Register Laptop</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Student Modal -->
-    <div class="modal-overlay" id="studentModal">
-        <div class="modal">
-            <button class="close-modal" id="closeStudentModal">&times;</button>
-            <h3><i class="fas fa-user-graduate" style="color:var(--primary);"></i> Add Student</h3>
-            <form id="studentForm">
-                <input type="text" placeholder="Student Name *" id="studentName" required>
-                <input type="text" placeholder="Student ID (e.g., S001)" id="studentId" required>
-                <select id="studentSchool">
-                    <option value="1">Greenwood High</option>
-                    <option value="2">Riverside Academy</option>
-                    <option value="3">Hilltop School</option>
-                </select>
-                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Add Student</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Staff Modal -->
-    <div class="modal-overlay" id="staffModal">
-        <div class="modal">
-            <button class="close-modal" id="closeStaffModal">&times;</button>
-            <h3><i class="fas fa-user-tie" style="color:var(--primary);"></i> Add Staff</h3>
-            <form id="staffForm">
-                <input type="text" placeholder="Staff Name *" id="staffName" required>
-                <input type="text" placeholder="Staff Number * (e.g., STF001)" id="staffNumber" required>
-                <input type="text" placeholder="Department *" id="staffDepartment" required>
-                <select id="staffSchool">
-                    <option value="1">Greenwood High</option>
-                    <option value="2">Riverside Academy</option>
-                    <option value="3">Hilltop School</option>
-                </select>
-                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Add Staff</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- New Book Borrowing Modal -->
-    <div class="modal-overlay" id="bookBorrowModal">
-        <div class="modal">
-            <button class="close-modal" id="closeBookBorrowModal">&times;</button>
-            <h3><i class="fas fa-hand-holding-heart" style="color:var(--primary);"></i> New Book Borrowing</h3>
-            <form id="bookBorrowForm">
-                <input type="text" placeholder="Borrower Name *" id="borrowerName" required>
-                <select id="borrowerType">
-                    <option value="Student">Student</option>
-                    <option value="Staff">Staff</option>
-                </select>
-                <select id="borrowBook" required>
-                    <option value="">Select Book *</option>
-                </select>
-                <input type="date" id="borrowDate" required>
-                <input type="date" id="dueDate" required>
-                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Record Borrowing</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- New Laptop Issuance Modal -->
-    <div class="modal-overlay" id="laptopBorrowModal">
-        <div class="modal">
-            <button class="close-modal" id="closeLaptopBorrowModal">&times;</button>
-            <h3><i class="fas fa-laptop" style="color:var(--primary);"></i> Issue Laptop</h3>
-            <form id="laptopBorrowForm">
-                <input type="text" placeholder="Owner Name *" id="laptopOwnerName" required>
-                <select id="ownerType">
-                    <option value="Student">Student</option>
-                    <option value="Staff">Staff</option>
-                </select>
-                <select id="laptopSelect" required>
-                    <option value="">Select Laptop *</option>
-                </select>
-                <input type="datetime-local" id="issuedTime" required>
-                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Issue Laptop</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- New Stationary Issuance Modal -->
-    <div class="modal-overlay" id="stationaryBorrowModal">
-        <div class="modal">
-            <button class="close-modal" id="closeStationaryBorrowModal">&times;</button>
-            <h3><i class="fas fa-box" style="color:var(--primary);"></i> Issue Stationary</h3>
-            <form id="stationaryBorrowForm">
-                <input type="text" placeholder="Staff Name *" id="staffNameIssuance" required>
-                <select id="stationarySelect" required>
-                    <option value="">Select Item *</option>
-                </select>
-                <input type="number" placeholder="Quantity *" id="stationaryQtyIssued" required min="1">
-                <input type="date" id="stationaryIssueDate" required>
-                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Issue Stationary</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Toast container -->
+    <!-- ===== TOAST ===== -->
     <div class="toast-container" id="toastContainer"></div>
-</div>
 
-<script>
+    <script>
     (function() {
         "use strict";
 
-        // ========== DATA STORE ==========
+        // ========== DATA ==========
         const schoolData = {
             schools: [
                 { id: 1, name: 'Greenwood High' },
@@ -749,19 +704,19 @@
                 { id: 4, title: 'To Kill a Mockingbird', author: 'Harper Lee', accession: 'ACC-004', genre: 'Fiction', schoolId: 1, status: 'Available' },
                 { id: 5, title: '1984', author: 'George Orwell', accession: 'ACC-005', genre: 'Fiction', schoolId: 2, status: 'Available' }
             ],
-            stationaryItems: [
-                { id: 1, name: 'A4 Paper (ream)', category: 'Paper', quantity: 50, schoolId: 1, dateAdded: '2026-01-10', status: 'Available' },
-                { id: 2, name: 'Pens (box)', category: 'Writing', quantity: 30, schoolId: 2, dateAdded: '2026-02-15', status: 'Available' },
-                { id: 3, name: 'Whiteboard Markers', category: 'Writing', quantity: 20, schoolId: 1, dateAdded: '2026-03-20', status: 'Available' },
-                { id: 4, name: 'Stapler', category: 'Office', quantity: 10, schoolId: 3, dateAdded: '2026-04-25', status: 'Available' },
-                { id: 5, name: 'Notebooks', category: 'Paper', quantity: 100, schoolId: 2, dateAdded: '2026-05-30', status: 'Available' }
+            stationary: [
+                { id: 1, name: 'A4 Paper (ream)', category: 'Paper', quantity: 50, schoolId: 1, status: 'Available' },
+                { id: 2, name: 'Pens (box)', category: 'Writing', quantity: 30, schoolId: 2, status: 'Available' },
+                { id: 3, name: 'Whiteboard Markers', category: 'Writing', quantity: 20, schoolId: 1, status: 'Available' },
+                { id: 4, name: 'Stapler', category: 'Office', quantity: 10, schoolId: 3, status: 'Available' },
+                { id: 5, name: 'Notebooks', category: 'Paper', quantity: 100, schoolId: 2, status: 'Available' }
             ],
             laptops: [
-                { id: 1, type: 'Dell XPS 13', serial: 'SN-001', owner: 'Alice Johnson', schoolId: 1, dateAdded: '2026-01-20', status: 'Available' },
-                { id: 2, type: 'MacBook Air', serial: 'SN-002', owner: 'Bob Smith', schoolId: 2, dateAdded: '2026-02-25', status: 'Available' },
-                { id: 3, type: 'HP Spectre', serial: 'SN-003', owner: 'Carol White', schoolId: 1, dateAdded: '2026-03-15', status: 'Available' },
-                { id: 4, type: 'Lenovo ThinkPad', serial: 'SN-004', owner: 'David Brown', schoolId: 3, dateAdded: '2026-04-10', status: 'Available' },
-                { id: 5, type: 'Acer Swift', serial: 'SN-005', owner: 'Emma Wilson', schoolId: 2, dateAdded: '2026-05-05', status: 'Available' }
+                { id: 1, type: 'Dell XPS 13', serial: 'SN-001', owner: 'Alice Johnson', schoolId: 1, status: 'Available' },
+                { id: 2, type: 'MacBook Air', serial: 'SN-002', owner: 'Bob Smith', schoolId: 2, status: 'Available' },
+                { id: 3, type: 'HP Spectre', serial: 'SN-003', owner: 'Carol White', schoolId: 1, status: 'Available' },
+                { id: 4, type: 'Lenovo ThinkPad', serial: 'SN-004', owner: 'David Brown', schoolId: 3, status: 'Available' },
+                { id: 5, type: 'Acer Swift', serial: 'SN-005', owner: 'Emma Wilson', schoolId: 2, status: 'Available' }
             ],
             students: [
                 { id: 1, studentId: 'S001', name: 'Alice Johnson', schoolId: 1, bookId: null, laptopId: null },
@@ -775,657 +730,336 @@
                 { id: 3, staffNumber: 'STF003', name: 'Peter Admin', department: 'Library', schoolId: 1, bookId: null, laptopId: null },
                 { id: 4, staffNumber: 'STF004', name: 'Sarah Science', department: 'Science', schoolId: 3, bookId: null, laptopId: null }
             ],
-            bookBorrowings: [
-                { id: 1, borrowerName: 'Alice Johnson', borrowerType: 'Student', bookId: 2, accession: 'ACC-002', borrowDate: '2026-07-20', dueDate: '2026-08-10', returned: false },
-                { id: 2, borrowerName: 'John Teacher', borrowerType: 'Staff', bookId: 4, accession: 'ACC-004', borrowDate: '2026-07-25', dueDate: '2026-08-15', returned: false },
-                { id: 3, borrowerName: 'Bob Smith', borrowerType: 'Student', bookId: 5, accession: 'ACC-005', borrowDate: '2026-06-01', dueDate: '2026-06-15', returned: true }
-            ],
-            laptopBorrowings: [
-                { id: 1, ownerName: 'Alice Johnson', ownerType: 'Student', laptopId: 1, serial: 'SN-001', issuedTime: '2026-07-20T09:30', returnedTime: null, returned: false },
-                { id: 2, ownerName: 'Mary Staff', ownerType: 'Staff', laptopId: 3, serial: 'SN-003', issuedTime: '2026-07-25T14:15', returnedTime: null, returned: false },
-                { id: 3, ownerName: 'David Brown', ownerType: 'Student', laptopId: 4, serial: 'SN-004', issuedTime: '2026-06-01T10:00', returnedTime: '2026-06-15T16:30', returned: true }
-            ],
-            stationaryBorrowings: [
-                { id: 1, staffName: 'John Teacher', stationaryId: 1, quantity: 5, issueDate: '2026-07-20', returned: false },
-                { id: 2, staffName: 'Mary Staff', stationaryId: 3, quantity: 10, issueDate: '2026-07-25', returned: false },
-                { id: 3, staffName: 'Peter Admin', stationaryId: 2, quantity: 2, issueDate: '2026-06-01', returned: true }
+            borrowings: [
+                { id: 1, borrowerName: 'Alice Johnson', borrowerType: 'Student', itemType: 'Book', itemId: 2, borrowDate: '2026-07-20', dueDate: '2026-08-10', returned: false },
+                { id: 2, borrowerName: 'John Teacher', borrowerType: 'Staff', itemType: 'Book', itemId: 4, borrowDate: '2026-07-25', dueDate: '2026-08-15', returned: false },
+                { id: 3, borrowerName: 'Bob Smith', borrowerType: 'Student', itemType: 'Book', itemId: 5, borrowDate: '2026-06-01', dueDate: '2026-06-15', returned: true }
             ]
         };
 
         let currentSchoolId = 'all';
-        let nextId = {
-            book: 6,
-            stationary: 6,
-            laptop: 6,
-            student: 5,
-            staff: 5,
-            bookBorrow: 4,
-            laptopBorrow: 4,
-            stationaryBorrow: 4
-        };
+        let nextId = { book: 6, stationary: 6, laptop: 6, student: 5, staff: 5, borrow: 4 };
+        let currentView = 'home';
 
-        // ========== HELPER FUNCTIONS ==========
+        // ========== HELPERS ==========
         function getSchoolName(id) {
-            const school = schoolData.schools.find(s => s.id === id);
-            return school ? school.name : 'Unknown';
+            const s = schoolData.schools.find(s => s.id === id);
+            return s ? s.name : 'Unknown';
         }
-
         function getBookTitle(id) {
-            const book = schoolData.books.find(b => b.id === id);
-            return book ? book.title : '—';
+            const b = schoolData.books.find(b => b.id === id);
+            return b ? b.title : '—';
         }
-
-        function getBookAccession(id) {
-            const book = schoolData.books.find(b => b.id === id);
-            return book ? book.accession : '—';
-        }
-
         function getLaptopType(id) {
-            const laptop = schoolData.laptops.find(l => l.id === id);
-            return laptop ? laptop.type : '—';
+            const l = schoolData.laptops.find(l => l.id === id);
+            return l ? l.type : '—';
         }
-
-        function getLaptopSerial(id) {
-            const laptop = schoolData.laptops.find(l => l.id === id);
-            return laptop ? laptop.serial : '—';
-        }
-
         function getStationaryName(id) {
-            const item = schoolData.stationaryItems.find(s => s.id === id);
-            return item ? item.name : '—';
+            const s = schoolData.stationary.find(s => s.id === id);
+            return s ? s.name : '—';
         }
-
-        function getFilteredItems(items, schoolId, searchTerm = '') {
+        function getFiltered(items, schoolId, search = '') {
             let filtered = items;
-            if (schoolId !== 'all') {
-                filtered = filtered.filter(item => item.schoolId === parseInt(schoolId));
-            }
-            if (searchTerm) {
-                const term = searchTerm.toLowerCase();
-                filtered = filtered.filter(item => 
-                    JSON.stringify(item).toLowerCase().includes(term)
-                );
+            if (schoolId !== 'all') filtered = filtered.filter(i => i.schoolId === parseInt(schoolId));
+            if (search) {
+                const term = search.toLowerCase();
+                filtered = filtered.filter(i => JSON.stringify(i).toLowerCase().includes(term));
             }
             return filtered;
         }
 
-        function formatDate(date) {
-            if (!date) return '—';
-            return date;
-        }
-
-        function formatDateTime(datetime) {
-            if (!datetime) return '—';
-            const d = new Date(datetime);
-            return d.toLocaleString();
-        }
-
-        // ========== RENDER FUNCTIONS ==========
+        // ========== RENDER ==========
         function renderBooks() {
             const tbody = document.getElementById('catalogTableBody');
-            const searchTerm = document.getElementById('bookSearch').value;
-            const genreFilter = document.getElementById('genreFilter').value;
-            
-            let books = getFilteredItems(schoolData.books, currentSchoolId, searchTerm);
-            if (genreFilter) books = books.filter(b => b.genre === genreFilter);
-
-            if (books.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="no-data-msg">No books found</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = books.map((b, index) => `
+            const search = document.getElementById('bookSearch').value;
+            const items = getFiltered(schoolData.books, currentSchoolId, search);
+            if (!items.length) { tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No books found</td></tr>`; return; }
+            tbody.innerHTML = items.map((b, i) => `
                 <tr>
-                    <td>${index + 1}</td>
-                    <td><i class="fas fa-book" style="margin-right:8px;color:var(--primary);"></i> ${b.title}</td>
+                    <td>${i+1}</td>
+                    <td>${b.title}</td>
                     <td>${b.author}</td>
                     <td><code>${b.accession}</code></td>
-                    <td>${b.genre}</td>
-                    <td><span class="badge badge-school">${getSchoolName(b.schoolId)}</span></td>
                     <td><span class="badge ${b.status === 'Available' ? 'badge-success' : 'badge-warning'}">${b.status}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button onclick="deleteBook(${b.id})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
+                    <td><button class="btn-sm" onclick="deleteBook(${b.id})"><i class="fas fa-trash"></i></button></td>
                 </tr>
             `).join('');
         }
 
-        function renderStationaryCatalog() {
-            const tbody = document.getElementById('stationaryCatalogTableBody');
-            const searchTerm = document.getElementById('stationaryCatalogSearch').value;
-            const items = getFilteredItems(schoolData.stationaryItems, currentSchoolId, searchTerm);
-
-            if (items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="no-data-msg">No stationary items found</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = items.map((item, index) => `
+        function renderStationary() {
+            const tbody = document.getElementById('stationaryTableBody');
+            const search = document.getElementById('stationarySearch').value;
+            const items = getFiltered(schoolData.stationary, currentSchoolId, search);
+            if (!items.length) { tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No stationary items</td></tr>`; return; }
+            tbody.innerHTML = items.map((s, i) => `
                 <tr>
-                    <td>${index + 1}</td>
-                    <td><i class="fas fa-box" style="margin-right:8px;color:var(--primary);"></i> ${item.name}</td>
-                    <td>${item.category}</td>
-                    <td><strong>${item.quantity}</strong></td>
-                    <td><span class="badge badge-school">${getSchoolName(item.schoolId)}</span></td>
-                    <td>${formatDate(item.dateAdded)}</td>
-                    <td><span class="badge ${item.status === 'Available' ? 'badge-success' : 'badge-warning'}">${item.status}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button onclick="deleteStationaryItem(${item.id})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
+                    <td>${i+1}</td>
+                    <td>${s.name}</td>
+                    <td>${s.category}</td>
+                    <td><strong>${s.quantity}</strong></td>
+                    <td><span class="badge ${s.status === 'Available' ? 'badge-success' : 'badge-warning'}">${s.status}</span></td>
+                    <td><button class="btn-sm" onclick="deleteStationary(${s.id})"><i class="fas fa-trash"></i></button></td>
                 </tr>
             `).join('');
         }
 
-        function renderLaptopCatalog() {
-            const tbody = document.getElementById('laptopCatalogTableBody');
-            const searchTerm = document.getElementById('laptopCatalogSearch').value;
-            const items = getFilteredItems(schoolData.laptops, currentSchoolId, searchTerm);
-
-            if (items.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="no-data-msg">No laptops found</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = items.map((item, index) => `
+        function renderLaptops() {
+            const tbody = document.getElementById('laptopTableBody');
+            const search = document.getElementById('laptopSearch').value;
+            const items = getFiltered(schoolData.laptops, currentSchoolId, search);
+            if (!items.length) { tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No laptops found</td></tr>`; return; }
+            tbody.innerHTML = items.map((l, i) => `
                 <tr>
-                    <td>${index + 1}</td>
-                    <td><i class="fas fa-laptop" style="margin-right:8px;color:var(--primary);"></i> ${item.type}</td>
-                    <td><code>${item.serial}</code></td>
-                    <td>${item.owner || '—'}</td>
-                    <td><span class="badge badge-school">${getSchoolName(item.schoolId)}</span></td>
-                    <td>${formatDate(item.dateAdded)}</td>
-                    <td><span class="badge ${item.status === 'Available' ? 'badge-success' : 'badge-warning'}">${item.status}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            <button onclick="deleteLaptopItem(${item.id})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
+                    <td>${i+1}</td>
+                    <td>${l.type}</td>
+                    <td><code>${l.serial}</code></td>
+                    <td>${l.owner || '—'}</td>
+                    <td><span class="badge ${l.status === 'Available' ? 'badge-success' : 'badge-warning'}">${l.status}</span></td>
+                    <td><button class="btn-sm" onclick="deleteLaptop(${l.id})"><i class="fas fa-trash"></i></button></td>
                 </tr>
             `).join('');
         }
 
         function renderStudents() {
             const tbody = document.getElementById('studentTableBody');
-            const searchTerm = document.getElementById('studentSearch').value;
-            let students = getFilteredItems(schoolData.students, currentSchoolId, searchTerm);
-
-            if (students.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No students found</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = students.map(s => `
+            const search = document.getElementById('studentSearch').value;
+            const items = getFiltered(schoolData.students, currentSchoolId, search);
+            if (!items.length) { tbody.innerHTML = `<tr><td colspan="5" class="no-data-msg">No students found</td></tr>`; return; }
+            tbody.innerHTML = items.map(s => `
                 <tr>
                     <td><strong>${s.studentId}</strong></td>
                     <td>${s.name}</td>
-                    <td><span class="badge badge-school">${getSchoolName(s.schoolId)}</span></td>
                     <td>${s.bookId ? getBookTitle(s.bookId) : '—'}</td>
                     <td>${s.laptopId ? getLaptopType(s.laptopId) : '—'}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button onclick="deleteStudent(${s.id})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
+                    <td><button class="btn-sm" onclick="deleteStudent(${s.id})"><i class="fas fa-trash"></i></button></td>
                 </tr>
             `).join('');
         }
 
         function renderStaff() {
             const tbody = document.getElementById('staffTableBody');
-            const searchTerm = document.getElementById('staffSearch').value;
-            let staff = getFilteredItems(schoolData.staff, currentSchoolId, searchTerm);
-
-            if (staff.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="no-data-msg">No staff found</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = staff.map(s => `
+            const search = document.getElementById('staffSearch').value;
+            const items = getFiltered(schoolData.staff, currentSchoolId, search);
+            if (!items.length) { tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No staff found</td></tr>`; return; }
+            tbody.innerHTML = items.map(s => `
                 <tr>
                     <td><strong>${s.staffNumber}</strong></td>
                     <td>${s.name}</td>
-                    <td><span class="badge badge-school">${getSchoolName(s.schoolId)}</span></td>
                     <td>${s.department}</td>
                     <td>${s.bookId ? getBookTitle(s.bookId) : '—'}</td>
                     <td>${s.laptopId ? getLaptopType(s.laptopId) : '—'}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button onclick="deleteStaff(${s.id})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
+                    <td><button class="btn-sm" onclick="deleteStaff(${s.id})"><i class="fas fa-trash"></i></button></td>
                 </tr>
             `).join('');
         }
 
-        function renderBookBorrowings() {
-            const tbody = document.getElementById('bookBorrowTableBody');
-            const searchTerm = document.getElementById('bookBorrowSearch').value;
-            
-            let borrowings = schoolData.bookBorrowings.filter(b => {
-                const book = schoolData.books.find(book => book.id === b.bookId);
-                if (!book) return false;
-                return currentSchoolId === 'all' || book.schoolId === parseInt(currentSchoolId);
-            });
-
-            if (searchTerm) {
-                const term = searchTerm.toLowerCase();
-                borrowings = borrowings.filter(b => 
-                    b.borrowerName.toLowerCase().includes(term) ||
-                    getBookTitle(b.bookId).toLowerCase().includes(term) ||
-                    b.accession.toLowerCase().includes(term)
-                );
-            }
-
-            if (borrowings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="no-data-msg">No borrowing records found</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = borrowings.map((b, index) => `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td><strong>${b.borrowerName}</strong></td>
-                    <td><span class="badge ${b.borrowerType === 'Student' ? 'badge-student' : 'badge-staff'}">${b.borrowerType}</span></td>
-                    <td>${getBookTitle(b.bookId)}</td>
-                    <td><code>${b.accession}</code></td>
-                    <td>${formatDate(b.borrowDate)}</td>
-                    <td>${formatDate(b.dueDate)}</td>
-                    <td><span class="badge ${b.returned ? 'badge-success' : 'badge-warning'}">${b.returned ? 'Returned' : 'Borrowed'}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            ${!b.returned ? `<button class="btn-success" onclick="returnBookBorrow(${b.id})"><i class="fas fa-undo"></i> Return</button>` : ''}
-                            <button onclick="deleteBookBorrow(${b.id})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function renderLaptopBorrowings() {
-            const tbody = document.getElementById('laptopBorrowTableBody');
-            const searchTerm = document.getElementById('laptopBorrowSearch').value;
-            
-            let borrowings = schoolData.laptopBorrowings.filter(b => {
-                const laptop = schoolData.laptops.find(l => l.id === b.laptopId);
-                if (!laptop) return false;
-                return currentSchoolId === 'all' || laptop.schoolId === parseInt(currentSchoolId);
-            });
-
-            if (searchTerm) {
-                const term = searchTerm.toLowerCase();
-                borrowings = borrowings.filter(b => 
-                    b.ownerName.toLowerCase().includes(term) ||
-                    getLaptopType(b.laptopId).toLowerCase().includes(term) ||
-                    b.serial.toLowerCase().includes(term)
-                );
-            }
-
-            if (borrowings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="no-data-msg">No laptop issuance records found</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = borrowings.map((b, index) => `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td><strong>${b.ownerName}</strong></td>
-                    <td><span class="badge ${b.ownerType === 'Student' ? 'badge-student' : 'badge-staff'}">${b.ownerType}</span></td>
-                    <td>${getLaptopType(b.laptopId)}</td>
-                    <td><code>${b.serial}</code></td>
-                    <td>${formatDateTime(b.issuedTime)}</td>
-                    <td>${b.returnedTime ? formatDateTime(b.returnedTime) : '—'}</td>
-                    <td><span class="badge ${b.returned ? 'badge-success' : 'badge-warning'}">${b.returned ? 'Returned' : 'Issued'}</span></td>
-                    <td>
-                        <div class="action-buttons">
-                            ${!b.returned ? `<button class="btn-success" onclick="returnLaptopBorrow(${b.id})"><i class="fas fa-undo"></i> Return</button>` : ''}
-                            <button onclick="deleteLaptopBorrow(${b.id})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function renderStationaryBorrowings() {
-            const tbody = document.getElementById('stationaryBorrowTableBody');
-            const searchTerm = document.getElementById('stationaryBorrowSearch').value;
-            
-            let borrowings = schoolData.stationaryBorrowings.filter(b => {
-                const item = schoolData.stationaryItems.find(s => s.id === b.stationaryId);
+        function renderBorrowings() {
+            const tbody = document.getElementById('borrowTableBody');
+            const search = document.getElementById('borrowSearch').value;
+            let items = schoolData.borrowings.filter(b => {
+                const item = b.itemType === 'Book' ? schoolData.books.find(x => x.id === b.itemId) : null;
                 if (!item) return false;
                 return currentSchoolId === 'all' || item.schoolId === parseInt(currentSchoolId);
             });
-
-            if (searchTerm) {
-                const term = searchTerm.toLowerCase();
-                borrowings = borrowings.filter(b => 
-                    b.staffName.toLowerCase().includes(term) ||
-                    getStationaryName(b.stationaryId).toLowerCase().includes(term)
-                );
+            if (search) {
+                const term = search.toLowerCase();
+                items = items.filter(b => b.borrowerName.toLowerCase().includes(term));
             }
-
-            if (borrowings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="no-data-msg">No stationary issuance records found</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = borrowings.map((b, index) => `
+            if (!items.length) { tbody.innerHTML = `<tr><td colspan="8" class="no-data-msg">No borrowings found</td></tr>`; return; }
+            tbody.innerHTML = items.map((b, i) => `
                 <tr>
-                    <td>${index + 1}</td>
-                    <td><strong>${b.staffName}</strong></td>
-                    <td>${getStationaryName(b.stationaryId)}</td>
-                    <td><span class="badge badge-school">${b.quantity}</span></td>
-                    <td>${formatDate(b.issueDate)}</td>
-                    <td><span class="badge ${b.returned ? 'badge-success' : 'badge-warning'}">${b.returned ? 'Returned' : 'Issued'}</span></td>
+                    <td>${i+1}</td>
+                    <td><strong>${b.borrowerName}</strong></td>
+                    <td><span class="badge ${b.borrowerType === 'Student' ? 'badge-student' : 'badge-staff'}">${b.borrowerType}</span></td>
+                    <td>${b.itemType === 'Book' ? getBookTitle(b.itemId) : '—'}</td>
+                    <td>${b.borrowDate}</td>
+                    <td>${b.dueDate}</td>
+                    <td><span class="badge ${b.returned ? 'badge-success' : 'badge-warning'}">${b.returned ? 'Returned' : 'Borrowed'}</span></td>
                     <td>
-                        <div class="action-buttons">
-                            ${!b.returned ? `<button class="btn-success" onclick="returnStationaryBorrow(${b.id})"><i class="fas fa-undo"></i> Return</button>` : ''}
-                            <button onclick="deleteStationaryBorrow(${b.id})"><i class="fas fa-trash"></i></button>
-                        </div>
+                        ${!b.returned ? `<button class="btn-success-sm" onclick="returnBorrow(${b.id})"><i class="fas fa-undo"></i></button>` : ''}
+                        <button class="btn-sm" onclick="deleteBorrow(${b.id})"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
         }
 
         function updateStats() {
-            const books = getFilteredItems(schoolData.books, currentSchoolId);
-            const students = getFilteredItems(schoolData.students, currentSchoolId);
-            const staff = getFilteredItems(schoolData.staff, currentSchoolId);
-            const bookBorrows = schoolData.bookBorrowings.filter(b => {
-                const book = schoolData.books.find(book => book.id === b.bookId);
-                return book && (currentSchoolId === 'all' || book.schoolId === parseInt(currentSchoolId));
+            const books = getFiltered(schoolData.books, currentSchoolId);
+            const students = getFiltered(schoolData.students, currentSchoolId);
+            const staff = getFiltered(schoolData.staff, currentSchoolId);
+            const borrows = schoolData.borrowings.filter(b => {
+                const item = b.itemType === 'Book' ? schoolData.books.find(x => x.id === b.itemId) : null;
+                return item && (currentSchoolId === 'all' || item.schoolId === parseInt(currentSchoolId));
             });
-
             document.getElementById('statBooks').textContent = books.length;
             document.getElementById('statStudents').textContent = students.length;
             document.getElementById('statStaff').textContent = staff.length;
-            document.getElementById('statBorrowings').textContent = bookBorrows.filter(b => !b.returned).length;
+            document.getElementById('statBorrowings').textContent = borrows.filter(b => !b.returned).length;
         }
 
         function refreshAll() {
             renderBooks();
-            renderStationaryCatalog();
-            renderLaptopCatalog();
+            renderStationary();
+            renderLaptops();
             renderStudents();
             renderStaff();
-            renderBookBorrowings();
-            renderLaptopBorrowings();
-            renderStationaryBorrowings();
+            renderBorrowings();
             updateStats();
         }
 
         // ========== ACTIONS ==========
         window.deleteBook = function(id) {
-            if (confirm('Delete this book?')) {
-                schoolData.books = schoolData.books.filter(b => b.id !== id);
-                showToast('Book deleted', 'success');
-                refreshAll();
-            }
+            if (confirm('Delete this book?')) { schoolData.books = schoolData.books.filter(b => b.id !== id); refreshAll(); showToast('Book deleted', 'success'); }
         };
-
-        window.deleteStationaryItem = function(id) {
-            if (confirm('Delete this stationary item?')) {
-                schoolData.stationaryItems = schoolData.stationaryItems.filter(s => s.id !== id);
-                showToast('Stationary item deleted', 'success');
-                refreshAll();
-            }
+        window.deleteStationary = function(id) {
+            if (confirm('Delete this item?')) { schoolData.stationary = schoolData.stationary.filter(s => s.id !== id); refreshAll(); showToast('Item deleted', 'success'); }
         };
-
-        window.deleteLaptopItem = function(id) {
-            if (confirm('Delete this laptop?')) {
-                schoolData.laptops = schoolData.laptops.filter(l => l.id !== id);
-                showToast('Laptop deleted', 'success');
-                refreshAll();
-            }
+        window.deleteLaptop = function(id) {
+            if (confirm('Delete this laptop?')) { schoolData.laptops = schoolData.laptops.filter(l => l.id !== id); refreshAll(); showToast('Laptop deleted', 'success'); }
         };
-
         window.deleteStudent = function(id) {
-            if (confirm('Delete this student?')) {
-                schoolData.students = schoolData.students.filter(s => s.id !== id);
-                showToast('Student deleted', 'success');
-                refreshAll();
-            }
+            if (confirm('Delete this student?')) { schoolData.students = schoolData.students.filter(s => s.id !== id); refreshAll(); showToast('Student deleted', 'success'); }
         };
-
         window.deleteStaff = function(id) {
-            if (confirm('Delete this staff member?')) {
-                schoolData.staff = schoolData.staff.filter(s => s.id !== id);
-                showToast('Staff member deleted', 'success');
+            if (confirm('Delete this staff?')) { schoolData.staff = schoolData.staff.filter(s => s.id !== id); refreshAll(); showToast('Staff deleted', 'success'); }
+        };
+        window.returnBorrow = function(id) {
+            const b = schoolData.borrowings.find(x => x.id === id);
+            if (b) {
+                b.returned = true;
+                if (b.itemType === 'Book') {
+                    const book = schoolData.books.find(x => x.id === b.itemId);
+                    if (book) book.status = 'Available';
+                    const student = schoolData.students.find(s => s.bookId === b.itemId);
+                    if (student) student.bookId = null;
+                    const staff = schoolData.staff.find(s => s.bookId === b.itemId);
+                    if (staff) staff.bookId = null;
+                }
                 refreshAll();
+                showToast('Item returned', 'success');
             }
         };
-
-        window.returnBookBorrow = function(id) {
-            const borrow = schoolData.bookBorrowings.find(b => b.id === id);
-            if (borrow) {
-                borrow.returned = true;
-                const book = schoolData.books.find(b => b.id === borrow.bookId);
-                if (book) book.status = 'Available';
-                // Remove from student/staff
-                const student = schoolData.students.find(s => s.bookId === borrow.bookId);
-                if (student) student.bookId = null;
-                const staff = schoolData.staff.find(s => s.bookId === borrow.bookId);
-                if (staff) staff.bookId = null;
-                showToast('Book returned successfully', 'success');
-                refreshAll();
-            }
-        };
-
-        window.deleteBookBorrow = function(id) {
-            if (confirm('Delete this borrowing record?')) {
-                schoolData.bookBorrowings = schoolData.bookBorrowings.filter(b => b.id !== id);
-                showToast('Record deleted', 'success');
-                refreshAll();
-            }
-        };
-
-        window.returnLaptopBorrow = function(id) {
-            const borrow = schoolData.laptopBorrowings.find(b => b.id === id);
-            if (borrow) {
-                borrow.returned = true;
-                borrow.returnedTime = new Date().toISOString();
-                const laptop = schoolData.laptops.find(l => l.id === borrow.laptopId);
-                if (laptop) laptop.status = 'Available';
-                // Remove from student/staff
-                const student = schoolData.students.find(s => s.laptopId === borrow.laptopId);
-                if (student) student.laptopId = null;
-                const staff = schoolData.staff.find(s => s.laptopId === borrow.laptopId);
-                if (staff) staff.laptopId = null;
-                showToast('Laptop returned successfully', 'success');
-                refreshAll();
-            }
-        };
-
-        window.deleteLaptopBorrow = function(id) {
-            if (confirm('Delete this laptop issuance record?')) {
-                schoolData.laptopBorrowings = schoolData.laptopBorrowings.filter(b => b.id !== id);
-                showToast('Record deleted', 'success');
-                refreshAll();
-            }
-        };
-
-        window.returnStationaryBorrow = function(id) {
-            const borrow = schoolData.stationaryBorrowings.find(b => b.id === id);
-            if (borrow) {
-                borrow.returned = true;
-                const item = schoolData.stationaryItems.find(s => s.id === borrow.stationaryId);
-                if (item) item.quantity += borrow.quantity;
-                showToast('Stationary returned successfully', 'success');
-                refreshAll();
-            }
-        };
-
-        window.deleteStationaryBorrow = function(id) {
-            if (confirm('Delete this stationary issuance record?')) {
-                schoolData.stationaryBorrowings = schoolData.stationaryBorrowings.filter(b => b.id !== id);
-                showToast('Record deleted', 'success');
-                refreshAll();
-            }
+        window.deleteBorrow = function(id) {
+            if (confirm('Delete this record?')) { schoolData.borrowings = schoolData.borrowings.filter(b => b.id !== id); refreshAll(); showToast('Record deleted', 'success'); }
         };
 
         // ========== PDF GENERATION ==========
         function generatePDF(title, headers, data, filename) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape', 'mm', 'a4');
-            
             doc.setFontSize(18);
             doc.setTextColor(30, 74, 111);
             doc.text(title, 14, 20);
-            
             doc.setFontSize(10);
             doc.setTextColor(100);
-            const schoolName = currentSchoolId === 'all' ? 'All Schools' : getSchoolName(parseInt(currentSchoolId));
-            doc.text(`School: ${schoolName}`, 14, 28);
+            doc.text(`School: ${currentSchoolId === 'all' ? 'All Schools' : getSchoolName(parseInt(currentSchoolId))}`, 14, 28);
             doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 33);
-            
-            doc.autoTable({
-                head: [headers],
-                body: data,
-                startY: 40,
-                styles: { fontSize: 8 },
-                headStyles: { fillColor: [30, 74, 111], textColor: [255, 255, 255] },
-                alternateRowStyles: { fillColor: [240, 244, 249] }
-            });
-            
+            doc.autoTable({ head: [headers], body: data, startY: 40, styles: { fontSize: 8 }, headStyles: { fillColor: [30, 74, 111] } });
             doc.save(filename);
-            showToast('PDF downloaded successfully!', 'success');
+            showToast('PDF downloaded!', 'success');
         }
 
         function downloadBookPDF() {
-            const books = getFilteredItems(schoolData.books, currentSchoolId);
-            const headers = ['#', 'Title', 'Author', 'Accession No.', 'Genre', 'School', 'Status'];
-            const data = books.map((b, i) => [i + 1, b.title, b.author, b.accession, b.genre, getSchoolName(b.schoolId), b.status]);
-            generatePDF('Book Catalog', headers, data, `book_catalog_${new Date().toISOString().split('T')[0]}.pdf`);
+            const items = getFiltered(schoolData.books, currentSchoolId);
+            generatePDF('Book Catalog', ['#', 'Title', 'Author', 'Accession', 'Status'], 
+                items.map((b, i) => [i+1, b.title, b.author, b.accession, b.status]), 
+                `books_${new Date().toISOString().split('T')[0]}.pdf`);
         }
-
         function downloadStationaryPDF() {
-            const items = getFilteredItems(schoolData.stationaryItems, currentSchoolId);
-            const headers = ['#', 'Item Name', 'Category', 'Quantity', 'School', 'Date Added', 'Status'];
-            const data = items.map((item, i) => [i + 1, item.name, item.category, item.quantity, getSchoolName(item.schoolId), item.dateAdded, item.status]);
-            generatePDF('Stationary Catalog', headers, data, `stationary_catalog_${new Date().toISOString().split('T')[0]}.pdf`);
+            const items = getFiltered(schoolData.stationary, currentSchoolId);
+            generatePDF('Stationary Catalog', ['#', 'Item', 'Category', 'Quantity', 'Status'],
+                items.map((s, i) => [i+1, s.name, s.category, s.quantity, s.status]),
+                `stationary_${new Date().toISOString().split('T')[0]}.pdf`);
         }
-
         function downloadLaptopPDF() {
-            const items = getFilteredItems(schoolData.laptops, currentSchoolId);
-            const headers = ['#', 'Type/Model', 'Serial Number', 'Owner', 'School', 'Date Added', 'Status'];
-            const data = items.map((item, i) => [i + 1, item.type, item.serial, item.owner || '—', getSchoolName(item.schoolId), item.dateAdded, item.status]);
-            generatePDF('Laptop Catalog', headers, data, `laptop_catalog_${new Date().toISOString().split('T')[0]}.pdf`);
+            const items = getFiltered(schoolData.laptops, currentSchoolId);
+            generatePDF('Laptop Catalog', ['#', 'Type', 'Serial', 'Owner', 'Status'],
+                items.map((l, i) => [i+1, l.type, l.serial, l.owner || '—', l.status]),
+                `laptops_${new Date().toISOString().split('T')[0]}.pdf`);
         }
-
         function downloadStudentPDF() {
-            const students = getFilteredItems(schoolData.students, currentSchoolId);
-            const headers = ['Student ID', 'Student Name', 'School', 'Book', 'Laptop'];
-            const data = students.map(s => [s.studentId, s.name, getSchoolName(s.schoolId), s.bookId ? getBookTitle(s.bookId) : '—', s.laptopId ? getLaptopType(s.laptopId) : '—']);
-            generatePDF('Student Records', headers, data, `students_${new Date().toISOString().split('T')[0]}.pdf`);
+            const items = getFiltered(schoolData.students, currentSchoolId);
+            generatePDF('Students', ['ID', 'Name', 'Book', 'Laptop'],
+                items.map(s => [s.studentId, s.name, s.bookId ? getBookTitle(s.bookId) : '—', s.laptopId ? getLaptopType(s.laptopId) : '—']),
+                `students_${new Date().toISOString().split('T')[0]}.pdf`);
         }
-
         function downloadStaffPDF() {
-            const staff = getFilteredItems(schoolData.staff, currentSchoolId);
-            const headers = ['Staff Number', 'Staff Name', 'School', 'Department', 'Book', 'Laptop'];
-            const data = staff.map(s => [s.staffNumber, s.name, getSchoolName(s.schoolId), s.department, s.bookId ? getBookTitle(s.bookId) : '—', s.laptopId ? getLaptopType(s.laptopId) : '—']);
-            generatePDF('Staff Records', headers, data, `staff_${new Date().toISOString().split('T')[0]}.pdf`);
+            const items = getFiltered(schoolData.staff, currentSchoolId);
+            generatePDF('Staff', ['Staff No.', 'Name', 'Department', 'Book', 'Laptop'],
+                items.map(s => [s.staffNumber, s.name, s.department, s.bookId ? getBookTitle(s.bookId) : '—', s.laptopId ? getLaptopType(s.laptopId) : '—']),
+                `staff_${new Date().toISOString().split('T')[0]}.pdf`);
         }
-
-        function downloadBookBorrowPDF() {
-            const borrowings = schoolData.bookBorrowings.filter(b => {
-                const book = schoolData.books.find(book => book.id === b.bookId);
-                return book && (currentSchoolId === 'all' || book.schoolId === parseInt(currentSchoolId));
-            });
-            const headers = ['#', 'Borrower', 'Type', 'Book', 'Accession No.', 'Borrow Date', 'Due Date', 'Status'];
-            const data = borrowings.map((b, i) => [i + 1, b.borrowerName, b.borrowerType, getBookTitle(b.bookId), b.accession, b.borrowDate, b.dueDate, b.returned ? 'Returned' : 'Borrowed']);
-            generatePDF('Book Borrowing Records', headers, data, `book_borrowings_${new Date().toISOString().split('T')[0]}.pdf`);
-        }
-
-        function downloadLaptopBorrowPDF() {
-            const borrowings = schoolData.laptopBorrowings.filter(b => {
-                const laptop = schoolData.laptops.find(l => l.id === b.laptopId);
-                return laptop && (currentSchoolId === 'all' || laptop.schoolId === parseInt(currentSchoolId));
-            });
-            const headers = ['#', 'Owner', 'Type', 'Laptop Type', 'Serial No.', 'Issued Time', 'Returned Time', 'Status'];
-            const data = borrowings.map((b, i) => [i + 1, b.ownerName, b.ownerType, getLaptopType(b.laptopId), b.serial, formatDateTime(b.issuedTime), b.returnedTime ? formatDateTime(b.returnedTime) : '—', b.returned ? 'Returned' : 'Issued']);
-            generatePDF('Laptop Issuance Records', headers, data, `laptop_borrowings_${new Date().toISOString().split('T')[0]}.pdf`);
-        }
-
-        function downloadStationaryBorrowPDF() {
-            const borrowings = schoolData.stationaryBorrowings.filter(b => {
-                const item = schoolData.stationaryItems.find(s => s.id === b.stationaryId);
+        function downloadBorrowPDF() {
+            const items = schoolData.borrowings.filter(b => {
+                const item = b.itemType === 'Book' ? schoolData.books.find(x => x.id === b.itemId) : null;
                 return item && (currentSchoolId === 'all' || item.schoolId === parseInt(currentSchoolId));
             });
-            const headers = ['#', 'Staff Name', 'Item Issued', 'Quantity', 'Date Issued', 'Status'];
-            const data = borrowings.map((b, i) => [i + 1, b.staffName, getStationaryName(b.stationaryId), b.quantity, b.issueDate, b.returned ? 'Returned' : 'Issued']);
-            generatePDF('Stationary Issuance Records', headers, data, `stationary_borrowings_${new Date().toISOString().split('T')[0]}.pdf`);
+            generatePDF('Borrowing Records', ['#', 'Borrower', 'Type', 'Item', 'Date', 'Due', 'Status'],
+                items.map((b, i) => [i+1, b.borrowerName, b.borrowerType, b.itemType === 'Book' ? getBookTitle(b.itemId) : '—', b.borrowDate, b.dueDate, b.returned ? 'Returned' : 'Borrowed']),
+                `borrowings_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
         // ========== TOAST ==========
-        function showToast(message, type = 'info') {
+        function showToast(msg, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = 'toast';
-            const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
-            const color = type === 'success' ? 'var(--success)' : 'var(--primary)';
-            toast.innerHTML = `<i class="fas ${icon}" style="color:${color};margin-right:8px;"></i> ${message}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}" style="color:var(--success);margin-right:8px;"></i> ${msg}`;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 3500);
         }
 
-        // ========== POPULATE DROPDOWNS ==========
-        function populateBookDropdown() {
-            const select = document.getElementById('borrowBook');
-            const books = getFilteredItems(schoolData.books.filter(b => b.status === 'Available'), currentSchoolId);
-            select.innerHTML = '<option value="">Select Book *</option>';
-            books.forEach(b => {
-                select.innerHTML += `<option value="${b.id}">${b.title} (${b.accession})</option>`;
-            });
+        // ========== NAVIGATION ==========
+        function showHome() {
+            document.getElementById('homepage').style.display = 'block';
+            document.getElementById('dashboardContainer').classList.remove('active');
+            document.querySelectorAll('.top-nav .nav-links a').forEach(a => a.classList.remove('active'));
+            document.getElementById('navHome').classList.add('active');
+            currentView = 'home';
         }
 
-        function populateLaptopDropdown() {
-            const select = document.getElementById('laptopSelect');
-            const laptops = getFilteredItems(schoolData.laptops.filter(l => l.status === 'Available'), currentSchoolId);
-            select.innerHTML = '<option value="">Select Laptop *</option>';
-            laptops.forEach(l => {
-                select.innerHTML += `<option value="${l.id}">${l.type} (${l.serial})</option>`;
-            });
-        }
-
-        function populateStationaryDropdown() {
-            const select = document.getElementById('stationarySelect');
-            const items = getFilteredItems(schoolData.stationaryItems.filter(s => s.quantity > 0 && s.status === 'Available'), currentSchoolId);
-            select.innerHTML = '<option value="">Select Item *</option>';
-            items.forEach(s => {
-                select.innerHTML += `<option value="${s.id}">${s.name} (${s.quantity} available)</option>`;
-            });
+        function showDashboard() {
+            document.getElementById('homepage').style.display = 'none';
+            document.getElementById('dashboardContainer').classList.add('active');
+            document.querySelectorAll('.top-nav .nav-links a').forEach(a => a.classList.remove('active'));
+            document.getElementById('navDashboard').classList.add('active');
+            currentView = 'dashboard';
+            refreshAll();
         }
 
         // ========== EVENT LISTENERS ==========
 
-        // School selection
+        // Navigation
+        document.getElementById('navHome').addEventListener('click', (e) => { e.preventDefault(); showHome(); });
+        document.getElementById('navDashboard').addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
+        document.getElementById('bottomHome').addEventListener('click', (e) => { e.preventDefault(); showHome(); });
+        document.getElementById('bottomDashboard').addEventListener('click', (e) => { e.preventDefault(); showDashboard(); });
+        document.getElementById('registerBtn').addEventListener('click', () => showToast('Registration feature coming soon!', 'info'));
+        document.getElementById('dashboardBtn').addEventListener('click', showDashboard);
+
+        // School filter
         document.getElementById('schoolSelect').addEventListener('change', function() {
             currentSchoolId = this.value;
-            refreshAll();
+            if (currentView === 'dashboard') refreshAll();
             showToast(`Switched to ${this.options[this.selectedIndex].text}`, 'info');
         });
 
-        // Theme toggle
+        // Theme
         document.getElementById('themeToggle').addEventListener('click', function() {
             document.body.classList.toggle('dark');
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
         });
         if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
-        // Tab switching
+        // Tabs
         const tabs = document.querySelectorAll('#mainTabs button');
         const tabContents = {
             books: document.getElementById('tab-books'),
-            stationaryCatalog: document.getElementById('tab-stationaryCatalog'),
-            laptopCatalog: document.getElementById('tab-laptopCatalog'),
+            stationary: document.getElementById('tab-stationary'),
+            laptops: document.getElementById('tab-laptops'),
             students: document.getElementById('tab-students'),
             staff: document.getElementById('tab-staff'),
-            bookBorrow: document.getElementById('tab-bookBorrow'),
-            laptopBorrow: document.getElementById('tab-laptopBorrow'),
-            stationaryBorrow: document.getElementById('tab-stationaryBorrow')
+            borrowings: document.getElementById('tab-borrowings')
         };
         tabs.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1434,37 +1068,22 @@
                 Object.keys(tabContents).forEach(key => {
                     tabContents[key].style.display = (key === this.dataset.tab) ? 'block' : 'none';
                 });
-                if (this.dataset.tab === 'bookBorrow') populateBookDropdown();
-                if (this.dataset.tab === 'laptopBorrow') populateLaptopDropdown();
-                if (this.dataset.tab === 'stationaryBorrow') populateStationaryDropdown();
             });
         });
 
-        // Search handlers
+        // Search
         document.getElementById('searchBookBtn').addEventListener('click', renderBooks);
         document.getElementById('bookSearch').addEventListener('input', renderBooks);
-        document.getElementById('genreFilter').addEventListener('change', renderBooks);
-        
-        document.getElementById('searchStationaryCatalogBtn').addEventListener('click', renderStationaryCatalog);
-        document.getElementById('stationaryCatalogSearch').addEventListener('input', renderStationaryCatalog);
-        
-        document.getElementById('searchLaptopCatalogBtn').addEventListener('click', renderLaptopCatalog);
-        document.getElementById('laptopCatalogSearch').addEventListener('input', renderLaptopCatalog);
-        
+        document.getElementById('searchStationaryBtn').addEventListener('click', renderStationary);
+        document.getElementById('stationarySearch').addEventListener('input', renderStationary);
+        document.getElementById('searchLaptopBtn').addEventListener('click', renderLaptops);
+        document.getElementById('laptopSearch').addEventListener('input', renderLaptops);
         document.getElementById('studentSearchBtn').addEventListener('click', renderStudents);
         document.getElementById('studentSearch').addEventListener('input', renderStudents);
-        
         document.getElementById('staffSearchBtn').addEventListener('click', renderStaff);
         document.getElementById('staffSearch').addEventListener('input', renderStaff);
-        
-        document.getElementById('searchBookBorrowBtn').addEventListener('click', renderBookBorrowings);
-        document.getElementById('bookBorrowSearch').addEventListener('input', renderBookBorrowings);
-        
-        document.getElementById('searchLaptopBorrowBtn').addEventListener('click', renderLaptopBorrowings);
-        document.getElementById('laptopBorrowSearch').addEventListener('input', renderLaptopBorrowings);
-        
-        document.getElementById('searchStationaryBorrowBtn').addEventListener('click', renderStationaryBorrowings);
-        document.getElementById('stationaryBorrowSearch').addEventListener('input', renderStationaryBorrowings);
+        document.getElementById('searchBorrowBtn').addEventListener('click', renderBorrowings);
+        document.getElementById('borrowSearch').addEventListener('input', renderBorrowings);
 
         // PDF Downloads
         document.getElementById('downloadBookPDF').addEventListener('click', downloadBookPDF);
@@ -1472,366 +1091,57 @@
         document.getElementById('downloadLaptopPDF').addEventListener('click', downloadLaptopPDF);
         document.getElementById('downloadStudentPDF').addEventListener('click', downloadStudentPDF);
         document.getElementById('downloadStaffPDF').addEventListener('click', downloadStaffPDF);
-        document.getElementById('downloadBookBorrowPDF').addEventListener('click', downloadBookBorrowPDF);
-        document.getElementById('downloadLaptopBorrowPDF').addEventListener('click', downloadLaptopBorrowPDF);
-        document.getElementById('downloadStationaryBorrowPDF').addEventListener('click', downloadStationaryBorrowPDF);
+        document.getElementById('downloadBorrowPDF').addEventListener('click', downloadBorrowPDF);
 
-        // Add Book Modal
-        const bookModal = document.getElementById('bookModal');
+        // Add buttons - simplified
         document.getElementById('addBookBtn').addEventListener('click', () => {
-            bookModal.classList.add('active');
+            const b = { id: nextId.book++, title: `New Book ${nextId.book-1}`, author: 'Author', accession: `ACC-${String(nextId.book-1).padStart(3,'0')}`, genre: 'Fiction', schoolId: 1, status: 'Available' };
+            schoolData.books.push(b); refreshAll(); showToast('Book added', 'success');
         });
-        document.getElementById('closeBookModal').addEventListener('click', () => bookModal.classList.remove('active'));
-        bookModal.addEventListener('click', (e) => { if (e.target === bookModal) bookModal.classList.remove('active'); });
-
-        document.getElementById('bookForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const title = document.getElementById('bookTitle').value.trim();
-            const author = document.getElementById('bookAuthor').value.trim();
-            const accession = document.getElementById('bookAccession').value.trim();
-            if (!title || !author || !accession) {
-                showToast('Please fill all required fields', 'warning');
-                return;
-            }
-            const book = {
-                id: nextId.book++,
-                title, author, accession,
-                genre: document.getElementById('bookGenre').value,
-                schoolId: parseInt(document.getElementById('bookSchool').value),
-                status: 'Available'
-            };
-            schoolData.books.push(book);
-            bookModal.classList.remove('active');
-            this.reset();
-            showToast(`Book "${title}" added!`, 'success');
-            refreshAll();
+        document.getElementById('addStationaryBtn').addEventListener('click', () => {
+            const s = { id: nextId.stationary++, name: `Item ${nextId.stationary-1}`, category: 'General', quantity: 10, schoolId: 1, status: 'Available' };
+            schoolData.stationary.push(s); refreshAll(); showToast('Item added', 'success');
         });
-
-        // Add Stationary Item Modal
-        const stationaryItemModal = document.getElementById('stationaryItemModal');
-        document.getElementById('addStationaryItemBtn').addEventListener('click', () => {
-            stationaryItemModal.classList.add('active');
-        });
-        document.getElementById('closeStationaryItemModal').addEventListener('click', () => stationaryItemModal.classList.remove('active'));
-        stationaryItemModal.addEventListener('click', (e) => { if (e.target === stationaryItemModal) stationaryItemModal.classList.remove('active'); });
-
-        document.getElementById('stationaryItemForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('stationaryItemName').value.trim();
-            const category = document.getElementById('stationaryCategory').value.trim();
-            const quantity = parseInt(document.getElementById('stationaryItemQty').value);
-            
-            if (!name || !category || !quantity) {
-                showToast('Please fill all required fields', 'warning');
-                return;
-            }
-
-            const item = {
-                id: nextId.stationary++,
-                name, category, quantity,
-                schoolId: parseInt(document.getElementById('stationaryItemSchool').value),
-                dateAdded: new Date().toISOString().split('T')[0],
-                status: 'Available'
-            };
-            schoolData.stationaryItems.push(item);
-            stationaryItemModal.classList.remove('active');
-            this.reset();
-            showToast(`Stationary item "${name}" added!`, 'success');
-            refreshAll();
-        });
-
-        // Add Laptop Modal
-        const laptopModal = document.getElementById('laptopModal');
         document.getElementById('addLaptopBtn').addEventListener('click', () => {
-            laptopModal.classList.add('active');
+            const l = { id: nextId.laptop++, type: `Laptop ${nextId.laptop-1}`, serial: `SN-${String(nextId.laptop-1).padStart(3,'0')}`, owner: null, schoolId: 1, status: 'Available' };
+            schoolData.laptops.push(l); refreshAll(); showToast('Laptop registered', 'success');
         });
-        document.getElementById('closeLaptopModal').addEventListener('click', () => laptopModal.classList.remove('active'));
-        laptopModal.addEventListener('click', (e) => { if (e.target === laptopModal) laptopModal.classList.remove('active'); });
-
-        document.getElementById('laptopForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const type = document.getElementById('laptopType').value.trim();
-            const serial = document.getElementById('laptopSerial').value.trim();
-            
-            if (!type || !serial) {
-                showToast('Please fill all required fields', 'warning');
-                return;
-            }
-
-            const laptop = {
-                id: nextId.laptop++,
-                type, serial,
-                owner: document.getElementById('laptopOwner').value.trim() || null,
-                schoolId: parseInt(document.getElementById('laptopSchool').value),
-                dateAdded: new Date().toISOString().split('T')[0],
-                status: 'Available'
-            };
-            schoolData.laptops.push(laptop);
-            laptopModal.classList.remove('active');
-            this.reset();
-            showToast(`Laptop "${type}" registered!`, 'success');
-            refreshAll();
-        });
-
-        // Add Student Modal
-        const studentModal = document.getElementById('studentModal');
         document.getElementById('addStudentBtn').addEventListener('click', () => {
-            studentModal.classList.add('active');
+            const s = { id: nextId.student++, studentId: `S${String(nextId.student-1).padStart(3,'0')}`, name: `Student ${nextId.student-1}`, schoolId: 1, bookId: null, laptopId: null };
+            schoolData.students.push(s); refreshAll(); showToast('Student added', 'success');
         });
-        document.getElementById('closeStudentModal').addEventListener('click', () => studentModal.classList.remove('active'));
-        studentModal.addEventListener('click', (e) => { if (e.target === studentModal) studentModal.classList.remove('active'); });
-
-        document.getElementById('studentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('studentName').value.trim();
-            const studentId = document.getElementById('studentId').value.trim();
-            
-            if (!name || !studentId) {
-                showToast('Please fill all required fields', 'warning');
-                return;
-            }
-
-            // Check for duplicate student ID
-            if (schoolData.students.some(s => s.studentId === studentId)) {
-                showToast('Student ID already exists!', 'warning');
-                return;
-            }
-
-            const student = {
-                id: nextId.student++,
-                studentId,
-                name,
-                schoolId: parseInt(document.getElementById('studentSchool').value),
-                bookId: null,
-                laptopId: null
-            };
-            schoolData.students.push(student);
-            studentModal.classList.remove('active');
-            this.reset();
-            showToast(`Student "${name}" added!`, 'success');
-            refreshAll();
-        });
-
-        // Add Staff Modal
-        const staffModal = document.getElementById('staffModal');
         document.getElementById('addStaffBtn').addEventListener('click', () => {
-            staffModal.classList.add('active');
+            const s = { id: nextId.staff++, staffNumber: `STF${String(nextId.staff-1).padStart(3,'0')}`, name: `Staff ${nextId.staff-1}`, department: 'General', schoolId: 1, bookId: null, laptopId: null };
+            schoolData.staff.push(s); refreshAll(); showToast('Staff added', 'success');
         });
-        document.getElementById('closeStaffModal').addEventListener('click', () => staffModal.classList.remove('active'));
-        staffModal.addEventListener('click', (e) => { if (e.target === staffModal) staffModal.classList.remove('active'); });
-
-        document.getElementById('staffForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('staffName').value.trim();
-            const staffNumber = document.getElementById('staffNumber').value.trim();
-            const department = document.getElementById('staffDepartment').value.trim();
-            
-            if (!name || !staffNumber || !department) {
-                showToast('Please fill all required fields', 'warning');
-                return;
-            }
-
-            // Check for duplicate staff number
-            if (schoolData.staff.some(s => s.staffNumber === staffNumber)) {
-                showToast('Staff number already exists!', 'warning');
-                return;
-            }
-
-            const staff = {
-                id: nextId.staff++,
-                staffNumber,
-                name,
-                department,
-                schoolId: parseInt(document.getElementById('staffSchool').value),
-                bookId: null,
-                laptopId: null
-            };
-            schoolData.staff.push(staff);
-            staffModal.classList.remove('active');
-            this.reset();
-            showToast(`Staff "${name}" added!`, 'success');
-            refreshAll();
-        });
-
-        // Book Borrowing Modal
-        const bookBorrowModal = document.getElementById('bookBorrowModal');
-        document.getElementById('newBookBorrowBtn').addEventListener('click', () => {
-            populateBookDropdown();
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('borrowDate').value = today;
-            const due = new Date();
-            due.setDate(due.getDate() + 14);
-            document.getElementById('dueDate').value = due.toISOString().split('T')[0];
-            bookBorrowModal.classList.add('active');
-        });
-        document.getElementById('closeBookBorrowModal').addEventListener('click', () => bookBorrowModal.classList.remove('active'));
-        bookBorrowModal.addEventListener('click', (e) => { if (e.target === bookBorrowModal) bookBorrowModal.classList.remove('active'); });
-
-        document.getElementById('bookBorrowForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const borrowerName = document.getElementById('borrowerName').value.trim();
-            const borrowerType = document.getElementById('borrowerType').value;
-            const bookId = parseInt(document.getElementById('borrowBook').value);
-            const borrowDate = document.getElementById('borrowDate').value;
-            const dueDate = document.getElementById('dueDate').value;
-            
-            if (!borrowerName || !bookId || !borrowDate || !dueDate) {
-                showToast('Please fill all required fields', 'warning');
-                return;
-            }
-            
-            const book = schoolData.books.find(b => b.id === bookId);
-            if (!book || book.status !== 'Available') {
-                showToast('Selected book is not available', 'warning');
-                return;
-            }
-            
-            const borrow = {
-                id: nextId.bookBorrow++,
-                borrowerName,
-                borrowerType,
-                bookId,
-                accession: book.accession,
-                borrowDate,
-                dueDate,
-                returned: false
-            };
-            schoolData.bookBorrowings.push(borrow);
+        document.getElementById('newBorrowBtn').addEventListener('click', () => {
+            const availBooks = schoolData.books.filter(b => b.status === 'Available');
+            if (!availBooks.length) { showToast('No available books', 'warning'); return; }
+            const book = availBooks[0];
+            const student = schoolData.students.find(s => !s.bookId);
+            if (!student) { showToast('No student available', 'warning'); return; }
+            const b = { id: nextId.borrow++, borrowerName: student.name, borrowerType: 'Student', itemType: 'Book', itemId: book.id, borrowDate: new Date().toISOString().split('T')[0], dueDate: new Date(Date.now()+14*86400000).toISOString().split('T')[0], returned: false };
+            schoolData.borrowings.push(b);
             book.status = 'Borrowed';
-            
-            // Assign book to student or staff
-            if (borrowerType === 'Student') {
-                const student = schoolData.students.find(s => s.name === borrowerName);
-                if (student) student.bookId = bookId;
-            } else {
-                const staff = schoolData.staff.find(s => s.name === borrowerName);
-                if (staff) staff.bookId = bookId;
-            }
-            
-            bookBorrowModal.classList.remove('active');
-            this.reset();
-            showToast(`Book borrowed by ${borrowerName} (${borrowerType})`, 'success');
+            student.bookId = book.id;
             refreshAll();
+            showToast(`Book borrowed by ${student.name}`, 'success');
         });
 
-        // Laptop Borrowing Modal
-        const laptopBorrowModal = document.getElementById('laptopBorrowModal');
-        document.getElementById('newLaptopBorrowBtn').addEventListener('click', () => {
-            populateLaptopDropdown();
-            document.getElementById('issuedTime').value = new Date().toISOString().slice(0, 16);
-            laptopBorrowModal.classList.add('active');
-        });
-        document.getElementById('closeLaptopBorrowModal').addEventListener('click', () => laptopBorrowModal.classList.remove('active'));
-        laptopBorrowModal.addEventListener('click', (e) => { if (e.target === laptopBorrowModal) laptopBorrowModal.classList.remove('active'); });
-
-        document.getElementById('laptopBorrowForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const ownerName = document.getElementById('laptopOwnerName').value.trim();
-            const ownerType = document.getElementById('ownerType').value;
-            const laptopId = parseInt(document.getElementById('laptopSelect').value);
-            const issuedTime = document.getElementById('issuedTime').value;
-            
-            if (!ownerName || !laptopId || !issuedTime) {
-                showToast('Please fill all required fields', 'warning');
-                return;
-            }
-            
-            const laptop = schoolData.laptops.find(l => l.id === laptopId);
-            if (!laptop || laptop.status !== 'Available') {
-                showToast('Selected laptop is not available', 'warning');
-                return;
-            }
-            
-            const borrow = {
-                id: nextId.laptopBorrow++,
-                ownerName,
-                ownerType,
-                laptopId,
-                serial: laptop.serial,
-                issuedTime,
-                returnedTime: null,
-                returned: false
-            };
-            schoolData.laptopBorrowings.push(borrow);
-            laptop.status = 'Issued';
-            
-            // Assign laptop to student or staff
-            if (ownerType === 'Student') {
-                const student = schoolData.students.find(s => s.name === ownerName);
-                if (student) student.laptopId = laptopId;
-            } else {
-                const staff = schoolData.staff.find(s => s.name === ownerName);
-                if (staff) staff.laptopId = laptopId;
-            }
-            
-            laptopBorrowModal.classList.remove('active');
-            this.reset();
-            showToast(`Laptop issued to ${ownerName} (${ownerType})`, 'success');
-            refreshAll();
-        });
-
-        // Stationary Borrowing Modal
-        const stationaryBorrowModal = document.getElementById('stationaryBorrowModal');
-        document.getElementById('newStationaryBorrowBtn').addEventListener('click', () => {
-            populateStationaryDropdown();
-            document.getElementById('stationaryIssueDate').value = new Date().toISOString().split('T')[0];
-            stationaryBorrowModal.classList.add('active');
-        });
-        document.getElementById('closeStationaryBorrowModal').addEventListener('click', () => stationaryBorrowModal.classList.remove('active'));
-        stationaryBorrowModal.addEventListener('click', (e) => { if (e.target === stationaryBorrowModal) stationaryBorrowModal.classList.remove('active'); });
-
-        document.getElementById('stationaryBorrowForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const staffName = document.getElementById('staffNameIssuance').value.trim();
-            const stationaryId = parseInt(document.getElementById('stationarySelect').value);
-            const quantity = parseInt(document.getElementById('stationaryQtyIssued').value);
-            const issueDate = document.getElementById('stationaryIssueDate').value;
-            
-            if (!staffName || !stationaryId || !quantity || !issueDate) {
-                showToast('Please fill all required fields', 'warning');
-                return;
-            }
-            
-            const item = schoolData.stationaryItems.find(s => s.id === stationaryId);
-            if (!item || item.quantity < quantity) {
-                showToast('Insufficient quantity available', 'warning');
-                return;
-            }
-            
-            const borrow = {
-                id: nextId.stationaryBorrow++,
-                staffName,
-                stationaryId,
-                quantity,
-                issueDate,
-                returned: false
-            };
-            schoolData.stationaryBorrowings.push(borrow);
-            item.quantity -= quantity;
-            stationaryBorrowModal.classList.remove('active');
-            this.reset();
-            showToast(`Stationary issued to ${staffName}`, 'success');
-            refreshAll();
-        });
-
-        // ========== INITIALIZATION ==========
-        refreshAll();
-        setTimeout(() => showToast('Welcome to SchoolLib!', 'success'), 600);
+        // ========== INIT ==========
+        showHome();
+        setTimeout(() => showToast('Welcome to School Integrated Library System!', 'success'), 600);
 
         // Make functions globally accessible
         window.deleteBook = deleteBook;
-        window.deleteStationaryItem = deleteStationaryItem;
-        window.deleteLaptopItem = deleteLaptopItem;
+        window.deleteStationary = deleteStationary;
+        window.deleteLaptop = deleteLaptop;
         window.deleteStudent = deleteStudent;
         window.deleteStaff = deleteStaff;
-        window.returnBookBorrow = returnBookBorrow;
-        window.deleteBookBorrow = deleteBookBorrow;
-        window.returnLaptopBorrow = returnLaptopBorrow;
-        window.deleteLaptopBorrow = deleteLaptopBorrow;
-        window.returnStationaryBorrow = returnStationaryBorrow;
-        window.deleteStationaryBorrow = deleteStationaryBorrow;
+        window.returnBorrow = returnBorrow;
+        window.deleteBorrow = deleteBorrow;
 
     })();
-</script>
+    </script>
 </body>
 </html>
