@@ -347,6 +347,23 @@
             background: var(--bg-body);
             color: var(--text-primary);
             font-weight: 500;
+            cursor: pointer;
+        }
+        .school-filter-badge {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: var(--primary);
+            color: white;
+        }
+        .hidden-row { display: none !important; }
+        .no-data-msg {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-style: italic;
         }
     </style>
 </head>
@@ -360,9 +377,11 @@
             <div class="school-selector">
                 <i class="fas fa-school"></i>
                 <select id="schoolSelect">
+                    <option value="all">All Schools</option>
                     <option value="1">Greenwood High</option>
                     <option value="2">Riverside Academy</option>
                     <option value="3">Hilltop School</option>
+                    <option value="4">St. Mary's College</option>
                 </select>
                 <button class="btn-outline" id="registerSchoolBtn"><i class="fas fa-plus-circle"></i> Register</button>
             </div>
@@ -372,19 +391,19 @@
         </div>
     </header>
 
-    <!-- stats -->
-    <div class="dashboard-grid">
-        <div class="stat-card"><div class="stat-info"><h4>Total Books</h4><h2>4,182</h2></div><div class="stat-icon"><i class="fas fa-book"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Students</h4><h2>1,847</h2></div><div class="stat-icon"><i class="fas fa-user-graduate"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Overdue</h4><h2>27</h2></div><div class="stat-icon"><i class="fas fa-clock"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Laptops Issued</h4><h2>43</h2></div><div class="stat-icon"><i class="fas fa-laptop"></i></div></div>
+    <!-- stats - will be dynamically updated -->
+    <div class="dashboard-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-info"><h4>Total Books</h4><h2 id="statBooks">0</h2></div><div class="stat-icon"><i class="fas fa-book"></i></div></div>
+        <div class="stat-card"><div class="stat-info"><h4>Students</h4><h2 id="statStudents">0</h2></div><div class="stat-icon"><i class="fas fa-user-graduate"></i></div></div>
+        <div class="stat-card"><div class="stat-info"><h4>Overdue</h4><h2 id="statOverdue">0</h2></div><div class="stat-icon"><i class="fas fa-clock"></i></div></div>
+        <div class="stat-card"><div class="stat-info"><h4>Laptops Issued</h4><h2 id="statLaptops">0</h2></div><div class="stat-icon"><i class="fas fa-laptop"></i></div></div>
     </div>
 
     <!-- Main Tabs -->
     <div class="card">
         <div class="tab-bar" id="mainTabs">
             <button class="active" data-tab="catalog"><i class="fas fa-list-ul"></i> Book Catalog</button>
-            <button data-tab="borrow"><i class="fas fa-hand-holding-heart"></i> My Books</button>
+            <button data-tab="borrow"><i class="fas fa-hand-holding-heart"></i> Borrowings</button>
             <button data-tab="fines"><i class="fas fa-coins"></i> Fine Management</button>
             <button data-tab="analytics"><i class="fas fa-chart-pie"></i> Analytics</button>
             <button data-tab="students"><i class="fas fa-user-graduate"></i> Students</button>
@@ -395,52 +414,50 @@
         <div id="tab-catalog" class="tab-content">
             <div class="search-bar">
                 <input type="text" placeholder="Search by title, author, ISBN..." id="bookSearch">
-                <select><option>All Genres</option><option>Fiction</option><option>Non-fiction</option><option>Science</option><option>History</option></select>
-                <button class="btn-primary"><i class="fas fa-search"></i> Search</button>
-                <button class="btn-outline"><i class="fas fa-plus"></i> Add Book</button>
+                <select id="genreFilter"><option value="">All Genres</option><option>Fiction</option><option>Non-fiction</option><option>Science</option><option>History</option><option>Mathematics</option></select>
+                <button class="btn-primary" id="searchBookBtn"><i class="fas fa-search"></i> Search</button>
+                <button class="btn-outline" id="addBookBtn"><i class="fas fa-plus"></i> Add Book</button>
                 <button class="btn-outline"><i class="fas fa-file-import"></i> Import</button>
             </div>
             <div class="table-responsive">
                 <table>
                     <thead><tr><th>#</th><th>Title</th><th>Author</th><th>Genre</th><th>School</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody id="catalogTableBody">
-                        <tr><td>1</td><td><i class="fas fa-book" style="margin-right:8px;color:var(--primary);"></i> The Great Gatsby</td><td>F. Scott Fitzgerald</td><td>Fiction</td><td><span class="badge badge-school">Greenwood</span></td><td><span class="badge badge-success">Available</span></td><td><i class="fas fa-edit" style="color:var(--primary);cursor:pointer;"></i> <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;"></i></td></tr>
-                        <tr><td>2</td><td><i class="fas fa-book" style="margin-right:8px;color:var(--primary);"></i> Sapiens</td><td>Yuval N. Harari</td><td>Non-fiction</td><td><span class="badge badge-school">Riverside</span></td><td><span class="badge badge-warning">Borrowed</span></td><td><i class="fas fa-edit" style="color:var(--primary);cursor:pointer;"></i> <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;"></i></td></tr>
-                        <tr><td>3</td><td><i class="fas fa-book" style="margin-right:8px;color:var(--primary);"></i> Dune</td><td>Frank Herbert</td><td>Science</td><td><span class="badge badge-school">Hilltop</span></td><td><span class="badge badge-success">Available</span></td><td><i class="fas fa-edit" style="color:var(--primary);cursor:pointer;"></i> <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;"></i></td></tr>
+                        <!-- Data will be populated dynamically -->
                     </tbody>
                 </table>
             </div>
-            <div class="flex mt-2"><span>Showing 1-3 of 18</span> <button class="btn-outline">Next</button></div>
+            <div class="flex mt-2"><span id="catalogCount">Showing 0 items</span> <button class="btn-outline">Next</button></div>
         </div>
 
-        <!-- TAB: MY BOOKS -->
+        <!-- TAB: BORROWINGS -->
         <div id="tab-borrow" class="tab-content" style="display:none;">
-            <div class="card-header"><h3><i class="fas fa-clock"></i> Currently Borrowed</h3><span class="badge">3 items</span></div>
+            <div class="card-header"><h3><i class="fas fa-clock"></i> Currently Borrowed</h3><span class="badge" id="borrowCount">0 items</span></div>
             <div class="table-responsive">
                 <table>
                     <thead><tr><th>Book</th><th>Student</th><th>School</th><th>Due Date</th><th>Countdown</th><th>Action</th></tr></thead>
-                    <tbody>
-                        <tr><td>Sapiens</td><td>Emma W.</td><td>Greenwood</td><td>2026-08-10</td><td><span class="countdown" data-due="2026-08-10">5d 12h</span></td><td><button class="btn-outline" style="padding:0.2rem 1rem;">Return</button></td></tr>
-                        <tr><td>Dune</td><td>Liam K.</td><td>Riverside</td><td>2026-08-15</td><td><span class="countdown" data-due="2026-08-15">10d 4h</span></td><td><button class="btn-outline" style="padding:0.2rem 1rem;">Return</button></td></tr>
+                    <tbody id="borrowTableBody">
+                        <!-- Data will be populated dynamically -->
                     </tbody>
                 </table>
             </div>
             <div class="card-header mt-2"><h3><i class="fas fa-history"></i> Borrowing History</h3></div>
             <div class="table-responsive">
                 <table><thead><tr><th>Book</th><th>Student</th><th>School</th><th>Borrowed</th><th>Returned</th><th>Status</th></tr></thead>
-                <tbody><tr><td>The Great Gatsby</td><td>Noah P.</td><td>Hilltop</td><td>2026-06-01</td><td>2026-06-15</td><td><span class="badge badge-success">Returned</span></td></tr></tbody>
+                <tbody id="historyTableBody">
+                    <!-- Data will be populated dynamically -->
+                </tbody>
                 </table>
             </div>
         </div>
 
         <!-- TAB: FINE MANAGEMENT -->
         <div id="tab-fines" class="tab-content" style="display:none;">
-            <div class="card-header"><h3><i class="fas fa-coins"></i> Outstanding Fines</h3><span class="badge badge-danger">$42.00</span></div>
+            <div class="card-header"><h3><i class="fas fa-coins"></i> Outstanding Fines</h3><span class="badge badge-danger" id="fineTotal">$0.00</span></div>
             <div class="table-responsive">
                 <table><thead><tr><th>Student</th><th>School</th><th>Book</th><th>Fine ($)</th><th>Status</th><th>Action</th></tr></thead>
-                <tbody>
-                    <tr><td>Emily R.</td><td>Greenwood</td><td>Sapiens</td><td>5.00</td><td><span class="badge badge-warning">Unpaid</span></td><td><button class="btn-outline" style="padding:0.2rem 1rem;"><i class="fas fa-credit-card"></i> Pay</button> <button class="btn-outline" style="padding:0.2rem 1rem;">Waive</button></td></tr>
-                    <tr><td>Michael T.</td><td>Riverside</td><td>Dune</td><td>8.50</td><td><span class="badge badge-warning">Unpaid</span></td><td><button class="btn-outline" style="padding:0.2rem 1rem;"><i class="fas fa-credit-card"></i> Pay</button> <button class="btn-outline" style="padding:0.2rem 1rem;">Waive</button></td></tr>
+                <tbody id="fineTableBody">
+                    <!-- Data will be populated dynamically -->
                 </tbody>
                 </table>
             </div>
@@ -449,7 +466,7 @@
 
         <!-- TAB: ANALYTICS -->
         <div id="tab-analytics" class="tab-content" style="display:none;">
-            <div class="card-header"><h3><i class="fas fa-chart-line"></i> Monthly Circulation by School</h3></div>
+            <div class="card-header"><h3><i class="fas fa-chart-line"></i> Monthly Circulation <span id="analyticsSchoolLabel">(All Schools)</span></h3></div>
             <div class="chart-container"><canvas id="circulationChart" width="400" height="200"></canvas></div>
             <div class="flex mt-2"><button class="btn-outline"><i class="fas fa-print"></i> Print Report</button></div>
         </div>
@@ -461,9 +478,9 @@
                 <button class="btn-primary" id="addStudentBtn"><i class="fas fa-user-plus"></i> Add Student</button>
             </div>
             <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); margin:0 0 1rem 0;">
-                <div class="stat-card"><div class="stat-info"><h4>Total Students</h4><h2>342</h2></div><div class="stat-icon"><i class="fas fa-users"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><h4>Books Issued</h4><h2>89</h2></div><div class="stat-icon"><i class="fas fa-book"></i></div></div>
-                <div class="stat-card"><div class="stat-info"><h4>Laptops Issued</h4><h2>18</h2></div><div class="stat-icon"><i class="fas fa-laptop"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><h4>Total Students</h4><h2 id="studentTotal">0</h2></div><div class="stat-icon"><i class="fas fa-users"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><h4>Books Issued</h4><h2 id="studentBooksIssued">0</h2></div><div class="stat-icon"><i class="fas fa-book"></i></div></div>
+                <div class="stat-card"><div class="stat-info"><h4>Laptops Issued</h4><h2 id="studentLaptopsIssued">0</h2></div><div class="stat-icon"><i class="fas fa-laptop"></i></div></div>
             </div>
             <div class="search-bar">
                 <input type="text" placeholder="Search student name or ID..." id="studentSearch">
@@ -474,41 +491,14 @@
                 <table>
                     <thead><tr><th>ID</th><th>Student</th><th>School</th><th>Book</th><th>Book Status</th><th>Laptop</th><th>Laptop Status</th><th>Actions</th></tr></thead>
                     <tbody id="studentTableBody">
-                        <tr data-student="1">
-                            <td>S001</td><td>Alice Johnson</td><td><span class="badge badge-school">Greenwood</span></td>
-                            <td>Sapiens</td><td><span class="badge badge-warning">Borrowed</span></td>
-                            <td>Dell XPS 13</td><td><span class="laptop-status laptop-issued"></span> Issued</td>
-                            <td>
-                                <button class="btn-outline student-return-book" style="padding:0.2rem 0.8rem;font-size:0.7rem;"><i class="fas fa-undo"></i> Ret Book</button>
-                                <button class="btn-outline student-return-laptop" style="padding:0.2rem 0.8rem;font-size:0.7rem;"><i class="fas fa-laptop"></i> Ret Laptop</button>
-                                <button class="btn-outline student-issue-laptop" style="padding:0.2rem 0.8rem;font-size:0.7rem;"><i class="fas fa-laptop"></i> Issue Laptop</button>
-                            </td>
-                        </tr>
-                        <tr data-student="2">
-                            <td>S002</td><td>Bob Smith</td><td><span class="badge badge-school">Riverside</span></td>
-                            <td>—</td><td><span class="badge badge-success">None</span></td>
-                            <td>—</td><td><span class="laptop-status laptop-available"></span> Available</td>
-                            <td>
-                                <button class="btn-outline student-issue-book" style="padding:0.2rem 0.8rem;font-size:0.7rem;"><i class="fas fa-book"></i> Issue Book</button>
-                                <button class="btn-outline student-issue-laptop" style="padding:0.2rem 0.8rem;font-size:0.7rem;"><i class="fas fa-laptop"></i> Issue Laptop</button>
-                            </td>
-                        </tr>
-                        <tr data-student="3">
-                            <td>S003</td><td>Carol White</td><td><span class="badge badge-school">Hilltop</span></td>
-                            <td>Dune</td><td><span class="badge badge-warning">Borrowed</span></td>
-                            <td>MacBook Air</td><td><span class="laptop-status laptop-issued"></span> Issued</td>
-                            <td>
-                                <button class="btn-outline student-return-book" style="padding:0.2rem 0.8rem;font-size:0.7rem;"><i class="fas fa-undo"></i> Ret Book</button>
-                                <button class="btn-outline student-return-laptop" style="padding:0.2rem 0.8rem;font-size:0.7rem;"><i class="fas fa-laptop"></i> Ret Laptop</button>
-                            </td>
-                        </tr>
+                        <!-- Data will be populated dynamically -->
                     </tbody>
                 </table>
             </div>
-            <div class="flex mt-2"><span>Showing 1-3 of 12</span> <button class="btn-outline">Next</button></div>
+            <div class="flex mt-2"><span id="studentCount">Showing 0 students</span> <button class="btn-outline">Next</button></div>
         </div>
 
-        <!-- TAB: SCHOOLS (NEW) -->
+        <!-- TAB: SCHOOLS -->
         <div id="tab-schools" class="tab-content" style="display:none;">
             <div class="card-header">
                 <h3><i class="fas fa-school"></i> Registered Schools</h3>
@@ -518,9 +508,7 @@
                 <table>
                     <thead><tr><th>School ID</th><th>School Name</th><th>Address</th><th>Students</th><th>Books</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody id="schoolTableBody">
-                        <tr><td>SCH-001</td><td>Greenwood High</td><td>123 Main St, NY</td><td>342</td><td>1,240</td><td><span class="badge badge-success">Active</span></td><td><i class="fas fa-edit" style="color:var(--primary);cursor:pointer;"></i> <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;"></i></td></tr>
-                        <tr><td>SCH-002</td><td>Riverside Academy</td><td>456 River Rd, CA</td><td>289</td><td>980</td><td><span class="badge badge-success">Active</span></td><td><i class="fas fa-edit" style="color:var(--primary);cursor:pointer;"></i> <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;"></i></td></tr>
-                        <tr><td>SCH-003</td><td>Hilltop School</td><td>789 Hill Ave, TX</td><td>156</td><td>540</td><td><span class="badge badge-warning">Pending</span></td><td><i class="fas fa-edit" style="color:var(--primary);cursor:pointer;"></i> <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;"></i></td></tr>
+                        <!-- Data will be populated dynamically -->
                     </tbody>
                 </table>
             </div>
@@ -551,15 +539,573 @@
     (function() {
         "use strict";
 
-        // ----- THEME TOGGLE -----
-        const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('click', function() {
+        // ========== DATA STORE ==========
+        const schoolData = {
+            schools: [
+                { id: 1, name: 'Greenwood High', address: '123 Main St, NY', email: 'greenwood@school.edu', status: 'Active' },
+                { id: 2, name: 'Riverside Academy', address: '456 River Rd, CA', email: 'riverside@school.edu', status: 'Active' },
+                { id: 3, name: 'Hilltop School', address: '789 Hill Ave, TX', email: 'hilltop@school.edu', status: 'Active' },
+                { id: 4, name: "St. Mary's College", address: '321 College Blvd, MA', email: 'stmary@school.edu', status: 'Active' }
+            ],
+            books: [
+                { id: 1, title: 'The Great Gatsby', author: 'F. Scott Fitzgerald', genre: 'Fiction', schoolId: 1, status: 'Available' },
+                { id: 2, title: 'Sapiens', author: 'Yuval N. Harari', genre: 'Non-fiction', schoolId: 2, status: 'Borrowed' },
+                { id: 3, title: 'Dune', author: 'Frank Herbert', genre: 'Science', schoolId: 3, status: 'Available' },
+                { id: 4, title: 'To Kill a Mockingbird', author: 'Harper Lee', genre: 'Fiction', schoolId: 1, status: 'Borrowed' },
+                { id: 5, title: '1984', author: 'George Orwell', genre: 'Fiction', schoolId: 2, status: 'Available' },
+                { id: 6, title: 'A Brief History of Time', author: 'Stephen Hawking', genre: 'Science', schoolId: 3, status: 'Borrowed' },
+                { id: 7, title: 'The Art of War', author: 'Sun Tzu', genre: 'History', schoolId: 4, status: 'Available' },
+                { id: 8, title: 'Pride and Prejudice', author: 'Jane Austen', genre: 'Fiction', schoolId: 4, status: 'Available' },
+                { id: 9, title: 'The Selfish Gene', author: 'Richard Dawkins', genre: 'Science', schoolId: 1, status: 'Borrowed' },
+                { id: 10, title: 'The Diary of a Young Girl', author: 'Anne Frank', genre: 'History', schoolId: 2, status: 'Available' }
+            ],
+            students: [
+                { id: 1, name: 'Alice Johnson', schoolId: 1, bookId: 2, laptop: 'Dell XPS 13', laptopStatus: 'Issued' },
+                { id: 2, name: 'Bob Smith', schoolId: 2, bookId: null, laptop: null, laptopStatus: 'Available' },
+                { id: 3, name: 'Carol White', schoolId: 3, bookId: 3, laptop: 'MacBook Air', laptopStatus: 'Issued' },
+                { id: 4, name: 'David Brown', schoolId: 1, bookId: 4, laptop: null, laptopStatus: 'Available' },
+                { id: 5, name: 'Emma Wilson', schoolId: 4, bookId: null, laptop: 'HP Spectre', laptopStatus: 'Issued' },
+                { id: 6, name: 'Frank Miller', schoolId: 2, bookId: 9, laptop: null, laptopStatus: 'Available' },
+                { id: 7, name: 'Grace Lee', schoolId: 3, bookId: null, laptop: null, laptopStatus: 'Available' },
+                { id: 8, name: 'Henry Davis', schoolId: 4, bookId: 7, laptop: 'Lenovo ThinkPad', laptopStatus: 'Issued' }
+            ],
+            borrowings: [
+                { id: 1, studentId: 1, bookId: 2, borrowDate: '2026-07-20', dueDate: '2026-08-10', returned: false },
+                { id: 2, studentId: 3, bookId: 3, borrowDate: '2026-07-25', dueDate: '2026-08-15', returned: false },
+                { id: 3, studentId: 4, bookId: 4, borrowDate: '2026-07-28', dueDate: '2026-08-18', returned: false },
+                { id: 4, studentId: 6, bookId: 9, borrowDate: '2026-07-22', dueDate: '2026-08-12', returned: false },
+                { id: 5, studentId: 8, bookId: 7, borrowDate: '2026-07-30', dueDate: '2026-08-20', returned: false },
+                { id: 6, studentId: 2, bookId: 5, borrowDate: '2026-06-01', dueDate: '2026-06-15', returned: true },
+                { id: 7, studentId: 5, bookId: 8, borrowDate: '2026-06-10', dueDate: '2026-06-24', returned: true }
+            ],
+            fines: [
+                { id: 1, studentId: 1, bookId: 2, amount: 5.00, status: 'Unpaid' },
+                { id: 2, studentId: 3, bookId: 3, amount: 8.50, status: 'Unpaid' },
+                { id: 3, studentId: 4, bookId: 4, amount: 3.00, status: 'Unpaid' }
+            ]
+        };
+
+        let currentSchoolId = 'all';
+        let nextStudentId = 9;
+        let nextBookId = 11;
+        let nextSchoolId = 5;
+
+        // ========== HELPER FUNCTIONS ==========
+        function getSchoolName(id) {
+            const school = schoolData.schools.find(s => s.id === id);
+            return school ? school.name : 'Unknown';
+        }
+
+        function getBookTitle(id) {
+            const book = schoolData.books.find(b => b.id === id);
+            return book ? book.title : '—';
+        }
+
+        function getStudentName(id) {
+            const student = schoolData.students.find(s => s.id === id);
+            return student ? student.name : 'Unknown';
+        }
+
+        function getStudentBook(id) {
+            const student = schoolData.students.find(s => s.id === id);
+            if (student && student.bookId) {
+                return getBookTitle(student.bookId);
+            }
+            return '—';
+        }
+
+        function getStudentBookStatus(id) {
+            const student = schoolData.students.find(s => s.id === id);
+            if (student && student.bookId) {
+                return '<span class="badge badge-warning">Borrowed</span>';
+            }
+            return '<span class="badge badge-success">None</span>';
+        }
+
+        function getStudentLaptop(id) {
+            const student = schoolData.students.find(s => s.id === id);
+            return student && student.laptop ? student.laptop : '—';
+        }
+
+        function getStudentLaptopStatus(id) {
+            const student = schoolData.students.find(s => s.id === id);
+            if (student && student.laptopStatus === 'Issued') {
+                return '<span class="laptop-status laptop-issued"></span> Issued';
+            }
+            return '<span class="laptop-status laptop-available"></span> Available';
+        }
+
+        function getSchoolStudents(schoolId) {
+            return schoolData.students.filter(s => schoolId === 'all' || s.schoolId === parseInt(schoolId));
+        }
+
+        function getSchoolBooks(schoolId) {
+            return schoolData.books.filter(b => schoolId === 'all' || b.schoolId === parseInt(schoolId));
+        }
+
+        function getSchoolBorrowings(schoolId) {
+            const students = getSchoolStudents(schoolId);
+            const studentIds = students.map(s => s.id);
+            return schoolData.borrowings.filter(b => studentIds.includes(b.studentId));
+        }
+
+        function getSchoolFines(schoolId) {
+            const students = getSchoolStudents(schoolId);
+            const studentIds = students.map(s => s.id);
+            return schoolData.fines.filter(f => studentIds.includes(f.studentId));
+        }
+
+        // ========== RENDER FUNCTIONS ==========
+        function renderStats() {
+            const students = getSchoolStudents(currentSchoolId);
+            const books = getSchoolBooks(currentSchoolId);
+            const borrowings = getSchoolBorrowings(currentSchoolId);
+            const fines = getSchoolFines(currentSchoolId);
+
+            document.getElementById('statBooks').textContent = books.length;
+            document.getElementById('statStudents').textContent = students.length;
+            document.getElementById('statOverdue').textContent = borrowings.filter(b => !b.returned).length;
+            document.getElementById('statLaptops').textContent = students.filter(s => s.laptopStatus === 'Issued').length;
+
+            // Update student tab stats
+            document.getElementById('studentTotal').textContent = students.length;
+            document.getElementById('studentBooksIssued').textContent = students.filter(s => s.bookId !== null).length;
+            document.getElementById('studentLaptopsIssued').textContent = students.filter(s => s.laptopStatus === 'Issued').length;
+        }
+
+        function renderCatalog() {
+            const tbody = document.getElementById('catalogTableBody');
+            const books = getSchoolBooks(currentSchoolId);
+            const searchTerm = document.getElementById('bookSearch').value.toLowerCase();
+            const genreFilter = document.getElementById('genreFilter').value;
+
+            let filtered = books.filter(b => {
+                const matchSearch = b.title.toLowerCase().includes(searchTerm) || 
+                                  b.author.toLowerCase().includes(searchTerm);
+                const matchGenre = !genreFilter || b.genre === genreFilter;
+                return matchSearch && matchGenre;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="no-data-msg">No books found for this school</td></tr>`;
+                document.getElementById('catalogCount').textContent = 'Showing 0 items';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((b, index) => `
+                <tr data-book-id="${b.id}">
+                    <td>${index + 1}</td>
+                    <td><i class="fas fa-book" style="margin-right:8px;color:var(--primary);"></i> ${b.title}</td>
+                    <td>${b.author}</td>
+                    <td>${b.genre}</td>
+                    <td><span class="badge badge-school">${getSchoolName(b.schoolId)}</span></td>
+                    <td><span class="badge ${b.status === 'Available' ? 'badge-success' : 'badge-warning'}">${b.status}</span></td>
+                    <td>
+                        <i class="fas fa-edit" style="color:var(--primary);cursor:pointer;" onclick="editBook(${b.id})"></i>
+                        <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;" onclick="deleteBook(${b.id})"></i>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('catalogCount').textContent = `Showing ${filtered.length} of ${books.length} items`;
+        }
+
+        function renderBorrowings() {
+            const tbody = document.getElementById('borrowTableBody');
+            const historyBody = document.getElementById('historyTableBody');
+            const borrowings = getSchoolBorrowings(currentSchoolId);
+            
+            const active = borrowings.filter(b => !b.returned);
+            const history = borrowings.filter(b => b.returned);
+
+            document.getElementById('borrowCount').textContent = `${active.length} items`;
+
+            if (active.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No active borrowings</td></tr>`;
+            } else {
+                tbody.innerHTML = active.map(b => {
+                    const student = schoolData.students.find(s => s.id === b.studentId);
+                    return `
+                        <tr data-borrow-id="${b.id}">
+                            <td>${getBookTitle(b.bookId)}</td>
+                            <td>${student ? student.name : 'Unknown'}</td>
+                            <td><span class="badge badge-school">${student ? getSchoolName(student.schoolId) : 'Unknown'}</span></td>
+                            <td>${b.dueDate}</td>
+                            <td><span class="countdown" data-due="${b.dueDate}">Calculating...</span></td>
+                            <td><button class="btn-outline" style="padding:0.2rem 1rem;" onclick="returnBook(${b.id})">Return</button></td>
+                        </tr>
+                    `;
+                }).join('');
+                updateCountdowns();
+            }
+
+            if (history.length === 0) {
+                historyBody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No borrowing history</td></tr>`;
+            } else {
+                historyBody.innerHTML = history.map(b => {
+                    const student = schoolData.students.find(s => s.id === b.studentId);
+                    return `
+                        <tr>
+                            <td>${getBookTitle(b.bookId)}</td>
+                            <td>${student ? student.name : 'Unknown'}</td>
+                            <td><span class="badge badge-school">${student ? getSchoolName(student.schoolId) : 'Unknown'}</span></td>
+                            <td>${b.borrowDate}</td>
+                            <td>${b.dueDate}</td>
+                            <td><span class="badge badge-success">Returned</span></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function renderFines() {
+            const tbody = document.getElementById('fineTableBody');
+            const fines = getSchoolFines(currentSchoolId);
+            let total = 0;
+
+            if (fines.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No fines for this school</td></tr>`;
+                document.getElementById('fineTotal').textContent = '$0.00';
+                return;
+            }
+
+            tbody.innerHTML = fines.map(f => {
+                const student = schoolData.students.find(s => s.id === f.studentId);
+                total += f.amount;
+                return `
+                    <tr data-fine-id="${f.id}">
+                        <td>${student ? student.name : 'Unknown'}</td>
+                        <td><span class="badge badge-school">${student ? getSchoolName(student.schoolId) : 'Unknown'}</span></td>
+                        <td>${getBookTitle(f.bookId)}</td>
+                        <td>${f.amount.toFixed(2)}</td>
+                        <td><span class="badge badge-warning">${f.status}</span></td>
+                        <td>
+                            <button class="btn-outline" style="padding:0.2rem 1rem;" onclick="payFine(${f.id})"><i class="fas fa-credit-card"></i> Pay</button>
+                            <button class="btn-outline" style="padding:0.2rem 1rem;" onclick="waiveFine(${f.id})">Waive</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            document.getElementById('fineTotal').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function renderStudents() {
+            const tbody = document.getElementById('studentTableBody');
+            const students = getSchoolStudents(currentSchoolId);
+            const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+
+            let filtered = students.filter(s => 
+                s.name.toLowerCase().includes(searchTerm) || 
+                `S${String(s.id).padStart(3, '0')}`.includes(searchTerm)
+            );
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="no-data-msg">No students found for this school</td></tr>`;
+                document.getElementById('studentCount').textContent = 'Showing 0 students';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(s => `
+                <tr data-student-id="${s.id}">
+                    <td>S${String(s.id).padStart(3, '0')}</td>
+                    <td>${s.name}</td>
+                    <td><span class="badge badge-school">${getSchoolName(s.schoolId)}</span></td>
+                    <td>${getStudentBook(s.id)}</td>
+                    <td>${getStudentBookStatus(s.id)}</td>
+                    <td>${getStudentLaptop(s.id)}</td>
+                    <td>${getStudentLaptopStatus(s.id)}</td>
+                    <td>
+                        ${!s.bookId ? `<button class="btn-outline" style="padding:0.2rem 0.8rem;font-size:0.7rem;" onclick="issueBook(${s.id})"><i class="fas fa-book"></i> Issue Book</button>` : 
+                        `<button class="btn-outline" style="padding:0.2rem 0.8rem;font-size:0.7rem;" onclick="returnStudentBook(${s.id})"><i class="fas fa-undo"></i> Ret Book</button>`}
+                        ${s.laptopStatus === 'Available' ? 
+                        `<button class="btn-outline" style="padding:0.2rem 0.8rem;font-size:0.7rem;" onclick="issueLaptop(${s.id})"><i class="fas fa-laptop"></i> Issue Laptop</button>` :
+                        `<button class="btn-outline" style="padding:0.2rem 0.8rem;font-size:0.7rem;" onclick="returnLaptop(${s.id})"><i class="fas fa-laptop"></i> Ret Laptop</button>`}
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('studentCount').textContent = `Showing ${filtered.length} of ${students.length} students`;
+        }
+
+        function renderSchools() {
+            const tbody = document.getElementById('schoolTableBody');
+            if (schoolData.schools.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="no-data-msg">No schools registered</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = schoolData.schools.map(s => {
+                const studentCount = schoolData.students.filter(st => st.schoolId === s.id).length;
+                const bookCount = schoolData.books.filter(b => b.schoolId === s.id).length;
+                return `
+                    <tr>
+                        <td>SCH-${String(s.id).padStart(3, '0')}</td>
+                        <td>${s.name}</td>
+                        <td>${s.address || '—'}</td>
+                        <td>${studentCount}</td>
+                        <td>${bookCount}</td>
+                        <td><span class="badge ${s.status === 'Active' ? 'badge-success' : 'badge-warning'}">${s.status}</span></td>
+                        <td>
+                            <i class="fas fa-edit" style="color:var(--primary);cursor:pointer;"></i>
+                            <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;" onclick="deleteSchool(${s.id})"></i>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateChart() {
+            const chart = window.circulationChart;
+            if (!chart) return;
+
+            const schoolId = currentSchoolId;
+            let datasets = [];
+            
+            if (schoolId === 'all') {
+                // Show all schools
+                const schoolColors = ['#1e4a6f', '#2d7a9b', '#4a8c6f', '#8b6f4a'];
+                schoolData.schools.forEach((school, idx) => {
+                    const students = schoolData.students.filter(s => s.schoolId === school.id);
+                    const borrowings = schoolData.borrowings.filter(b => 
+                        students.some(s => s.id === b.studentId)
+                    );
+                    // Simulate monthly data
+                    const monthlyData = [30, 35, 42, 50, 55, 48].map(v => 
+                        Math.round(v * (borrowings.length / 10 + 0.5))
+                    );
+                    datasets.push({
+                        label: school.name,
+                        data: monthlyData,
+                        backgroundColor: schoolColors[idx % schoolColors.length]
+                    });
+                });
+            } else {
+                // Show selected school
+                const school = schoolData.schools.find(s => s.id === parseInt(schoolId));
+                if (school) {
+                    const students = schoolData.students.filter(s => s.schoolId === school.id);
+                    const borrowings = schoolData.borrowings.filter(b => 
+                        students.some(s => s.id === b.studentId)
+                    );
+                    const monthlyData = [30, 35, 42, 50, 55, 48].map(v => 
+                        Math.round(v * (borrowings.length / 10 + 0.5))
+                    );
+                    datasets = [{
+                        label: school.name,
+                        data: monthlyData,
+                        backgroundColor: '#1e4a6f'
+                    }];
+                }
+            }
+
+            chart.data.datasets = datasets;
+            chart.update();
+
+            document.getElementById('analyticsSchoolLabel').textContent = 
+                schoolId === 'all' ? '(All Schools)' : `(${getSchoolName(parseInt(schoolId))})`;
+        }
+
+        // ========== ACTIONS ==========
+        window.editBook = function(id) {
+            showToast(`Editing book ID ${id}`, 'info');
+        };
+
+        window.deleteBook = function(id) {
+            if (confirm('Delete this book?')) {
+                const book = schoolData.books.find(b => b.id === id);
+                schoolData.books = schoolData.books.filter(b => b.id !== id);
+                // Remove from students
+                schoolData.students.forEach(s => {
+                    if (s.bookId === id) s.bookId = null;
+                });
+                showToast('Book deleted successfully', 'success');
+                refreshAll();
+            }
+        };
+
+        window.returnBook = function(id) {
+            const borrowing = schoolData.borrowings.find(b => b.id === id);
+            if (borrowing) {
+                borrowing.returned = true;
+                // Update student
+                const student = schoolData.students.find(s => s.id === borrowing.studentId);
+                if (student) student.bookId = null;
+                showToast('Book returned successfully', 'success');
+                refreshAll();
+            }
+        };
+
+        window.payFine = function(id) {
+            const fine = schoolData.fines.find(f => f.id === id);
+            if (fine) {
+                fine.status = 'Paid';
+                showToast('Payment simulated! Fine cleared.', 'success');
+                refreshAll();
+            }
+        };
+
+        window.waiveFine = function(id) {
+            const fine = schoolData.fines.find(f => f.id === id);
+            if (fine) {
+                fine.status = 'Waived';
+                showToast('Fine waived by admin.', 'info');
+                refreshAll();
+            }
+        };
+
+        window.issueBook = function(studentId) {
+            const student = schoolData.students.find(s => s.id === studentId);
+            if (!student) return;
+            
+            const availableBooks = schoolData.books.filter(b => 
+                b.schoolId === student.schoolId && b.status === 'Available'
+            );
+            
+            if (availableBooks.length === 0) {
+                showToast('No available books for this school', 'warning');
+                return;
+            }
+            
+            const book = availableBooks[0];
+            student.bookId = book.id;
+            book.status = 'Borrowed';
+            
+            // Add borrowing record
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 14);
+            schoolData.borrowings.push({
+                id: schoolData.borrowings.length + 1,
+                studentId: studentId,
+                bookId: book.id,
+                borrowDate: new Date().toISOString().split('T')[0],
+                dueDate: dueDate.toISOString().split('T')[0],
+                returned: false
+            });
+            
+            showToast(`Book "${book.title}" issued to ${student.name}`, 'success');
+            refreshAll();
+        };
+
+        window.returnStudentBook = function(studentId) {
+            const student = schoolData.students.find(s => s.id === studentId);
+            if (!student || !student.bookId) return;
+            
+            const book = schoolData.books.find(b => b.id === student.bookId);
+            if (book) book.status = 'Available';
+            
+            const borrowing = schoolData.borrowings.find(b => 
+                b.studentId === studentId && b.bookId === student.bookId && !b.returned
+            );
+            if (borrowing) borrowing.returned = true;
+            
+            student.bookId = null;
+            showToast('Book returned successfully', 'success');
+            refreshAll();
+        };
+
+        window.issueLaptop = function(studentId) {
+            const student = schoolData.students.find(s => s.id === studentId);
+            if (!student) return;
+            
+            if (student.laptopStatus === 'Issued') {
+                showToast('Student already has a laptop', 'warning');
+                return;
+            }
+            
+            student.laptop = 'Dell Latitude 5420';
+            student.laptopStatus = 'Issued';
+            showToast('Laptop issued successfully', 'success');
+            refreshAll();
+        };
+
+        window.returnLaptop = function(studentId) {
+            const student = schoolData.students.find(s => s.id === studentId);
+            if (!student || student.laptopStatus !== 'Issued') return;
+            
+            student.laptop = null;
+            student.laptopStatus = 'Available';
+            showToast('Laptop returned successfully', 'success');
+            refreshAll();
+        };
+
+        window.deleteSchool = function(id) {
+            if (confirm('Delete this school? This will remove all associated data.')) {
+                schoolData.schools = schoolData.schools.filter(s => s.id !== id);
+                schoolData.books = schoolData.books.filter(b => b.schoolId !== id);
+                schoolData.students = schoolData.students.filter(s => s.schoolId !== id);
+                schoolData.borrowings = schoolData.borrowings.filter(b => 
+                    schoolData.students.some(s => s.id === b.studentId)
+                );
+                schoolData.fines = schoolData.fines.filter(f => 
+                    schoolData.students.some(s => s.id === f.studentId)
+                );
+                showToast('School deleted successfully', 'success');
+                // Update select
+                const select = document.getElementById('schoolSelect');
+                const option = select.querySelector(`option[value="${id}"]`);
+                if (option) option.remove();
+                if (currentSchoolId === String(id)) {
+                    currentSchoolId = 'all';
+                    select.value = 'all';
+                }
+                refreshAll();
+            }
+        };
+
+        // ========== COUNTDOWN TIMER ==========
+        function updateCountdowns() {
+            const now = new Date();
+            document.querySelectorAll('.countdown[data-due]').forEach(el => {
+                const due = new Date(el.dataset.due + 'T23:59:59');
+                const diff = due - now;
+                if (diff <= 0) {
+                    el.textContent = 'Overdue!';
+                    el.style.color = '#b91c1c';
+                    return;
+                }
+                const days = Math.floor(diff / (1000*60*60*24));
+                const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+                el.textContent = `${days}d ${hours}h`;
+            });
+        }
+
+        // ========== REFRESH ALL ==========
+        function refreshAll() {
+            renderStats();
+            renderCatalog();
+            renderBorrowings();
+            renderFines();
+            renderStudents();
+            renderSchools();
+            updateChart();
+            updateCountdowns();
+        }
+
+        // ========== TOAST ==========
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}" style="color:var(--primary);margin-right:8px;"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        // ========== EVENT LISTENERS ==========
+
+        // School selection change
+        document.getElementById('schoolSelect').addEventListener('change', function() {
+            currentSchoolId = this.value;
+            refreshAll();
+            showToast(`Switched to ${this.options[this.selectedIndex].text}`, 'info');
+        });
+
+        // Theme toggle
+        document.getElementById('themeToggle').addEventListener('click', function() {
             document.body.classList.toggle('dark');
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
         });
         if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
 
-        // ----- TABS -----
+        // Tab switching
         const tabs = document.querySelectorAll('#mainTabs button');
         const contents = {
             catalog: document.getElementById('tab-catalog'),
@@ -576,54 +1122,63 @@
                 Object.keys(contents).forEach(key => {
                     contents[key].style.display = (key === this.dataset.tab) ? 'block' : 'none';
                 });
+                if (this.dataset.tab === 'analytics') {
+                    updateChart();
+                }
             });
         });
 
-        // ----- COUNTDOWN -----
-        function updateCountdowns() {
-            const now = new Date();
-            document.querySelectorAll('.countdown[data-due]').forEach(el => {
-                const due = new Date(el.dataset.due + 'T23:59:59');
-                const diff = due - now;
-                if (diff <= 0) { el.textContent = 'Overdue!'; el.style.color = '#b91c1c'; return; }
-                const days = Math.floor(diff / (1000*60*60*24));
-                const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-                el.textContent = `${days}d ${hours}h`;
-            });
-        }
-        updateCountdowns();
-        setInterval(updateCountdowns, 60000);
+        // Search book
+        document.getElementById('searchBookBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            renderCatalog();
+        });
+        document.getElementById('bookSearch').addEventListener('input', renderCatalog);
+        document.getElementById('genreFilter').addEventListener('change', renderCatalog);
 
-        // ----- CHART -----
-        const ctx = document.getElementById('circulationChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [
-                    { label: 'Greenwood', data: [30, 35, 42, 50, 55, 48], backgroundColor: '#1e4a6f' },
-                    { label: 'Riverside', data: [20, 25, 30, 28, 35, 40], backgroundColor: '#2d7a9b' },
-                    { label: 'Hilltop', data: [15, 18, 20, 22, 25, 28], backgroundColor: '#4a8c6f' }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+        // Search student
+        document.getElementById('studentSearchBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            renderStudents();
+        });
+        document.getElementById('studentSearch').addEventListener('input', renderStudents);
+
+        // Add Book
+        document.getElementById('addBookBtn').addEventListener('click', function() {
+            const schoolId = currentSchoolId === 'all' ? 1 : parseInt(currentSchoolId);
+            const newBook = {
+                id: nextBookId++,
+                title: `New Book ${nextBookId - 1}`,
+                author: 'Author Name',
+                genre: 'Fiction',
+                schoolId: schoolId,
+                status: 'Available'
+            };
+            schoolData.books.push(newBook);
+            showToast(`Book "${newBook.title}" added to ${getSchoolName(schoolId)}`, 'success');
+            refreshAll();
         });
 
-        // ----- TOAST -----
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}" style="color:var(--primary);margin-right:8px;"></i> ${message}`;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
-        }
-        setTimeout(() => showToast('Welcome to SchoolLib!', 'success'), 600);
+        // Add Student
+        document.getElementById('addStudentBtn').addEventListener('click', function() {
+            const schoolId = currentSchoolId === 'all' ? 1 : parseInt(currentSchoolId);
+            const newStudent = {
+                id: nextStudentId++,
+                name: `New Student ${nextStudentId - 1}`,
+                schoolId: schoolId,
+                bookId: null,
+                laptop: null,
+                laptopStatus: 'Available'
+            };
+            schoolData.students.push(newStudent);
+            showToast(`Student "${newStudent.name}" added to ${getSchoolName(schoolId)}`, 'success');
+            refreshAll();
+        });
 
-        // ----- SCHOOL REGISTRATION MODAL -----
+        // School Registration Modal
         const modal = document.getElementById('schoolModal');
-        const registerBtns = document.querySelectorAll('#registerSchoolBtn, #registerSchoolFromTab');
-        registerBtns.forEach(btn => btn.addEventListener('click', () => modal.classList.add('active')));
+        document.getElementById('registerSchoolBtn').addEventListener('click', () => modal.classList.add('active'));
+        document.getElementById('registerSchoolFromTab').addEventListener('click', () => modal.classList.add('active'));
         document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.remove('active'));
         modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
 
@@ -631,188 +1186,58 @@
             e.preventDefault();
             const name = document.getElementById('schoolName').value.trim();
             if (!name) { showToast('School name is required', 'warning'); return; }
-            const tbody = document.getElementById('schoolTableBody');
-            const newId = tbody.children.length + 1;
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>SCH-00${newId}</td>
-                <td>${name}</td>
-                <td>${document.getElementById('schoolAddress').value || '—'}</td>
-                <td>0</td>
-                <td>0</td>
-                <td><span class="badge badge-success">Active</span></td>
-                <td><i class="fas fa-edit" style="color:var(--primary);cursor:pointer;"></i> <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;"></i></td>
-            `;
-            tbody.appendChild(row);
-            // Add to school select dropdown
+            
+            const newSchool = {
+                id: nextSchoolId++,
+                name: name,
+                address: document.getElementById('schoolAddress').value || '—',
+                email: document.getElementById('schoolEmail').value || '—',
+                status: document.getElementById('schoolStatus').value
+            };
+            schoolData.schools.push(newSchool);
+            
+            // Add to select
             const select = document.getElementById('schoolSelect');
             const opt = document.createElement('option');
-            opt.value = newId + 10;
-            opt.textContent = name;
+            opt.value = newSchool.id;
+            opt.textContent = newSchool.name;
             select.appendChild(opt);
+            
             modal.classList.remove('active');
             showToast(`School "${name}" registered successfully!`, 'success');
             this.reset();
-        });
-
-        // ----- STUDENT OPERATIONS -----
-        document.getElementById('addStudentBtn')?.addEventListener('click', function() {
-            const tbody = document.getElementById('studentTableBody');
-            const newId = tbody.children.length + 1;
-            const row = document.createElement('tr');
-            row.dataset.student = newId;
-            const schoolOpts = document.getElementById('schoolSelect').options;
-            const schoolName = schoolOpts.length > 0 ? schoolOpts[schoolOpts.selectedIndex || 0].text : 'Greenwood';
-            row.innerHTML = `
-                <td>S00${newId}</td>
-                <td>New Student ${newId}</td>
-                <td><span class="badge badge-school">${schoolName}</span></td>
-                <td>—</td>
-                <td><span class="badge badge-success">None</span></td>
-                <td>—</td>
-                <td><span class="laptop-status laptop-available"></span> Available</td>
-                <td>
-                    <button class="btn-outline student-issue-book" style="padding:0.2rem 0.8rem;font-size:0.7rem;"><i class="fas fa-book"></i> Issue Book</button>
-                    <button class="btn-outline student-issue-laptop" style="padding:0.2rem 0.8rem;font-size:0.7rem;"><i class="fas fa-laptop"></i> Issue Laptop</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-            attachStudentEvents(row);
-            showToast('Student added successfully!', 'success');
-        });
-
-        function attachStudentEvents(row) {
-            const issueBook = row.querySelector('.student-issue-book');
-            if (issueBook) {
-                issueBook.addEventListener('click', function() {
-                    const bookCell = row.children[3];
-                    const statusCell = row.children[4];
-                    if (bookCell.textContent.trim() === '—') {
-                        bookCell.textContent = 'The Great Gatsby';
-                        statusCell.innerHTML = '<span class="badge badge-warning">Borrowed</span>';
-                        showToast('Book issued to student', 'success');
-                    } else showToast('Student already has a book', 'warning');
-                });
-            }
-            const returnBook = row.querySelector('.student-return-book');
-            if (returnBook) {
-                returnBook.addEventListener('click', function() {
-                    const bookCell = row.children[3];
-                    const statusCell = row.children[4];
-                    if (bookCell.textContent.trim() !== '—' && bookCell.textContent.trim() !== 'None') {
-                        bookCell.textContent = '—';
-                        statusCell.innerHTML = '<span class="badge badge-success">None</span>';
-                        showToast('Book returned', 'success');
-                    } else showToast('No book to return', 'warning');
-                });
-            }
-            const issueLaptop = row.querySelector('.student-issue-laptop');
-            if (issueLaptop) {
-                issueLaptop.addEventListener('click', function() {
-                    const laptopCell = row.children[5];
-                    const laptopStatusCell = row.children[6];
-                    if (laptopCell.textContent.trim() === '—' || laptopCell.textContent.trim() === '') {
-                        laptopCell.textContent = 'Dell Latitude 5420';
-                        laptopStatusCell.innerHTML = '<span class="laptop-status laptop-issued"></span> Issued';
-                        showToast('Laptop issued', 'success');
-                    } else showToast('Student already has a laptop', 'warning');
-                });
-            }
-            const returnLaptop = row.querySelector('.student-return-laptop');
-            if (returnLaptop) {
-                returnLaptop.addEventListener('click', function() {
-                    const laptopCell = row.children[5];
-                    const laptopStatusCell = row.children[6];
-                    if (laptopCell.textContent.trim() !== '—' && laptopCell.textContent.trim() !== '') {
-                        laptopCell.textContent = '—';
-                        laptopStatusCell.innerHTML = '<span class="laptop-status laptop-available"></span> Available';
-                        showToast('Laptop returned', 'success');
-                    } else showToast('No laptop to return', 'warning');
-                });
-            }
-        }
-
-        document.querySelectorAll('#studentTableBody tr').forEach(row => attachStudentEvents(row));
-
-        // Student search
-        document.getElementById('studentSearchBtn')?.addEventListener('click', function() {
-            const val = document.getElementById('studentSearch').value.toLowerCase();
-            document.querySelectorAll('#studentTableBody tr').forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
-            });
-            showToast('Student search completed', 'info');
-        });
-        document.getElementById('studentSearch')?.addEventListener('input', function() {
-            const val = this.value.toLowerCase();
-            document.querySelectorAll('#studentTableBody tr').forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
-            });
+            refreshAll();
         });
 
         // Export buttons
-        document.getElementById('exportStudentCSV')?.addEventListener('click', () => showToast('Student data exported (CSV)', 'success'));
-        document.querySelectorAll('.btn-outline').forEach(btn => {
-            if (btn.textContent.includes('Export') || btn.textContent.includes('Print') || btn.textContent.includes('Pay') || btn.textContent.includes('Waive')) {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    if (this.textContent.includes('Pay')) {
-                        const row = this.closest('tr');
-                        if (row) { row.querySelector('.badge').textContent = 'Paid'; row.querySelector('.badge').className = 'badge badge-success'; }
-                        showToast('Payment simulated', 'success');
-                    } else if (this.textContent.includes('Waive')) {
-                        const row = this.closest('tr');
-                        if (row) { row.querySelector('.badge').textContent = 'Waived'; row.querySelector('.badge').className = 'badge badge-success'; }
-                        showToast('Fine waived', 'info');
-                    } else if (this.textContent.includes('Return') && this.closest('#tab-borrow')) {
-                        const row = this.closest('tr');
-                        if (row) row.remove();
-                        showToast('Book returned', 'success');
-                    } else if (this.textContent.includes('Export') || this.textContent.includes('Print')) {
-                        showToast(`Export/Print: ${this.textContent.trim()}`, 'info');
-                    }
-                });
-            }
+        document.getElementById('exportStudentCSV').addEventListener('click', function() {
+            showToast('Student data exported (CSV)', 'success');
         });
 
-        // Search catalog
-        document.querySelector('#tab-catalog .btn-primary')?.addEventListener('click', function(e) {
-            e.preventDefault();
-            const val = document.getElementById('bookSearch').value.toLowerCase();
-            document.querySelectorAll('#catalogTableBody tr').forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
-            });
-            showToast(`Search: "${val}"`, 'info');
-        });
-        document.getElementById('bookSearch')?.addEventListener('input', function() {
-            const val = this.value.toLowerCase();
-            document.querySelectorAll('#catalogTableBody tr').forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
-            });
-        });
+        // ========== INITIALIZATION ==========
+        // Setup initial data
+        refreshAll();
 
-        // Add book
-        document.querySelector('#tab-catalog .btn-outline .fa-plus')?.closest('button')?.addEventListener('click', function() {
-            const tbody = document.getElementById('catalogTableBody');
-            const row = document.createElement('tr');
-            const schools = ['Greenwood', 'Riverside', 'Hilltop'];
-            const school = schools[Math.floor(Math.random() * schools.length)];
-            row.innerHTML = `<td>${tbody.children.length+1}</td><td><i class="fas fa-book" style="margin-right:8px;color:var(--primary);"></i> New Book</td><td>Author</td><td>Fiction</td><td><span class="badge badge-school">${school}</span></td><td><span class="badge badge-success">Available</span></td><td><i class="fas fa-edit" style="color:var(--primary);cursor:pointer;"></i> <i class="fas fa-trash" style="color:var(--danger);cursor:pointer;margin-left:8px;"></i></td>`;
-            tbody.appendChild(row);
-            showToast('Book added', 'success');
-        });
+        // Update countdowns every minute
+        setInterval(updateCountdowns, 60000);
 
-        // Role badge click
-        document.querySelector('.role-badge')?.addEventListener('click', () => showToast('Admin · full access', 'info'));
+        // Set initial school filter badge
+        console.log('SchoolLib initialized!');
 
-        // Announcement
-        document.querySelector('.card .btn-outline .fa-plus')?.closest('button')?.addEventListener('click', function() {
-            const list = document.querySelector('.card ul');
-            const li = document.createElement('li');
-            li.style.cssText = 'padding:0.5rem 0; border-bottom:1px solid var(--border);';
-            li.innerHTML = `<i class="fas fa-circle" style="color:var(--primary);font-size:0.6rem;"></i> New: ${new Date().toLocaleDateString()} announcement`;
-            list.appendChild(li);
-            showToast('Announcement posted', 'success');
-        });
+        // Welcome toast
+        setTimeout(() => showToast('Welcome to SchoolLib! Select a school to filter data.', 'success'), 600);
+
+        // Make functions globally accessible for onclick handlers
+        window.editBook = editBook;
+        window.deleteBook = deleteBook;
+        window.returnBook = returnBook;
+        window.payFine = payFine;
+        window.waiveFine = waiveFine;
+        window.issueBook = issueBook;
+        window.returnStudentBook = returnStudentBook;
+        window.issueLaptop = issueLaptop;
+        window.returnLaptop = returnLaptop;
+        window.deleteSchool = deleteSchool;
 
     })();
 </script>
