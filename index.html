@@ -133,7 +133,7 @@
         /* Stats */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 1.5rem;
             margin: 0.5rem 0;
         }
@@ -193,6 +193,8 @@
         .badge-warning { background: #fef3c7; color: #b45309; }
         .badge-danger { background: #fee2e2; color: #b91c1c; }
         .badge-school { background: var(--primary); color: white; }
+        .badge-staff { background: #8b5cf6; color: white; }
+        .badge-student { background: #3b82f6; color: white; }
 
         /* Search */
         .search-bar {
@@ -356,17 +358,6 @@
             .topbar-actions { justify-content: space-between; }
             .modal { padding: 1.5rem; }
         }
-        /* Status indicators for catalogs */
-        .status-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-        .status-available { background: var(--success); }
-        .status-issued { background: var(--warning); }
-        .status-maintenance { background: var(--danger); }
     </style>
 </head>
 <body>
@@ -394,8 +385,8 @@
     <!-- Stats -->
     <div class="dashboard-grid" id="statsGrid">
         <div class="stat-card"><div class="stat-info"><h4>Total Books</h4><h2 id="statBooks">0</h2></div><div class="stat-icon"><i class="fas fa-book"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Stationary Items</h4><h2 id="statStationaryItems">0</h2></div><div class="stat-icon"><i class="fas fa-box"></i></div></div>
-        <div class="stat-card"><div class="stat-info"><h4>Registered Laptops</h4><h2 id="statLaptops">0</h2></div><div class="stat-icon"><i class="fas fa-laptop"></i></div></div>
+        <div class="stat-card"><div class="stat-info"><h4>Students</h4><h2 id="statStudents">0</h2></div><div class="stat-icon"><i class="fas fa-user-graduate"></i></div></div>
+        <div class="stat-card"><div class="stat-info"><h4>Staff</h4><h2 id="statStaff">0</h2></div><div class="stat-icon"><i class="fas fa-user-tie"></i></div></div>
         <div class="stat-card"><div class="stat-info"><h4>Active Borrowings</h4><h2 id="statBorrowings">0</h2></div><div class="stat-icon"><i class="fas fa-hand-holding"></i></div></div>
     </div>
 
@@ -405,10 +396,11 @@
             <button class="active" data-tab="books"><i class="fas fa-book"></i> Book Catalog</button>
             <button data-tab="stationaryCatalog"><i class="fas fa-box"></i> Stationary Catalog</button>
             <button data-tab="laptopCatalog"><i class="fas fa-laptop"></i> Laptop Catalog</button>
+            <button data-tab="students"><i class="fas fa-user-graduate"></i> Students</button>
+            <button data-tab="staff"><i class="fas fa-user-tie"></i> Staff</button>
             <button data-tab="bookBorrow"><i class="fas fa-hand-holding-heart"></i> Book Borrowing</button>
             <button data-tab="laptopBorrow"><i class="fas fa-laptop"></i> Laptop Issuance</button>
             <button data-tab="stationaryBorrow"><i class="fas fa-box"></i> Stationary Issuance</button>
-            <button data-tab="students"><i class="fas fa-user-graduate"></i> Students</button>
         </div>
 
         <!-- TAB: BOOK CATALOG -->
@@ -475,6 +467,48 @@
             </div>
         </div>
 
+        <!-- TAB: STUDENTS -->
+        <div id="tab-students" class="tab-content" style="display:none;">
+            <div class="card-header">
+                <h3><i class="fas fa-user-graduate"></i> Student Management</h3>
+                <div class="flex">
+                    <button class="btn-primary" id="addStudentBtn"><i class="fas fa-user-plus"></i> Add Student</button>
+                    <button class="btn-pdf" id="downloadStudentPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                </div>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search student by name or ID..." id="studentSearch">
+                <button class="btn-primary" id="studentSearchBtn"><i class="fas fa-search"></i> Search</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Student ID</th><th>Student Name</th><th>School</th><th>Book</th><th>Laptop</th><th>Actions</th></tr></thead>
+                    <tbody id="studentTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB: STAFF -->
+        <div id="tab-staff" class="tab-content" style="display:none;">
+            <div class="card-header">
+                <h3><i class="fas fa-user-tie"></i> Staff Management</h3>
+                <div class="flex">
+                    <button class="btn-primary" id="addStaffBtn"><i class="fas fa-user-plus"></i> Add Staff</button>
+                    <button class="btn-pdf" id="downloadStaffPDF"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                </div>
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search staff by name or number..." id="staffSearch">
+                <button class="btn-primary" id="staffSearchBtn"><i class="fas fa-search"></i> Search</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Staff No.</th><th>Staff Name</th><th>School</th><th>Department</th><th>Book</th><th>Laptop</th><th>Actions</th></tr></thead>
+                    <tbody id="staffTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- TAB: BOOK BORROWING -->
         <div id="tab-bookBorrow" class="tab-content" style="display:none;">
             <div class="card-header">
@@ -490,7 +524,7 @@
             </div>
             <div class="table-responsive">
                 <table>
-                    <thead><tr><th>#</th><th>Borrower Name</th><th>Book Title</th><th>Accession No.</th><th>Date Borrowed</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>#</th><th>Borrower Name</th><th>Borrower Type</th><th>Book Title</th><th>Accession No.</th><th>Date Borrowed</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody id="bookBorrowTableBody"></tbody>
                 </table>
             </div>
@@ -511,7 +545,7 @@
             </div>
             <div class="table-responsive">
                 <table>
-                    <thead><tr><th>#</th><th>Owner Name</th><th>Laptop Type</th><th>Serial No.</th><th>Issued Time</th><th>Returned Time</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>#</th><th>Owner Name</th><th>Owner Type</th><th>Laptop Type</th><th>Serial No.</th><th>Issued Time</th><th>Returned Time</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody id="laptopBorrowTableBody"></tbody>
                 </table>
             </div>
@@ -535,22 +569,6 @@
                     <thead><tr><th>#</th><th>Staff Name</th><th>Item Issued</th><th>Quantity</th><th>Date Issued</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody id="stationaryBorrowTableBody"></tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- TAB: STUDENTS -->
-        <div id="tab-students" class="tab-content" style="display:none;">
-            <div class="card-header">
-                <h3><i class="fas fa-user-graduate"></i> Student Management</h3>
-                <button class="btn-primary" id="addStudentBtn"><i class="fas fa-user-plus"></i> Add Student</button>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search student..." id="studentSearch">
-                <button class="btn-primary" id="studentSearchBtn"><i class="fas fa-search"></i> Search</button>
-            </div>
-            <div class="table-responsive">
-                <table><thead><tr><th>ID</th><th>Student</th><th>School</th><th>Book</th><th>Laptop</th><th>Actions</th></tr></thead>
-                <tbody id="studentTableBody"></tbody></table>
             </div>
         </div>
     </div>
@@ -614,6 +632,43 @@
         </div>
     </div>
 
+    <!-- Add Student Modal -->
+    <div class="modal-overlay" id="studentModal">
+        <div class="modal">
+            <button class="close-modal" id="closeStudentModal">&times;</button>
+            <h3><i class="fas fa-user-graduate" style="color:var(--primary);"></i> Add Student</h3>
+            <form id="studentForm">
+                <input type="text" placeholder="Student Name *" id="studentName" required>
+                <input type="text" placeholder="Student ID (e.g., S001)" id="studentId" required>
+                <select id="studentSchool">
+                    <option value="1">Greenwood High</option>
+                    <option value="2">Riverside Academy</option>
+                    <option value="3">Hilltop School</option>
+                </select>
+                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Add Student</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Staff Modal -->
+    <div class="modal-overlay" id="staffModal">
+        <div class="modal">
+            <button class="close-modal" id="closeStaffModal">&times;</button>
+            <h3><i class="fas fa-user-tie" style="color:var(--primary);"></i> Add Staff</h3>
+            <form id="staffForm">
+                <input type="text" placeholder="Staff Name *" id="staffName" required>
+                <input type="text" placeholder="Staff Number * (e.g., STF001)" id="staffNumber" required>
+                <input type="text" placeholder="Department *" id="staffDepartment" required>
+                <select id="staffSchool">
+                    <option value="1">Greenwood High</option>
+                    <option value="2">Riverside Academy</option>
+                    <option value="3">Hilltop School</option>
+                </select>
+                <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Add Staff</button>
+            </form>
+        </div>
+    </div>
+
     <!-- New Book Borrowing Modal -->
     <div class="modal-overlay" id="bookBorrowModal">
         <div class="modal">
@@ -621,6 +676,10 @@
             <h3><i class="fas fa-hand-holding-heart" style="color:var(--primary);"></i> New Book Borrowing</h3>
             <form id="bookBorrowForm">
                 <input type="text" placeholder="Borrower Name *" id="borrowerName" required>
+                <select id="borrowerType">
+                    <option value="Student">Student</option>
+                    <option value="Staff">Staff</option>
+                </select>
                 <select id="borrowBook" required>
                     <option value="">Select Book *</option>
                 </select>
@@ -638,6 +697,10 @@
             <h3><i class="fas fa-laptop" style="color:var(--primary);"></i> Issue Laptop</h3>
             <form id="laptopBorrowForm">
                 <input type="text" placeholder="Owner Name *" id="laptopOwnerName" required>
+                <select id="ownerType">
+                    <option value="Student">Student</option>
+                    <option value="Staff">Staff</option>
+                </select>
                 <select id="laptopSelect" required>
                     <option value="">Select Laptop *</option>
                 </select>
@@ -653,7 +716,7 @@
             <button class="close-modal" id="closeStationaryBorrowModal">&times;</button>
             <h3><i class="fas fa-box" style="color:var(--primary);"></i> Issue Stationary</h3>
             <form id="stationaryBorrowForm">
-                <input type="text" placeholder="Staff Name *" id="staffName" required>
+                <input type="text" placeholder="Staff Name *" id="staffNameIssuance" required>
                 <select id="stationarySelect" required>
                     <option value="">Select Item *</option>
                 </select>
@@ -701,20 +764,26 @@
                 { id: 5, type: 'Acer Swift', serial: 'SN-005', owner: 'Emma Wilson', schoolId: 2, dateAdded: '2026-05-05', status: 'Available' }
             ],
             students: [
-                { id: 1, name: 'Alice Johnson', schoolId: 1 },
-                { id: 2, name: 'Bob Smith', schoolId: 2 },
-                { id: 3, name: 'Carol White', schoolId: 1 },
-                { id: 4, name: 'David Brown', schoolId: 3 }
+                { id: 1, studentId: 'S001', name: 'Alice Johnson', schoolId: 1, bookId: null, laptopId: null },
+                { id: 2, studentId: 'S002', name: 'Bob Smith', schoolId: 2, bookId: null, laptopId: null },
+                { id: 3, studentId: 'S003', name: 'Carol White', schoolId: 1, bookId: null, laptopId: null },
+                { id: 4, studentId: 'S004', name: 'David Brown', schoolId: 3, bookId: null, laptopId: null }
+            ],
+            staff: [
+                { id: 1, staffNumber: 'STF001', name: 'John Teacher', department: 'Mathematics', schoolId: 1, bookId: null, laptopId: null },
+                { id: 2, staffNumber: 'STF002', name: 'Mary Staff', department: 'Administration', schoolId: 2, bookId: null, laptopId: null },
+                { id: 3, staffNumber: 'STF003', name: 'Peter Admin', department: 'Library', schoolId: 1, bookId: null, laptopId: null },
+                { id: 4, staffNumber: 'STF004', name: 'Sarah Science', department: 'Science', schoolId: 3, bookId: null, laptopId: null }
             ],
             bookBorrowings: [
-                { id: 1, borrowerName: 'Alice Johnson', bookId: 2, accession: 'ACC-002', borrowDate: '2026-07-20', dueDate: '2026-08-10', returned: false },
-                { id: 2, borrowerName: 'Carol White', bookId: 4, accession: 'ACC-004', borrowDate: '2026-07-25', dueDate: '2026-08-15', returned: false },
-                { id: 3, borrowerName: 'Bob Smith', bookId: 5, accession: 'ACC-005', borrowDate: '2026-06-01', dueDate: '2026-06-15', returned: true }
+                { id: 1, borrowerName: 'Alice Johnson', borrowerType: 'Student', bookId: 2, accession: 'ACC-002', borrowDate: '2026-07-20', dueDate: '2026-08-10', returned: false },
+                { id: 2, borrowerName: 'John Teacher', borrowerType: 'Staff', bookId: 4, accession: 'ACC-004', borrowDate: '2026-07-25', dueDate: '2026-08-15', returned: false },
+                { id: 3, borrowerName: 'Bob Smith', borrowerType: 'Student', bookId: 5, accession: 'ACC-005', borrowDate: '2026-06-01', dueDate: '2026-06-15', returned: true }
             ],
             laptopBorrowings: [
-                { id: 1, ownerName: 'Alice Johnson', laptopId: 1, serial: 'SN-001', issuedTime: '2026-07-20T09:30', returnedTime: null, returned: false },
-                { id: 2, ownerName: 'Carol White', laptopId: 3, serial: 'SN-003', issuedTime: '2026-07-25T14:15', returnedTime: null, returned: false },
-                { id: 3, ownerName: 'David Brown', laptopId: 4, serial: 'SN-004', issuedTime: '2026-06-01T10:00', returnedTime: '2026-06-15T16:30', returned: true }
+                { id: 1, ownerName: 'Alice Johnson', ownerType: 'Student', laptopId: 1, serial: 'SN-001', issuedTime: '2026-07-20T09:30', returnedTime: null, returned: false },
+                { id: 2, ownerName: 'Mary Staff', ownerType: 'Staff', laptopId: 3, serial: 'SN-003', issuedTime: '2026-07-25T14:15', returnedTime: null, returned: false },
+                { id: 3, ownerName: 'David Brown', ownerType: 'Student', laptopId: 4, serial: 'SN-004', issuedTime: '2026-06-01T10:00', returnedTime: '2026-06-15T16:30', returned: true }
             ],
             stationaryBorrowings: [
                 { id: 1, staffName: 'John Teacher', stationaryId: 1, quantity: 5, issueDate: '2026-07-20', returned: false },
@@ -729,6 +798,7 @@
             stationary: 6,
             laptop: 6,
             student: 5,
+            staff: 5,
             bookBorrow: 4,
             laptopBorrow: 4,
             stationaryBorrow: 4
@@ -843,7 +913,6 @@
                     <td><span class="badge ${item.status === 'Available' ? 'badge-success' : 'badge-warning'}">${item.status}</span></td>
                     <td>
                         <div class="action-buttons">
-                            <button onclick="editStationaryItem(${item.id})"><i class="fas fa-edit"></i></button>
                             <button onclick="deleteStationaryItem(${item.id})"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
@@ -872,8 +941,60 @@
                     <td><span class="badge ${item.status === 'Available' ? 'badge-success' : 'badge-warning'}">${item.status}</span></td>
                     <td>
                         <div class="action-buttons">
-                            <button onclick="editLaptopItem(${item.id})"><i class="fas fa-edit"></i></button>
                             <button onclick="deleteLaptopItem(${item.id})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderStudents() {
+            const tbody = document.getElementById('studentTableBody');
+            const searchTerm = document.getElementById('studentSearch').value;
+            let students = getFilteredItems(schoolData.students, currentSchoolId, searchTerm);
+
+            if (students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No students found</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = students.map(s => `
+                <tr>
+                    <td><strong>${s.studentId}</strong></td>
+                    <td>${s.name}</td>
+                    <td><span class="badge badge-school">${getSchoolName(s.schoolId)}</span></td>
+                    <td>${s.bookId ? getBookTitle(s.bookId) : '—'}</td>
+                    <td>${s.laptopId ? getLaptopType(s.laptopId) : '—'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button onclick="deleteStudent(${s.id})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderStaff() {
+            const tbody = document.getElementById('staffTableBody');
+            const searchTerm = document.getElementById('staffSearch').value;
+            let staff = getFilteredItems(schoolData.staff, currentSchoolId, searchTerm);
+
+            if (staff.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="no-data-msg">No staff found</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = staff.map(s => `
+                <tr>
+                    <td><strong>${s.staffNumber}</strong></td>
+                    <td>${s.name}</td>
+                    <td><span class="badge badge-school">${getSchoolName(s.schoolId)}</span></td>
+                    <td>${s.department}</td>
+                    <td>${s.bookId ? getBookTitle(s.bookId) : '—'}</td>
+                    <td>${s.laptopId ? getLaptopType(s.laptopId) : '—'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button onclick="deleteStaff(${s.id})"><i class="fas fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>
@@ -900,7 +1021,7 @@
             }
 
             if (borrowings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="no-data-msg">No borrowing records found</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="no-data-msg">No borrowing records found</td></tr>`;
                 return;
             }
 
@@ -908,6 +1029,7 @@
                 <tr>
                     <td>${index + 1}</td>
                     <td><strong>${b.borrowerName}</strong></td>
+                    <td><span class="badge ${b.borrowerType === 'Student' ? 'badge-student' : 'badge-staff'}">${b.borrowerType}</span></td>
                     <td>${getBookTitle(b.bookId)}</td>
                     <td><code>${b.accession}</code></td>
                     <td>${formatDate(b.borrowDate)}</td>
@@ -943,7 +1065,7 @@
             }
 
             if (borrowings.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="no-data-msg">No laptop issuance records found</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="no-data-msg">No laptop issuance records found</td></tr>`;
                 return;
             }
 
@@ -951,6 +1073,7 @@
                 <tr>
                     <td>${index + 1}</td>
                     <td><strong>${b.ownerName}</strong></td>
+                    <td><span class="badge ${b.ownerType === 'Student' ? 'badge-student' : 'badge-staff'}">${b.ownerType}</span></td>
                     <td>${getLaptopType(b.laptopId)}</td>
                     <td><code>${b.serial}</code></td>
                     <td>${formatDateTime(b.issuedTime)}</td>
@@ -1007,44 +1130,18 @@
             `).join('');
         }
 
-        function renderStudents() {
-            const tbody = document.getElementById('studentTableBody');
-            const searchTerm = document.getElementById('studentSearch').value;
-            let students = getFilteredItems(schoolData.students, currentSchoolId, searchTerm);
-
-            if (students.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="no-data-msg">No students found</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = students.map(s => `
-                <tr>
-                    <td>S${String(s.id).padStart(3, '0')}</td>
-                    <td>${s.name}</td>
-                    <td><span class="badge badge-school">${getSchoolName(s.schoolId)}</span></td>
-                    <td>${s.bookId ? getBookTitle(s.bookId) : '—'}</td>
-                    <td>${s.laptopId ? getLaptopType(s.laptopId) : '—'}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button onclick="deleteStudent(${s.id})"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
         function updateStats() {
             const books = getFilteredItems(schoolData.books, currentSchoolId);
-            const stationary = getFilteredItems(schoolData.stationaryItems, currentSchoolId);
-            const laptops = getFilteredItems(schoolData.laptops, currentSchoolId);
+            const students = getFilteredItems(schoolData.students, currentSchoolId);
+            const staff = getFilteredItems(schoolData.staff, currentSchoolId);
             const bookBorrows = schoolData.bookBorrowings.filter(b => {
                 const book = schoolData.books.find(book => book.id === b.bookId);
                 return book && (currentSchoolId === 'all' || book.schoolId === parseInt(currentSchoolId));
             });
 
             document.getElementById('statBooks').textContent = books.length;
-            document.getElementById('statStationaryItems').textContent = stationary.length;
-            document.getElementById('statLaptops').textContent = laptops.length;
+            document.getElementById('statStudents').textContent = students.length;
+            document.getElementById('statStaff').textContent = staff.length;
             document.getElementById('statBorrowings').textContent = bookBorrows.filter(b => !b.returned).length;
         }
 
@@ -1052,10 +1149,11 @@
             renderBooks();
             renderStationaryCatalog();
             renderLaptopCatalog();
+            renderStudents();
+            renderStaff();
             renderBookBorrowings();
             renderLaptopBorrowings();
             renderStationaryBorrowings();
-            renderStudents();
             updateStats();
         }
 
@@ -1076,20 +1174,6 @@
             }
         };
 
-        window.editStationaryItem = function(id) {
-            showToast('Edit feature - will open form with data', 'info');
-            const item = schoolData.stationaryItems.find(s => s.id === id);
-            if (item) {
-                document.getElementById('stationaryItemName').value = item.name;
-                document.getElementById('stationaryCategory').value = item.category;
-                document.getElementById('stationaryItemQty').value = item.quantity;
-                document.getElementById('stationaryItemSchool').value = item.schoolId;
-                document.getElementById('stationaryItemModal').classList.add('active');
-                // Store edit ID for update
-                document.getElementById('stationaryItemForm').dataset.editId = id;
-            }
-        };
-
         window.deleteLaptopItem = function(id) {
             if (confirm('Delete this laptop?')) {
                 schoolData.laptops = schoolData.laptops.filter(l => l.id !== id);
@@ -1098,16 +1182,19 @@
             }
         };
 
-        window.editLaptopItem = function(id) {
-            showToast('Edit feature - will open form with data', 'info');
-            const item = schoolData.laptops.find(l => l.id === id);
-            if (item) {
-                document.getElementById('laptopType').value = item.type;
-                document.getElementById('laptopSerial').value = item.serial;
-                document.getElementById('laptopOwner').value = item.owner || '';
-                document.getElementById('laptopSchool').value = item.schoolId;
-                document.getElementById('laptopModal').classList.add('active');
-                document.getElementById('laptopForm').dataset.editId = id;
+        window.deleteStudent = function(id) {
+            if (confirm('Delete this student?')) {
+                schoolData.students = schoolData.students.filter(s => s.id !== id);
+                showToast('Student deleted', 'success');
+                refreshAll();
+            }
+        };
+
+        window.deleteStaff = function(id) {
+            if (confirm('Delete this staff member?')) {
+                schoolData.staff = schoolData.staff.filter(s => s.id !== id);
+                showToast('Staff member deleted', 'success');
+                refreshAll();
             }
         };
 
@@ -1117,6 +1204,11 @@
                 borrow.returned = true;
                 const book = schoolData.books.find(b => b.id === borrow.bookId);
                 if (book) book.status = 'Available';
+                // Remove from student/staff
+                const student = schoolData.students.find(s => s.bookId === borrow.bookId);
+                if (student) student.bookId = null;
+                const staff = schoolData.staff.find(s => s.bookId === borrow.bookId);
+                if (staff) staff.bookId = null;
                 showToast('Book returned successfully', 'success');
                 refreshAll();
             }
@@ -1137,6 +1229,11 @@
                 borrow.returnedTime = new Date().toISOString();
                 const laptop = schoolData.laptops.find(l => l.id === borrow.laptopId);
                 if (laptop) laptop.status = 'Available';
+                // Remove from student/staff
+                const student = schoolData.students.find(s => s.laptopId === borrow.laptopId);
+                if (student) student.laptopId = null;
+                const staff = schoolData.staff.find(s => s.laptopId === borrow.laptopId);
+                if (staff) staff.laptopId = null;
                 showToast('Laptop returned successfully', 'success');
                 refreshAll();
             }
@@ -1165,14 +1262,6 @@
             if (confirm('Delete this stationary issuance record?')) {
                 schoolData.stationaryBorrowings = schoolData.stationaryBorrowings.filter(b => b.id !== id);
                 showToast('Record deleted', 'success');
-                refreshAll();
-            }
-        };
-
-        window.deleteStudent = function(id) {
-            if (confirm('Delete this student?')) {
-                schoolData.students = schoolData.students.filter(s => s.id !== id);
-                showToast('Student deleted', 'success');
                 refreshAll();
             }
         };
@@ -1226,13 +1315,27 @@
             generatePDF('Laptop Catalog', headers, data, `laptop_catalog_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
+        function downloadStudentPDF() {
+            const students = getFilteredItems(schoolData.students, currentSchoolId);
+            const headers = ['Student ID', 'Student Name', 'School', 'Book', 'Laptop'];
+            const data = students.map(s => [s.studentId, s.name, getSchoolName(s.schoolId), s.bookId ? getBookTitle(s.bookId) : '—', s.laptopId ? getLaptopType(s.laptopId) : '—']);
+            generatePDF('Student Records', headers, data, `students_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
+        function downloadStaffPDF() {
+            const staff = getFilteredItems(schoolData.staff, currentSchoolId);
+            const headers = ['Staff Number', 'Staff Name', 'School', 'Department', 'Book', 'Laptop'];
+            const data = staff.map(s => [s.staffNumber, s.name, getSchoolName(s.schoolId), s.department, s.bookId ? getBookTitle(s.bookId) : '—', s.laptopId ? getLaptopType(s.laptopId) : '—']);
+            generatePDF('Staff Records', headers, data, `staff_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+
         function downloadBookBorrowPDF() {
             const borrowings = schoolData.bookBorrowings.filter(b => {
                 const book = schoolData.books.find(book => book.id === b.bookId);
                 return book && (currentSchoolId === 'all' || book.schoolId === parseInt(currentSchoolId));
             });
-            const headers = ['#', 'Borrower', 'Book', 'Accession No.', 'Borrow Date', 'Due Date', 'Status'];
-            const data = borrowings.map((b, i) => [i + 1, b.borrowerName, getBookTitle(b.bookId), b.accession, b.borrowDate, b.dueDate, b.returned ? 'Returned' : 'Borrowed']);
+            const headers = ['#', 'Borrower', 'Type', 'Book', 'Accession No.', 'Borrow Date', 'Due Date', 'Status'];
+            const data = borrowings.map((b, i) => [i + 1, b.borrowerName, b.borrowerType, getBookTitle(b.bookId), b.accession, b.borrowDate, b.dueDate, b.returned ? 'Returned' : 'Borrowed']);
             generatePDF('Book Borrowing Records', headers, data, `book_borrowings_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
@@ -1241,8 +1344,8 @@
                 const laptop = schoolData.laptops.find(l => l.id === b.laptopId);
                 return laptop && (currentSchoolId === 'all' || laptop.schoolId === parseInt(currentSchoolId));
             });
-            const headers = ['#', 'Owner', 'Laptop Type', 'Serial No.', 'Issued Time', 'Returned Time', 'Status'];
-            const data = borrowings.map((b, i) => [i + 1, b.ownerName, getLaptopType(b.laptopId), b.serial, formatDateTime(b.issuedTime), b.returnedTime ? formatDateTime(b.returnedTime) : '—', b.returned ? 'Returned' : 'Issued']);
+            const headers = ['#', 'Owner', 'Type', 'Laptop Type', 'Serial No.', 'Issued Time', 'Returned Time', 'Status'];
+            const data = borrowings.map((b, i) => [i + 1, b.ownerName, b.ownerType, getLaptopType(b.laptopId), b.serial, formatDateTime(b.issuedTime), b.returnedTime ? formatDateTime(b.returnedTime) : '—', b.returned ? 'Returned' : 'Issued']);
             generatePDF('Laptop Issuance Records', headers, data, `laptop_borrowings_${new Date().toISOString().split('T')[0]}.pdf`);
         }
 
@@ -1318,10 +1421,11 @@
             books: document.getElementById('tab-books'),
             stationaryCatalog: document.getElementById('tab-stationaryCatalog'),
             laptopCatalog: document.getElementById('tab-laptopCatalog'),
+            students: document.getElementById('tab-students'),
+            staff: document.getElementById('tab-staff'),
             bookBorrow: document.getElementById('tab-bookBorrow'),
             laptopBorrow: document.getElementById('tab-laptopBorrow'),
-            stationaryBorrow: document.getElementById('tab-stationaryBorrow'),
-            students: document.getElementById('tab-students')
+            stationaryBorrow: document.getElementById('tab-stationaryBorrow')
         };
         tabs.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1347,6 +1451,12 @@
         document.getElementById('searchLaptopCatalogBtn').addEventListener('click', renderLaptopCatalog);
         document.getElementById('laptopCatalogSearch').addEventListener('input', renderLaptopCatalog);
         
+        document.getElementById('studentSearchBtn').addEventListener('click', renderStudents);
+        document.getElementById('studentSearch').addEventListener('input', renderStudents);
+        
+        document.getElementById('staffSearchBtn').addEventListener('click', renderStaff);
+        document.getElementById('staffSearch').addEventListener('input', renderStaff);
+        
         document.getElementById('searchBookBorrowBtn').addEventListener('click', renderBookBorrowings);
         document.getElementById('bookBorrowSearch').addEventListener('input', renderBookBorrowings);
         
@@ -1355,14 +1465,13 @@
         
         document.getElementById('searchStationaryBorrowBtn').addEventListener('click', renderStationaryBorrowings);
         document.getElementById('stationaryBorrowSearch').addEventListener('input', renderStationaryBorrowings);
-        
-        document.getElementById('studentSearchBtn').addEventListener('click', renderStudents);
-        document.getElementById('studentSearch').addEventListener('input', renderStudents);
 
         // PDF Downloads
         document.getElementById('downloadBookPDF').addEventListener('click', downloadBookPDF);
         document.getElementById('downloadStationaryPDF').addEventListener('click', downloadStationaryPDF);
         document.getElementById('downloadLaptopPDF').addEventListener('click', downloadLaptopPDF);
+        document.getElementById('downloadStudentPDF').addEventListener('click', downloadStudentPDF);
+        document.getElementById('downloadStaffPDF').addEventListener('click', downloadStaffPDF);
         document.getElementById('downloadBookBorrowPDF').addEventListener('click', downloadBookBorrowPDF);
         document.getElementById('downloadLaptopBorrowPDF').addEventListener('click', downloadLaptopBorrowPDF);
         document.getElementById('downloadStationaryBorrowPDF').addEventListener('click', downloadStationaryBorrowPDF);
@@ -1370,7 +1479,6 @@
         // Add Book Modal
         const bookModal = document.getElementById('bookModal');
         document.getElementById('addBookBtn').addEventListener('click', () => {
-            document.getElementById('bookForm').dataset.editId = '';
             bookModal.classList.add('active');
         });
         document.getElementById('closeBookModal').addEventListener('click', () => bookModal.classList.remove('active'));
@@ -1402,7 +1510,6 @@
         // Add Stationary Item Modal
         const stationaryItemModal = document.getElementById('stationaryItemModal');
         document.getElementById('addStationaryItemBtn').addEventListener('click', () => {
-            document.getElementById('stationaryItemForm').dataset.editId = '';
             stationaryItemModal.classList.add('active');
         });
         document.getElementById('closeStationaryItemModal').addEventListener('click', () => stationaryItemModal.classList.remove('active'));
@@ -1419,40 +1526,23 @@
                 return;
             }
 
-            const editId = this.dataset.editId;
-            if (editId) {
-                // Edit existing item
-                const item = schoolData.stationaryItems.find(s => s.id === parseInt(editId));
-                if (item) {
-                    item.name = name;
-                    item.category = category;
-                    item.quantity = quantity;
-                    item.schoolId = parseInt(document.getElementById('stationaryItemSchool').value);
-                    showToast(`Stationary item "${name}" updated!`, 'success');
-                }
-                delete this.dataset.editId;
-            } else {
-                // Add new item
-                const item = {
-                    id: nextId.stationary++,
-                    name, category, quantity,
-                    schoolId: parseInt(document.getElementById('stationaryItemSchool').value),
-                    dateAdded: new Date().toISOString().split('T')[0],
-                    status: 'Available'
-                };
-                schoolData.stationaryItems.push(item);
-                showToast(`Stationary item "${name}" added!`, 'success');
-            }
-            
+            const item = {
+                id: nextId.stationary++,
+                name, category, quantity,
+                schoolId: parseInt(document.getElementById('stationaryItemSchool').value),
+                dateAdded: new Date().toISOString().split('T')[0],
+                status: 'Available'
+            };
+            schoolData.stationaryItems.push(item);
             stationaryItemModal.classList.remove('active');
             this.reset();
+            showToast(`Stationary item "${name}" added!`, 'success');
             refreshAll();
         });
 
         // Add Laptop Modal
         const laptopModal = document.getElementById('laptopModal');
         document.getElementById('addLaptopBtn').addEventListener('click', () => {
-            document.getElementById('laptopForm').dataset.editId = '';
             laptopModal.classList.add('active');
         });
         document.getElementById('closeLaptopModal').addEventListener('click', () => laptopModal.classList.remove('active'));
@@ -1462,41 +1552,104 @@
             e.preventDefault();
             const type = document.getElementById('laptopType').value.trim();
             const serial = document.getElementById('laptopSerial').value.trim();
-            const owner = document.getElementById('laptopOwner').value.trim();
             
             if (!type || !serial) {
                 showToast('Please fill all required fields', 'warning');
                 return;
             }
 
-            const editId = this.dataset.editId;
-            if (editId) {
-                // Edit existing laptop
-                const item = schoolData.laptops.find(l => l.id === parseInt(editId));
-                if (item) {
-                    item.type = type;
-                    item.serial = serial;
-                    item.owner = owner || null;
-                    item.schoolId = parseInt(document.getElementById('laptopSchool').value);
-                    showToast(`Laptop "${type}" updated!`, 'success');
-                }
-                delete this.dataset.editId;
-            } else {
-                // Add new laptop
-                const laptop = {
-                    id: nextId.laptop++,
-                    type, serial,
-                    owner: owner || null,
-                    schoolId: parseInt(document.getElementById('laptopSchool').value),
-                    dateAdded: new Date().toISOString().split('T')[0],
-                    status: 'Available'
-                };
-                schoolData.laptops.push(laptop);
-                showToast(`Laptop "${type}" registered!`, 'success');
-            }
-            
+            const laptop = {
+                id: nextId.laptop++,
+                type, serial,
+                owner: document.getElementById('laptopOwner').value.trim() || null,
+                schoolId: parseInt(document.getElementById('laptopSchool').value),
+                dateAdded: new Date().toISOString().split('T')[0],
+                status: 'Available'
+            };
+            schoolData.laptops.push(laptop);
             laptopModal.classList.remove('active');
             this.reset();
+            showToast(`Laptop "${type}" registered!`, 'success');
+            refreshAll();
+        });
+
+        // Add Student Modal
+        const studentModal = document.getElementById('studentModal');
+        document.getElementById('addStudentBtn').addEventListener('click', () => {
+            studentModal.classList.add('active');
+        });
+        document.getElementById('closeStudentModal').addEventListener('click', () => studentModal.classList.remove('active'));
+        studentModal.addEventListener('click', (e) => { if (e.target === studentModal) studentModal.classList.remove('active'); });
+
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const studentId = document.getElementById('studentId').value.trim();
+            
+            if (!name || !studentId) {
+                showToast('Please fill all required fields', 'warning');
+                return;
+            }
+
+            // Check for duplicate student ID
+            if (schoolData.students.some(s => s.studentId === studentId)) {
+                showToast('Student ID already exists!', 'warning');
+                return;
+            }
+
+            const student = {
+                id: nextId.student++,
+                studentId,
+                name,
+                schoolId: parseInt(document.getElementById('studentSchool').value),
+                bookId: null,
+                laptopId: null
+            };
+            schoolData.students.push(student);
+            studentModal.classList.remove('active');
+            this.reset();
+            showToast(`Student "${name}" added!`, 'success');
+            refreshAll();
+        });
+
+        // Add Staff Modal
+        const staffModal = document.getElementById('staffModal');
+        document.getElementById('addStaffBtn').addEventListener('click', () => {
+            staffModal.classList.add('active');
+        });
+        document.getElementById('closeStaffModal').addEventListener('click', () => staffModal.classList.remove('active'));
+        staffModal.addEventListener('click', (e) => { if (e.target === staffModal) staffModal.classList.remove('active'); });
+
+        document.getElementById('staffForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('staffName').value.trim();
+            const staffNumber = document.getElementById('staffNumber').value.trim();
+            const department = document.getElementById('staffDepartment').value.trim();
+            
+            if (!name || !staffNumber || !department) {
+                showToast('Please fill all required fields', 'warning');
+                return;
+            }
+
+            // Check for duplicate staff number
+            if (schoolData.staff.some(s => s.staffNumber === staffNumber)) {
+                showToast('Staff number already exists!', 'warning');
+                return;
+            }
+
+            const staff = {
+                id: nextId.staff++,
+                staffNumber,
+                name,
+                department,
+                schoolId: parseInt(document.getElementById('staffSchool').value),
+                bookId: null,
+                laptopId: null
+            };
+            schoolData.staff.push(staff);
+            staffModal.classList.remove('active');
+            this.reset();
+            showToast(`Staff "${name}" added!`, 'success');
             refreshAll();
         });
 
@@ -1517,6 +1670,7 @@
         document.getElementById('bookBorrowForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const borrowerName = document.getElementById('borrowerName').value.trim();
+            const borrowerType = document.getElementById('borrowerType').value;
             const bookId = parseInt(document.getElementById('borrowBook').value);
             const borrowDate = document.getElementById('borrowDate').value;
             const dueDate = document.getElementById('dueDate').value;
@@ -1535,6 +1689,7 @@
             const borrow = {
                 id: nextId.bookBorrow++,
                 borrowerName,
+                borrowerType,
                 bookId,
                 accession: book.accession,
                 borrowDate,
@@ -1543,9 +1698,19 @@
             };
             schoolData.bookBorrowings.push(borrow);
             book.status = 'Borrowed';
+            
+            // Assign book to student or staff
+            if (borrowerType === 'Student') {
+                const student = schoolData.students.find(s => s.name === borrowerName);
+                if (student) student.bookId = bookId;
+            } else {
+                const staff = schoolData.staff.find(s => s.name === borrowerName);
+                if (staff) staff.bookId = bookId;
+            }
+            
             bookBorrowModal.classList.remove('active');
             this.reset();
-            showToast(`Book borrowed by ${borrowerName}`, 'success');
+            showToast(`Book borrowed by ${borrowerName} (${borrowerType})`, 'success');
             refreshAll();
         });
 
@@ -1562,6 +1727,7 @@
         document.getElementById('laptopBorrowForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const ownerName = document.getElementById('laptopOwnerName').value.trim();
+            const ownerType = document.getElementById('ownerType').value;
             const laptopId = parseInt(document.getElementById('laptopSelect').value);
             const issuedTime = document.getElementById('issuedTime').value;
             
@@ -1579,6 +1745,7 @@
             const borrow = {
                 id: nextId.laptopBorrow++,
                 ownerName,
+                ownerType,
                 laptopId,
                 serial: laptop.serial,
                 issuedTime,
@@ -1587,9 +1754,19 @@
             };
             schoolData.laptopBorrowings.push(borrow);
             laptop.status = 'Issued';
+            
+            // Assign laptop to student or staff
+            if (ownerType === 'Student') {
+                const student = schoolData.students.find(s => s.name === ownerName);
+                if (student) student.laptopId = laptopId;
+            } else {
+                const staff = schoolData.staff.find(s => s.name === ownerName);
+                if (staff) staff.laptopId = laptopId;
+            }
+            
             laptopBorrowModal.classList.remove('active');
             this.reset();
-            showToast(`Laptop issued to ${ownerName}`, 'success');
+            showToast(`Laptop issued to ${ownerName} (${ownerType})`, 'success');
             refreshAll();
         });
 
@@ -1605,7 +1782,7 @@
 
         document.getElementById('stationaryBorrowForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const staffName = document.getElementById('staffName').value.trim();
+            const staffName = document.getElementById('staffNameIssuance').value.trim();
             const stationaryId = parseInt(document.getElementById('stationarySelect').value);
             const quantity = parseInt(document.getElementById('stationaryQtyIssued').value);
             const issueDate = document.getElementById('stationaryIssueDate').value;
@@ -1637,19 +1814,6 @@
             refreshAll();
         });
 
-        // Add Student
-        document.getElementById('addStudentBtn').addEventListener('click', function() {
-            const schoolId = currentSchoolId === 'all' ? 1 : parseInt(currentSchoolId);
-            const student = {
-                id: nextId.student++,
-                name: `New Student ${nextId.student - 1}`,
-                schoolId: schoolId
-            };
-            schoolData.students.push(student);
-            showToast(`Student added to ${getSchoolName(schoolId)}`, 'success');
-            refreshAll();
-        });
-
         // ========== INITIALIZATION ==========
         refreshAll();
         setTimeout(() => showToast('Welcome to SchoolLib!', 'success'), 600);
@@ -1657,16 +1821,15 @@
         // Make functions globally accessible
         window.deleteBook = deleteBook;
         window.deleteStationaryItem = deleteStationaryItem;
-        window.editStationaryItem = editStationaryItem;
         window.deleteLaptopItem = deleteLaptopItem;
-        window.editLaptopItem = editLaptopItem;
+        window.deleteStudent = deleteStudent;
+        window.deleteStaff = deleteStaff;
         window.returnBookBorrow = returnBookBorrow;
         window.deleteBookBorrow = deleteBookBorrow;
         window.returnLaptopBorrow = returnLaptopBorrow;
         window.deleteLaptopBorrow = deleteLaptopBorrow;
         window.returnStationaryBorrow = returnStationaryBorrow;
         window.deleteStationaryBorrow = deleteStationaryBorrow;
-        window.deleteStudent = deleteStudent;
 
     })();
 </script>
